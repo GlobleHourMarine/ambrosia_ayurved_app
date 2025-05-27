@@ -1,13 +1,13 @@
+import 'package:ambrosia_ayurved/cosmetics/thankyou/thankyou.dart';
+import 'package:ambrosia_ayurved/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
 import 'package:ambrosia_ayurved/cosmetics/common_widgets/shimmer_effect/shimmer_effect.dart';
 import 'package:ambrosia_ayurved/cosmetics/common_widgets/snackbar.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/address/address_provider.dart';
-
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/order_item_total_price_provider.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/place_order/place_order_provider.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/payment/payment_method_page.dart';
-
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/order_grandtotal_provider.dart';
 // import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_provider.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/products/products_model.dart';
@@ -18,6 +18,8 @@ import 'package:ambrosia_ayurved/cosmetics/view/home/cart/new_cart/provider.dart
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_page.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_model.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:ambrosia_ayurved/razorpay_service.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class OrderNowPage extends StatefulWidget {
   const OrderNowPage({super.key});
@@ -39,11 +41,16 @@ class _OrderNowPageState extends State<OrderNowPage> {
   final TextEditingController _countryController = TextEditingController();
   final TextEditingController _pincodeController = TextEditingController();
 
-  bool _isLoading = true; // Loader State
+  late Razorpay _razorpay;
+  bool _isLoading = false; // Loader State
 
-  @override
   void initState() {
     super.initState();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final cartProvider = Provider.of<CartProvider>(context, listen: false);
       final grandTotalProvider =
@@ -57,6 +64,7 @@ class _OrderNowPageState extends State<OrderNowPage> {
 
   @override
   void dispose() {
+    _razorpay.clear();
     // Dispose all controllers
     _fnameController.dispose();
     _lnameController.dispose();
@@ -70,7 +78,117 @@ class _OrderNowPageState extends State<OrderNowPage> {
     super.dispose();
   }
 
-  Widget _buildTextField(TextEditingController controller, String label) {
+  //
+  //
+  //
+  //
+
+  // Razorpay payment handlers
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    // Payment success logic
+    print(response);
+
+    Future.delayed(Duration(seconds: 1));
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CheckoutMessageView(),
+        ));
+
+    // showDialog(
+    //   context: context,
+    //   builder: (BuildContext context) => AlertDialog(
+    //     title: Text("Payment Successful"),
+    //     content: Text(
+    //         "Payment ID: ${response.paymentId} , order id : ${response.orderId} , "
+    //         //response.data
+    //         ),
+    //     actions: [
+    //       TextButton(
+    //         onPressed: () {
+    //           Navigator.pop(context); // Close dialog
+    //           Navigator.pushReplacement(
+    //               context,
+    //               MaterialPageRoute(
+    //                 builder: (context) => HomeScreen(),
+    //               ));
+    //           // You might want to navigate to order confirmation page here
+    //         },
+    //         child: Text("OK"),
+    //       )
+    //     ],
+    //   ),
+    // );
+
+    // Here you can also save the order to your database
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text("Payment Failed"),
+        content: Text("Code: ${response.code}\nMessage: ${response.message}"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("OK"),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text("External Wallet Selected"),
+        content: Text("Wallet: ${response.walletName}"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("OK"),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _openRazorpayCheckout(double amount) {
+    var options = {
+      'key': 'rzp_test_J4DBKJFYTiyeCf',
+      'amount': amount * 100, // Convert to paise
+      'name': 'Ambrosia Ayurved',
+      'description': 'Order Payment',
+      'prefill': {
+        'contact': _mobileController.text,
+        'email': _emailController.text,
+        'name': '${_fnameController.text} ${_lnameController.text}'
+      },
+      'external': {
+        'wallets': ['paytm']
+      }
+    };
+
+    try {
+      _razorpay.open(options);
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
+  }
+
+  //
+  //
+  //
+  //
+
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label, {
+    String? Function(String?)? validator,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
@@ -80,8 +198,9 @@ class _OrderNowPageState extends State<OrderNowPage> {
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
-      validator: (value) =>
-          value == null || value.isEmpty ? 'Enter $label' : null,
+      validator: validator ??
+          (value) => value == null || value.isEmpty ? '$label' : null,
+      keyboardType: keyboardType,
     );
   }
 
@@ -89,8 +208,6 @@ class _OrderNowPageState extends State<OrderNowPage> {
   Widget build(BuildContext context) {
     // final TextEditingController _addressController = TextEditingController();
     // final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-    bool _isLoading = false;
 
     final addressProvider = Provider.of<AddressProvider>(context);
 
@@ -139,42 +256,59 @@ class _OrderNowPageState extends State<OrderNowPage> {
           // const SizedBox(height: 2),
           cartProvider.isLoading
               ? Center(child: CircularProgressIndicator())
-              : Card(
-                  elevation: 3,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 27, vertical: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "${AppLocalizations.of(context)!.productDetails}",
-                          //'Product Details'
-                        ),
-                        Text(
-                          "${AppLocalizations.of(context)!.totalPrice}",
-                          // 'Total price'
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              :
+
+              // Card(
+              //     elevation: 3,
+              //     child: Padding(
+              //       padding: EdgeInsets.symmetric(horizontal: 27, vertical: 10),
+              //       child: Row(
+              //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //         children: [
+              //           Text(
+              //             "${AppLocalizations.of(context)!.productDetails}",
+              //             //'Product Details'
+              //           ),
+              //           Text(
+              //             "${AppLocalizations.of(context)!.totalPrice}",
+              //             // 'Total price'
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //   ),
+              SizedBox(height: 5),
           Expanded(
             child: ListView.builder(
               itemCount: cartList.length,
               itemBuilder: (context, index) {
                 final item = cartList[index];
-
+                print(item.description);
                 // Access the provider
-
                 final totalPriceProvider =
                     Provider.of<ItemTotalPriceProvider>(context, listen: false);
-
                 // Calculate total price using provider
                 double totalPrice = totalPriceProvider.calculateTotalPrice(
                   item.price.toString(),
                   item.quantity.toString(),
                 );
 
+                //
+                //
+                // Convert price to double
+                double price = double.tryParse(item.price.toString()) ?? 0.0;
+                int quantity = int.tryParse(item.quantity.toString()) ?? 1;
+                double basePricePerItem = price / 1.12;
+
+                //
+                double gstPerItem = price - basePricePerItem;
+
+                //
+                double baseTotal = basePricePerItem * quantity;
+                double gstTotal = gstPerItem * quantity;
+                double totalWithGst = price * quantity;
+
+//
                 // // Ensure price is treated as a double
                 // double itemPrice =
                 //     double.tryParse(item.price.toString()) ?? 0.0;
@@ -189,74 +323,288 @@ class _OrderNowPageState extends State<OrderNowPage> {
                     elevation: 3,
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Column(
                         children: [
-                          Container(
-                            width: 70, // Adjust as needed
-                            height: 90, // Adjust as needed
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.network(
-                                'https://ambrosiaayurved.in/${item.image}',
-                                fit: BoxFit.fill,
-                                loadingBuilder: (context, child, progress) {
-                                  if (progress == null) return child;
-                                  return const ShimmerEffect(
-                                      width: 50, height: 50);
-                                },
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const ShimmerEffect(
-                                      width: 50, height: 50);
-                                },
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 100, // Adjust as needed
+                                height: 120, // Adjust as needed
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    'https://ambrosiaayurved.in/${item.image}',
+                                    fit: BoxFit.fill,
+                                    loadingBuilder: (context, child, progress) {
+                                      if (progress == null) return child;
+                                      return const ShimmerEffect(
+                                          width: 100, height: 100);
+                                    },
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const ShimmerEffect(
+                                          width: 100, height: 100);
+                                    },
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                              const SizedBox(width: 20),
+                              //
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    SizedBox(width: 20),
+                                    Directionality(
+                                      textDirection: TextDirection.ltr,
+                                      child: Text(
+                                        AppLocalizations.of(context)!.a5product,
+                                        //  item.productName,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 20,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 3),
                                     Text(
-                                      item.productName,
+                                      AppLocalizations.of(context)!
+                                          .descriptionproduct,
+                                      //  item.description,
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 20,
+                                        // fontWeight: FontWeight.w700,
+                                        fontSize: 14,
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 5),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Rs ${item.price} * ${item.quantity}',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                    Text(
-                                      'Rs ${totalPrice.toStringAsFixed(2)}',
-                                      style: TextStyle(fontSize: 16),
+                              ),
+                              //
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Row(
+                              //   children: [],
+                              // ),
+                              const SizedBox(height: 8),
+
+                              // Price Card with shadow and rounded corners
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.2),
+                                      spreadRadius: 1,
+                                      blurRadius: 3,
+                                      offset: Offset(0, 1),
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
-                          ),
+                                padding: EdgeInsets.all(8),
+                                child: Column(
+                                  children: [
+                                    // Price breakdown header
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          // "Price Break Down : ",
+                                          "${AppLocalizations.of(context)!.priceBreakDown}",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
+                                            color: Acolors.primary,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Rs ${totalWithGst.toStringAsFixed(2)}",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: Acolors.primary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Divider(height: 12, thickness: 1),
+
+                                    // Base price row
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(Icons.circle,
+                                                size: 8,
+                                                color: Colors.grey[700]),
+                                            SizedBox(width: 6),
+                                            Text(
+                                              //  'Base Price : ',
+                                              "${AppLocalizations.of(context)!.basePrice}:",
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.grey[700]),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "Rs ${basePricePerItem.toStringAsFixed(2)} × ${item.quantity}",
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.grey[700]),
+                                            ),
+                                            SizedBox(width: 8),
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[200],
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                "Rs ${baseTotal.toStringAsFixed(2)}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 8),
+
+                                    // GST row
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(Icons.circle,
+                                                size: 8,
+                                                color: Colors.grey[700]),
+                                            SizedBox(width: 6),
+                                            Text(
+                                              "${AppLocalizations.of(context)!.gst}",
+                                              //  "Gst  (12%) :",
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.grey[700]),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "Rs ${gstPerItem.toStringAsFixed(2)} × ${item.quantity}",
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.grey[700]),
+                                            ),
+                                            SizedBox(width: 8),
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[200],
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                "Rs ${gstTotal.toStringAsFixed(2)}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+
+                                    Divider(height: 12, thickness: 1),
+
+                                    // Total row with highlight
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Acolors.primary
+                                                .withOpacity(0.1),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            border: Border.all(
+                                                color: Acolors.primary
+                                                    .withOpacity(0.3)),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                "${AppLocalizations.of(context)!.total}: ",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                              Consumer<GrandTotalProvider>(
+                                                builder: (context,
+                                                    grandTotalProvider, child) {
+                                                  return Text(
+                                                    "Rs ${grandTotalProvider.grandTotal.toStringAsFixed(2)}",
+                                                    //  "₹${totalWithGst.toStringAsFixed(2)}",
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 16,
+                                                      color: Acolors.primary,
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )
                         ],
                       ),
                     ));
               },
             ),
           ),
+
+          //
+          //
+          //
+
+          //
+          //
+          //
           // const Padding(
           //   padding: const EdgeInsets.symmetric(horizontal: 23),
           //   child: Text(
@@ -290,16 +638,17 @@ class _OrderNowPageState extends State<OrderNowPage> {
                       const SizedBox(height: 16),
 
                       // First name and Last name
+
                       Row(
                         children: [
                           Expanded(
-                            child:
-                                _buildTextField(_fnameController, 'First Name'),
+                            child: _buildTextField(_fnameController,
+                                "${AppLocalizations.of(context)!.firstName}"),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child:
-                                _buildTextField(_lnameController, 'Last Name'),
+                            child: _buildTextField(_lnameController,
+                                "${AppLocalizations.of(context)!.lastName}"),
                           ),
                         ],
                       ),
@@ -310,7 +659,8 @@ class _OrderNowPageState extends State<OrderNowPage> {
                       // const SizedBox(height: 10),
 
                       // Address and Mobile
-                      _buildTextField(_addressController, 'Address'),
+                      _buildTextField(_addressController,
+                          "${AppLocalizations.of(context)!.address}"),
                       const SizedBox(width: 10),
                       const SizedBox(height: 10),
 
@@ -318,16 +668,31 @@ class _OrderNowPageState extends State<OrderNowPage> {
                       Row(
                         children: [
                           Expanded(
-                            child: _buildTextField(_cityController, 'City'),
+                            child: _buildTextField(_cityController,
+                                "${AppLocalizations.of(context)!.city}"),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: _buildTextField(_stateController, 'State'),
+                            child: _buildTextField(_stateController,
+                                "${AppLocalizations.of(context)!.state}"),
                           ),
                           const SizedBox(width: 10),
+                          // Pincode (6 digits only)
                           Expanded(
-                            child:
-                                _buildTextField(_pincodeController, 'Pincode'),
+                            child: _buildTextField(
+                              _pincodeController,
+                              "${AppLocalizations.of(context)!.pincode}",
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "${AppLocalizations.of(context)!.enterPincode}";
+                                } else if (!RegExp(r'^\d{6}$')
+                                    .hasMatch(value)) {
+                                  return "${AppLocalizations.of(context)!.validPincode}";
+                                }
+                                return null;
+                              },
+                            ),
                           ),
                         ],
                       ),
@@ -337,11 +702,25 @@ class _OrderNowPageState extends State<OrderNowPage> {
                       Row(
                         children: [
                           Expanded(
-                              child: _buildTextField(
-                                  _countryController, 'Country')),
+                              child: _buildTextField(_countryController,
+                                  "${AppLocalizations.of(context)!.country}")),
                           const SizedBox(width: 10),
+                          // Mobile (12 digits only)
                           Expanded(
-                            child: _buildTextField(_mobileController, 'Mobile'),
+                            child: _buildTextField(
+                              _mobileController,
+                              "${AppLocalizations.of(context)!.mobile}",
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "${AppLocalizations.of(context)!.enterMobile}";
+                                } else if (!RegExp(r'^\d{10}$')
+                                    .hasMatch(value)) {
+                                  return "${AppLocalizations.of(context)!.validMobile}";
+                                }
+                                return null;
+                              },
+                            ),
                           ),
                         ],
                       ),
@@ -400,7 +779,7 @@ class _OrderNowPageState extends State<OrderNowPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "${AppLocalizations.of(context)!.grandTotal} : ",
+                          "${AppLocalizations.of(context)!.grandTotal} ",
                           //  "Grand Total : ",
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
@@ -432,6 +811,8 @@ class _OrderNowPageState extends State<OrderNowPage> {
                     final userProvider =
                         Provider.of<UserProvider>(context, listen: false);
                     String userId = userProvider.id;
+                    final grandTotalProvider =
+                        Provider.of<GrandTotalProvider>(context, listen: false);
 
                     // Get the list of productIds from cart
                     List<String> productIds = cartProvider.cartItems
@@ -457,11 +838,8 @@ class _OrderNowPageState extends State<OrderNowPage> {
                       context: context,
                     );
 
-                    // Show message
-                    //    SnackbarMessage.showSnackbar(context, AddressProvider.message);
-
-                    // Navigate if successful
                     if (success) {
+                      //  _openRazorpayCheckout(grandTotalProvider.grandTotal);
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -469,6 +847,9 @@ class _OrderNowPageState extends State<OrderNowPage> {
                         ),
                       );
                     }
+                    setState(() {
+                      _isLoading = false;
+                    });
                   }
 
                   // if (_formKey.currentState!.validate()) {
@@ -491,7 +872,7 @@ class _OrderNowPageState extends State<OrderNowPage> {
                   //   }
                   // }
                 },
-                child: addressProvider.isLoading
+                child: _isLoading || addressProvider.isLoading
                     ? const CircularProgressIndicator(color: Acolors.white)
                     : Text(
                         "${AppLocalizations.of(context)!.proceedToCheckout}",
@@ -506,8 +887,6 @@ class _OrderNowPageState extends State<OrderNowPage> {
     );
   }
 }
-
-
 
 
 

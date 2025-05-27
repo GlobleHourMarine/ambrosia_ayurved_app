@@ -499,8 +499,8 @@ class UserProvider with ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user', jsonEncode(user.toJson()));
-
       setUser(user);
+
       print('User data saved successfully');
     } catch (e) {
       print('Error saving user data: $e');

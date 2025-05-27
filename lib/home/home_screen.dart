@@ -37,6 +37,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -95,6 +96,21 @@ class _HomeScreenState extends State<HomeScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  // Add this method to launch WhatsApp
+  Future<void> _launchWhatsApp() async {
+    const phoneNumber =
+        '+918000057233'; // Replace with your actual phone number
+    const message = 'Hello, I have a question about Ambrosia Ayurved products';
+    final url =
+        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}';
+
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   @override
@@ -222,6 +238,19 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   ],
                 ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 85, // Position above the tab bar
+            right: 20,
+            child: FloatingActionButton(
+              //   backgroundColor: Colors.white, // WhatsApp green color
+              onPressed: _launchWhatsApp,
+              child: Image.asset(
+                'assets/images/whatsapp.png',
+                width: 35,
+                height: 35,
               ),
             ),
           ),

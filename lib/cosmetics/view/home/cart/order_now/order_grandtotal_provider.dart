@@ -14,6 +14,7 @@ class GrandTotalProvider extends ChangeNotifier {
 
       total += itemPrice * itemQuantity;
     }
+
     _grandTotal = total;
 
     print("Updated Grand Total: $_grandTotal");

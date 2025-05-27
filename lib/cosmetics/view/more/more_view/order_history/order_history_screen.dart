@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/order_history/submit_review.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
 import 'package:ambrosia_ayurved/cosmetics/common_widgets/snackbar.dart';
@@ -25,19 +26,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     Future.microtask(() => Provider.of<OrderProvider>(context, listen: false)
         .fetchOrders(context));
   }
-
-  // /// added temporary
-  // final Map<String, bool> _cancelRequests = {}; // Track canceled orders locally
-
-  // void _cancelOrder(
-  //     BuildContext context, OrderProvider orderProvider, String orderId) async {
-  //   final success = await orderProvider.cancelOrder(orderId, context);
-  //   if (success) {
-  //     setState(() {
-  //       _cancelRequests[orderId] = true; // Mark this order as canceled
-  //     });
-  //   }
-  // }
 
   void _showCancelDialog(
     BuildContext context,
@@ -471,13 +459,25 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                             : order.status == 4
                                                 ? TextButton(
                                                     onPressed: () {
-                                                      showReviewDialog(
-                                                        context,
-                                                        int.parse(order
-                                                            .productId), // Convert String to int
-                                                        int.parse(
-                                                            order.orderId),
-                                                      );
+                                                      Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                SubmitReviewScreen(
+                                                              orderId:
+                                                                  order.orderId,
+                                                              productId: order
+                                                                  .productId,
+                                                            ),
+                                                          ));
+
+                                                      // showReviewDialog(
+                                                      //   context,
+                                                      //   int.parse(order
+                                                      //       .productId), // Convert String to int
+                                                      //   int.parse(
+                                                      //       order.orderId),
+                                                      // );
                                                     },
                                                     child: Text(
                                                       AppLocalizations.of(

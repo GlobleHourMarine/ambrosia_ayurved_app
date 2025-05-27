@@ -1,3 +1,4 @@
+import 'package:ambrosia_ayurved/widgets/address/address_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
@@ -39,10 +40,10 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: userProvider),
-        //   ChangeNotifierProvider(create: (context) => UserProvider()),
+        // ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider.value(value: languageProvider),
-        //  ChangeNotifierProvider(create: (context) => TranslationProvider()),
-
+        // ChangeNotifierProvider(create: (context) => TranslationProvider()),
+        //  ChangeNotifierProvider(create: (context) => Address()),
         ChangeNotifierProvider(create: (context) => ProductNotifier()),
         ChangeNotifierProvider(create: (context) => CartProvider()),
         ChangeNotifierProvider(create: (context) => PaymentProvider()),
@@ -73,10 +74,6 @@ class _MyAppState extends State<MyApp> {
     return Consumer<LanguageProvider>(
       builder: (context, languageProvider, child) {
         final currentLocale = languageProvider.selectedLocale;
-        //  print("📍 Current locale in main: ${currentLocale.languageCode}");
-
-        // Update Get.locale to keep it in sync with Provider
-        // This helps avoid conflicts between GetX and Provider
         if (Get.locale?.languageCode != currentLocale.languageCode) {
           Future.microtask(() => Get.updateLocale(currentLocale));
         }
@@ -85,6 +82,7 @@ class _MyAppState extends State<MyApp> {
           supportedLocales: const [
             Locale('en'),
             Locale('ms'),
+            Locale('ar'),
           ],
           locale: currentLocale, // Set from provider
           fallbackLocale:
@@ -95,6 +93,8 @@ class _MyAppState extends State<MyApp> {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
+          //
+          //
           title: 'Ambrosia Ayurved',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Acolors.primary),

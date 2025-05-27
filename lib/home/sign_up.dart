@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ambrosia_ayurved/cosmetics/common_widgets/custom_message.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/ourpolicies/privacy_policy.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/ourpolicies/terms&conditions.dart';
 import 'package:flutter/material.dart';
@@ -6,14 +7,12 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
 import 'package:ambrosia_ayurved/cosmetics/common_widgets/snackbar.dart';
-
 import 'package:ambrosia_ayurved/home/home_screen.dart';
 import 'package:ambrosia_ayurved/home/signin.dart';
 import 'package:ambrosia_ayurved/internet/internet.dart';
 import 'package:ambrosia_ayurved/models/user_model.dart';
 import 'package:ambrosia_ayurved/new_bottom_nav_bar.dart';
 import 'package:ambrosia_ayurved/provider/user_provider.dart';
-
 import 'package:ambrosia_ayurved/theme/theme.dart';
 import 'package:ambrosia_ayurved/cosmetics/common_widgets/snackbar.dart';
 import 'package:ambrosia_ayurved/widgets/custom_scaffold.dart';
@@ -123,33 +122,44 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
           print(responseBody['data']);
 
-          Get.snackbar(
-            "${AppLocalizations.of(context)!.loginSuccess}",
-            "${AppLocalizations.of(context)!.loginSuccessMsg}",
-            // 'Login Successfull',
-            // 'You have successfully logged in.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Acolors.primary,
-            colorText: Colors.white,
-            duration: Duration(seconds: 2),
-            titleText: Text(
-              "${AppLocalizations.of(context)!.loginSuccess}",
-              // 'Login Successfull',
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            messageText: Text(
-              "${AppLocalizations.of(context)!.loginSuccessMsg}",
-              // 'You have successfully logged in.',
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
+          SuccessPopup.show(
+            context: context,
+            title: "${AppLocalizations.of(context)!.loginSuccess}",
+            subtitle:
+                "${AppLocalizations.of(context)!.youHaveBeenredirectedtohomescreen}",
+            icon: Icons.verified_user,
+            //   iconColor: Colors.blue,
+            navigateToScreen: HomeScreen(),
+            autoCloseDuration: 3,
           );
-          Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomeScreen(),
-              ));
+
+          // Get.snackbar(
+          //   "${AppLocalizations.of(context)!.loginSuccess}",
+          //   "${AppLocalizations.of(context)!.loginSuccessMsg}",
+          //   // 'Login Successfull',
+          //   // 'You have successfully logged in.',
+          //   snackPosition: SnackPosition.BOTTOM,
+          //   backgroundColor: Acolors.primary,
+          //   colorText: Colors.white,
+          //   duration: Duration(seconds: 2),
+          //   titleText: Text(
+          //     "${AppLocalizations.of(context)!.loginSuccess}",
+          //     // 'Login Successfull',
+          //     style:
+          //         TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          //   ),
+          //   messageText: Text(
+          //     "${AppLocalizations.of(context)!.loginSuccessMsg}",
+          //     // 'You have successfully logged in.',
+          //     style:
+          //         TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          //   ),
+          // );
+          // Navigator.pushReplacement(
+          //     context,
+          //     MaterialPageRoute(
+          //       builder: (context) => HomeScreen(),
+          //     ));
           // Call login API after successful registration
           // await loginUser(emailController, passwordController, context);
           /*     if (response.statusCode == 200 &&
@@ -768,8 +778,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               ),
 
                               Text(
-                                'I agree to ',
-                                //  "${AppLocalizations.of(context)!.iAgreeTo} ", // 'I agree to '
+                                // 'I agree to ',
+                                "${AppLocalizations.of(context)!.iagreeto} ",
                               ),
                               GestureDetector(
                                 onTap: () {
@@ -789,9 +799,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   ),
                                 ),
                               ),
-                              Text(' and'
-                                  // "${AppLocalizations.of(context)!.and} "
-                                  ), // ' and '
+                              Text(
+                                  //'and'
+                                  "${AppLocalizations.of(context)!.and} "), // ' and '
                               GestureDetector(
                                 onTap: () {
                                   Navigator.push(
@@ -839,7 +849,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 if (_formSignupKey.currentState!.validate()) {
                                   if (!_agreedToPolicy) {
                                     SnackbarMessage.showSnackbar(context,
-                                        'Please agree to the Privacy Policy and Terms and Conditions');
+                                        "${AppLocalizations.of(context)!.agreePrivacyTerms}");
                                     return;
                                   }
                                   registerUser(context);

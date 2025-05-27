@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -239,7 +240,8 @@ class _CartPageState extends State<CartPage> {
                               ),
                             ),
                             Text(
-                              'Your Cart is empty',
+                              '${AppLocalizations.of(context)!.cartEmptyTitle}',
+                              //'Your Cart is empty',
                               style: TextStyle(
                                   fontSize: 24, fontWeight: FontWeight.w400),
                             ),
@@ -247,7 +249,8 @@ class _CartPageState extends State<CartPage> {
                             Padding(
                               padding: const EdgeInsets.all(22.0),
                               child: Text(
-                                "Looks like you haven't added anything to your cart yet.",
+                                '${AppLocalizations.of(context)!.cartEmptyMessage}',
+                                // "Looks like you haven't added anything to your cart yet.",
                                 style: TextStyle(
                                     fontSize: 18, color: Colors.black54),
                               ),
@@ -308,65 +311,84 @@ class _CartPageState extends State<CartPage> {
                             child: Column(
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 120, // Adjust as needed
-                                        height: 140, // Adjust as needed
+                                  padding: EdgeInsets.all(8.0),
+                                  child: InkWell(
+                                    onTap: () {
+                                      Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => HomeScreen(),
+                                          ));
+                                    },
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: 120, // Adjust as needed
+                                          height: 140, // Adjust as needed
 
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                          child: Image.network(
-                                            'https://ambrosiaayurved.in/${cartItem.image}',
-                                            fit: BoxFit.fill,
-                                            loadingBuilder:
-                                                (context, child, progress) {
-                                              if (progress == null)
-                                                return child;
-                                              return const ShimmerEffect(
-                                                  width: 50, height: 50);
-                                            },
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                              return const ShimmerEffect(
-                                                  width: 50, height: 50);
-                                            },
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            child: Image.network(
+                                              'https://ambrosiaayurved.in/${cartItem.image}',
+                                              fit: BoxFit.fill,
+                                              loadingBuilder:
+                                                  (context, child, progress) {
+                                                if (progress == null)
+                                                  return child;
+                                                return const ShimmerEffect(
+                                                    width: 50, height: 50);
+                                              },
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
+                                                return const ShimmerEffect(
+                                                    width: 50, height: 50);
+                                              },
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              cartItem.productName,
-                                              style: TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w600),
-                                            ),
-                                            SizedBox(height: 7),
-                                            Text(
-                                              '${cartItem.description}',
-                                              maxLines: 3,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(fontSize: 12),
-                                            ),
-                                            SizedBox(height: 10),
-                                            Text(
-                                              'Rs ${cartItem.price}',
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.w600),
-                                            ),
-                                          ],
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Directionality(
+                                                textDirection:
+                                                    TextDirection.ltr,
+                                                child: Text(
+                                                  AppLocalizations.of(context)!
+                                                      .a5product,
+                                                  // cartItem.productName,
+                                                  style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.w600),
+                                                ),
+                                              ),
+                                              SizedBox(height: 7),
+                                              Text(
+                                                AppLocalizations.of(context)!
+                                                    .descriptionproduct,
+                                                //  '${cartItem.description}',
+                                                maxLines: 3,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(fontSize: 14),
+                                              ),
+                                              SizedBox(height: 10),
+                                              Text(
+                                                'Rs ${cartItem.price}',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.w600),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                                 Divider(),
@@ -391,8 +413,9 @@ class _CartPageState extends State<CartPage> {
                                       },
                                       icon: Icon(Icons.delete_outline_outlined),
                                       label: Text(
-                                          //   "${AppLocalizations.of(context)!.remove}",
-                                          'Remove'),
+                                        "${AppLocalizations.of(context)!.remove}",
+                                        //  'Remove',
+                                      ),
                                     ),
                                     SizedBox(width: 80),
                                     InkWell(

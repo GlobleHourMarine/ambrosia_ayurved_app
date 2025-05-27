@@ -68,14 +68,14 @@ class PlaceOrderProvider with ChangeNotifier {
           print("Order ID: $_orderId");
           print(responseData);
 
-          SnackbarMessage.showSnackbar(context, 'Order placed successfully');
+          // SnackbarMessage.showSnackbar(context, 'Order placed successfully');
         } else {
-          SnackbarMessage.showSnackbar(context, 'Failed to place order');
+          //  SnackbarMessage.showSnackbar(context, 'Failed to place order');
           _message = "Order placement failed!";
         }
       } catch (error) {
         print(error);
-        SnackbarMessage.showSnackbar(context, '$error');
+        //  SnackbarMessage.showSnackbar(context, '$error');
         _message = "An error occurred!";
       }
     }

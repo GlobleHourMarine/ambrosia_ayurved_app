@@ -7,19 +7,18 @@ class Benefits extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.all(12.0),
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: Text(
-              AppLocalizations.of(context)!.benefits,
-              // "Benefits",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.green,
-              ),
+          child: Text(
+            AppLocalizations.of(context)!.benefits,
+            // "Benefits",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.green,
             ),
           ),
         ),
@@ -78,11 +77,12 @@ class Benefits extends StatelessWidget {
         ),
         _buildBenefitItem(
           imagePath: 'assets/images/kap_blood_sugar_3.webp',
-          boldText: "${AppLocalizations.of(context)!.preventComplications}"
-              "Prevent Other Related Complications",
+          boldText: "${AppLocalizations.of(context)!.preventComplications}",
+
+          //   "Prevent Other Related Complications",
           description:
-              "${AppLocalizations.of(context)!.naturalControlPreventsIssues}"
-              "Naturally controlling Blood Sugar can prevent other health complications like BP and kidney issues",
+              "${AppLocalizations.of(context)!.naturalControlPreventsIssues}",
+          //  "Naturally controlling Blood Sugar can prevent other health complications like BP and kidney issues",
         ),
         // Usage Instructions
       ],

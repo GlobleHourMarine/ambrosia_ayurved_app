@@ -204,6 +204,7 @@ class _ProductDetailPageState extends State<ProductDetailPage>
       'assets/images/A5_front.webp',
       'assets/images/A5_pack_front.png',
       'assets/images/A5_pack_back.png',
+      'assets/images/PH02.webp',
       'assets/images/A5_aboutus.webp',
       // Add more images if available
     ];
@@ -260,12 +261,17 @@ class _ProductDetailPageState extends State<ProductDetailPage>
     //  print(product.description);
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Text(
-        'A5 – Ayurveda’s Ultimate Answer to Diabetes',
-        //  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-
-        //   product.name,
-        style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+      child: Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Text(
+            // 'A5 – Ayurveda’s Ultimate Answer to Diabetes',
+            //  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            AppLocalizations.of(context)!.a5product,
+            //  product.name,
+            style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+          ),
+        ),
       ),
     );
   }
@@ -365,166 +371,179 @@ class _ProductDetailPageState extends State<ProductDetailPage>
 
   Widget bottomCartSection(Product product) {
     final cart = Provider.of<CartProvider>(context);
-    return Row(
-      children: [
-        Stack(
-          alignment: Alignment.centerLeft,
-          children: [
-            Container(
-              height: 180,
-              width: 100,
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(50),
-                  bottomRight: Radius.circular(50),
-                ),
-                color: Acolors.primary,
-              ),
-            ),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 50),
-                  child: Container(
-                    height: 120,
-                    width: 300,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(40),
-                        topLeft: Radius.circular(40),
-                        bottomRight: Radius.circular(20),
-                        topRight: Radius.circular(20),
-                      ),
-                      boxShadow: [
-                        BoxShadow(blurRadius: 10, color: Acolors.primary)
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 14),
-                        Text(
-                          product.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                          ),
-                        ),
-                        // SizedBox(height: 3),
-                        Text(
-                          '\Rs ${product.price}',
-                          style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: 3),
+    final screenWidth = MediaQuery.of(context).size.width;
 
-                        SizedBox(
-                          height: 30,
-                          width: 170,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Acolors.primary,
-                            ),
-                            onPressed: _isAddingToCart
-                                ? null
-                                : () async {
-                                    setState(() {
-                                      _isAddingToCart = true;
-                                    });
-
-                                    await Provider.of<CartProvider>(context,
-                                            listen: false)
-                                        .addToCart(
-                                      product.id.toString(),
-                                      product.name,
-                                      context,
-                                    );
-
-                                    setState(() {
-                                      _isAddingToCart = false;
-                                    });
-                                  },
-                            child: _isAddingToCart
-                                ? const SizedBox(
-                                    height: 16,
-                                    width: 16,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Icon(
-                                        Icons.shopping_cart,
-                                        color: Acolors.white,
-                                        size: 20,
-                                      ),
-                                      Text(
-                                        AppLocalizations.of(context)!.addtocart,
-                                        style: TextStyle(color: Acolors.white),
-                                      ),
-                                    ],
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Row(
+        children: [
+          Stack(
+            alignment: Alignment.centerLeft,
+            children: [
+              Container(
+                height: 180,
+                //  width: screenWidth * 0.23, // 25% of screen width
+                width: 100,
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(50),
+                    bottomRight: Radius.circular(50),
                   ),
+                  color: Acolors.primary,
                 ),
-              ],
-            ),
-            Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 330),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CartPage(),
-                          ));
-                    },
+              ),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 50),
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      height: 120,
+                      //  width: screenWidth * 0.70, // 75% of screen width
+                      width: 300,
                       decoration: const BoxDecoration(
-                        color: Acolors.white,
-                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(40),
+                          topLeft: Radius.circular(40),
+                          bottomRight: Radius.circular(20),
+                          topRight: Radius.circular(20),
+                        ),
                         boxShadow: [
-                          BoxShadow(
-                            blurRadius: 7,
-                            color: Acolors.primary,
+                          BoxShadow(blurRadius: 10, color: Acolors.primary)
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 14),
+                          Directionality(
+                            textDirection: TextDirection.ltr,
+                            child: Text(
+                              AppLocalizations.of(context)!.a5product,
+                              //   product.name,
+                              style: const TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          // SizedBox(height: 3),
+                          Text(
+                            '\Rs ${product.price}',
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 3),
+                          SizedBox(
+                            height: 30,
+                            //  width: screenWidth * 0.4, // 45% of screen width
+                            width: 170,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Acolors.primary,
+                              ),
+                              onPressed: _isAddingToCart
+                                  ? null
+                                  : () async {
+                                      setState(() {
+                                        _isAddingToCart = true;
+                                      });
+
+                                      await Provider.of<CartProvider>(context,
+                                              listen: false)
+                                          .addToCart(
+                                        product.id.toString(),
+                                        product.name,
+                                        context,
+                                      );
+
+                                      setState(() {
+                                        _isAddingToCart = false;
+                                      });
+                                    },
+                              child: _isAddingToCart
+                                  ? const SizedBox(
+                                      height: 16,
+                                      width: 16,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Icon(
+                                          Icons.shopping_cart,
+                                          color: Acolors.white,
+                                          size: 20,
+                                        ),
+                                        Text(
+                                          AppLocalizations.of(context)!
+                                              .addtocart,
+                                          style:
+                                              TextStyle(color: Acolors.white),
+                                        ),
+                                      ],
+                                    ),
+                            ),
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.shopping_cart,
-                        color: Acolors.primary,
+                    ),
+                  ),
+                ],
+              ),
+              Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 330),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const CartPage(),
+                            ));
+                      },
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: const BoxDecoration(
+                          color: Acolors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 7,
+                              color: Acolors.primary,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.shopping_cart,
+                          color: Acolors.primary,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: CircleAvatar(
-                    radius: 8,
-                    backgroundColor: const Color.fromARGB(255, 245, 114, 74),
-                    child: Text(
-                      '${cart.totalUniqueItems}',
-                      style: TextStyle(fontSize: 12, color: Colors.white),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: CircleAvatar(
+                      radius: 8,
+                      backgroundColor: const Color.fromARGB(255, 245, 114, 74),
+                      child: Text(
+                        '${cart.totalUniqueItems}',
+                        style: TextStyle(fontSize: 12, color: Colors.white),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -534,6 +553,9 @@ class _ProductDetailPageState extends State<ProductDetailPage>
 //
 //
 //
+
+/*
+
 
 class A5Description extends StatelessWidget {
   @override
@@ -591,10 +613,7 @@ class A5Description extends StatelessWidget {
 }
 
 
-
-/*
-
-
+*/
 
 class A5Description extends StatelessWidget {
   @override
@@ -633,17 +652,14 @@ class A5Description extends StatelessWidget {
         children: <Widget>[
           Icon(Icons.check_box, color: Colors.green),
           SizedBox(width: 8.0),
-          Text(
-            text,
-            style: TextStyle(fontWeight: FontWeight.bold),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
     );
   }
 }
-
-
-
-
-*/

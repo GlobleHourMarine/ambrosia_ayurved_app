@@ -1,9 +1,5 @@
 import 'dart:convert';
-
-// import 'package:ONO/screens/internet/InternetUi.dart';
-// import 'package:ONO/screens/user_model.dart';
-// import 'package:ONO/screens/userprovider.dart';
-// import 'package:ONO/screens/welcome_screen/signin_screen.dart';
+import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 // import 'package:ONO/theme/theme.dart';
 import 'package:http/http.dart' as http;
@@ -15,6 +11,7 @@ import 'package:ambrosia_ayurved/internet/internet.dart';
 import 'package:ambrosia_ayurved/models/user_model.dart';
 import 'package:ambrosia_ayurved/provider/user_provider.dart';
 import 'package:ambrosia_ayurved/theme/theme.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:ambrosia_ayurved/profile/otp_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -265,6 +262,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
           return false;
         }
       } else {
+      
         print('Failed to check user existence: ${response.statusCode}');
         return false;
       }
@@ -330,136 +328,138 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BasePage(
-        fetchDataFunction: () async {},
-        child: SafeArea(
-          child: Scaffold(
-            backgroundColor: Colors.white,
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  const SizedBox(height: 100),
-                  // FadeInUp(
-                  //   duration: Duration(milliseconds: 1000),
-                  //   child: CircleAvatar(
-                  //     radius: 90,
-                  //     backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                  //     child: Image.asset('assets/images/img2.png'),
-                  //   ),
-                  // ),
-                  Expanded(
-                    child: FadeInUp(
-                      duration: const Duration(milliseconds: 1000),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Color.fromARGB(255, 255, 255, 255),
-                              Acolors.primary,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(60),
-                            topRight: Radius.circular(60),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(40),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: <Widget>[
-                              Text(
-                                "${AppLocalizations.of(context)!.forgotPassword}",
-                                //    'Forgot Your Password?',
-                                style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF272829)),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 20.0),
-                              TextFormField(
-                                controller: emailController,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return "${AppLocalizations.of(context)!.pleaseEnterEmail}";
-                                    //    'Please enter Email';
-                                  }
-                                  return null;
-                                },
-                                decoration: InputDecoration(
-                                  label: Text(
-                                    "${AppLocalizations.of(context)!.email}",
-                                    //  'Email'
-                                  ),
-                                  hintText:
-                                      "${AppLocalizations.of(context)!.enterEmail}",
+    return Scaffold(
+      appBar: CustomAppBar(
+        title: 'Forget Password',
+      ),
+      resizeToAvoidBottomInset: true,
 
-                                  // 'Enter Email',
-                                  hintStyle: const TextStyle(
-                                    color: Acolors.primary,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderSide: const BorderSide(
-                                        color: Acolors
-                                            .primary // Default border color
-                                        ),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                      borderSide: const BorderSide(
-                                        color: Acolors
-                                            .primary, // Default border color
-                                      ),
-                                      borderRadius: BorderRadius.circular(10)),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: const BorderSide(
-                                      color:
-                                          Colors.blue, // Default border color
-                                    ),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  filled: true,
-                                  fillColor: const Color(
-                                      0xFFFFFFFF), // White background color
-                                ),
-                                style: const TextStyle(
-                                  color: Color(0xFF272829), // Text color red
-                                ),
-                              ),
-                              const SizedBox(height: 20.0),
-                              FadeInUp(
-                                duration: const Duration(milliseconds: 1200),
-                                child: ElevatedButton(
-                                  onPressed: () =>
-                                      initiatePasswordReset(context),
-                                  child: Text(
-                                    "${AppLocalizations.of(context)!.resetPassword}",
-                                    //  'Reset Password',
-                                    style: TextStyle(
-                                        color:
-                                            Color.fromARGB(255, 255, 255, 255)),
-                                  ),
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStateProperty.all<Color>(
-                                            Acolors.primary),
-                                  ),
-                                ),
-                              ),
-                            ],
+      //  backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: FadeInUp(
+          duration: const Duration(milliseconds: 1000),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Expanded(
+              child: Column(
+                children: <Widget>[
+                  SizedBox(height: 20),
+                  SizedBox(
+                    // height: 300,
+                    child: Lottie.asset(
+                      'assets/images/forget_password_2.json',
+                      fit: BoxFit.contain,
+                      repeat: true,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Lottie.network(
+                        'https://assets5.lottiefiles.com/packages/lf20_ktwnwv5m.json', // Fallback animation
+                        height: 200,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+
+                  //
+                  //
+
+                  // Title and subtitle
+                  SizedBox(height: 50),
+                  // Spacer(),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      "${AppLocalizations.of(context)!.forgotPassword}",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2E3E5C),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Don\'t worry! It happens. Please enter the email address associated with your account.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF8F9BB3),
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  //
+
+                  TextFormField(
+                    controller: emailController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "${AppLocalizations.of(context)!.pleaseEnterEmail}";
+                        //    'Please enter Email';
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      label: Text(
+                        "${AppLocalizations.of(context)!.email}",
+                        //  'Email'
+                      ),
+                      hintText: "${AppLocalizations.of(context)!.enterEmail}",
+
+                      // 'Enter Email',
+                      hintStyle: const TextStyle(
+                        color: Acolors.primary,
+                      ),
+                      prefixIcon: const Icon(Icons.email_outlined),
+
+                      ///
+
+                      //
+                      border: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                            color: Acolors.primary // Default border color
+                            ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Acolors.primary, // Default border color
                           ),
+                          borderRadius: BorderRadius.circular(10)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: Acolors.primary, // Default border color
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      filled: true,
+                      fillColor:
+                          const Color(0xFFFFFFFF), // White background color
+                    ),
+                    style: const TextStyle(
+                      color: Color(0xFF272829), // Text color red
+                    ),
+                  ),
+                  const SizedBox(height: 20.0),
+                  FadeInUp(
+                    duration: const Duration(milliseconds: 1200),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 100),
+                      child: ElevatedButton(
+                        onPressed: () => initiatePasswordReset(context),
+                        child: Text(
+                          "${AppLocalizations.of(context)!.resetPassword}",
+                          //  'Reset Password',
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 255, 255, 255)),
+                        ),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all<Color>(Acolors.primary),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(
-                    height: 25.0,
-                  ),
+                  const SizedBox(height: 20.0),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -496,7 +496,12 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
               ),
             ),
           ),
-        ));
+        ),
+      ),
+
+      //   ],
+      // ),
+    );
   }
 }
 

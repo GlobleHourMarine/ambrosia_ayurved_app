@@ -1,3 +1,5 @@
+/*
+
 import 'package:flutter/material.dart';
 
 class TermsAndConditionsScreen2 extends StatelessWidget {
@@ -115,9 +117,7 @@ class BulletPoint extends StatelessWidget {
     );
   }
 }
-
-
-/*
+*/
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -221,6 +221,3 @@ class BulletPoint extends StatelessWidget {
     );
   }
 }
-
-
-*/

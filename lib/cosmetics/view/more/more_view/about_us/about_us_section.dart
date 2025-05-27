@@ -33,24 +33,26 @@ class _AboutUsShortSectionState extends State<AboutUsShortSection> {
         children: [
           Icon(Icons.groups, color: Colors.green),
           SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.aboutUsTitle,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${AppLocalizations.of(context)!.aboutUsTitle}',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF006666),
+                  ),
+                ),
+                SizedBox(height: 4),
+                Container(
+                  height: 2,
+                  width: 355,
                   color: Color(0xFF006666),
                 ),
-              ),
-              SizedBox(height: 4),
-              Container(
-                height: 2,
-                width: 355,
-                color: Color(0xFF006666),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ambrosia_ayurved/cosmetics/common_widgets/custom_message.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/ourpolicies/privacy_policy.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/ourpolicies/terms&conditions.dart';
 import 'package:flutter/material.dart';
@@ -67,64 +68,100 @@ class RegisterService {
                         ),
                       ),
                       Text(
-                        'Register to add product to cart',
+                        "${AppLocalizations.of(context)!.registertoaddproduct} ",
+                        //  'Register to add product to cart',
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 20),
-                      buildTextFormField(emailController, 'Email', (value) {
-                        if (value!.isEmpty) return 'Email cannot be empty';
+                      buildTextFormField(emailController,
+                          "${AppLocalizations.of(context)!.email} ", (value) {
+                        if (value!.isEmpty)
+                          return "${AppLocalizations.of(context)!.enterEmail} ";
+                        // 'Email cannot be empty';
                         if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+com')
                             .hasMatch(value)) {
-                          return 'Enter a valid email';
+                          return "${AppLocalizations.of(context)!.pleaseEnterValidEmail}";
+                          // 'Enter a valid email';
                         }
                         return null;
                       }),
                       Row(
                         children: [
                           Expanded(
-                            child: buildTextFormField(
-                                fnameController, 'First Name', (value) {
+                            child: buildTextFormField(fnameController,
+                                "${AppLocalizations.of(context)!.firstName} ",
+                                //'First Name',
+                                (value) {
                               if (value!.isEmpty)
-                                return 'First name cannot be empty';
+                                return "${AppLocalizations.of(context)!.pleaseEnterFirstName} ";
+                              //  'First name cannot be empty';
                               return null;
                             }),
                           ),
                           SizedBox(width: 7),
                           Expanded(
-                            child: buildTextFormField(
-                                lnameController, 'Last Name', (value) {
+                            child: buildTextFormField(lnameController,
+                                "${AppLocalizations.of(context)!.lastName} ",
+                                //  'Last Name',
+                                (value) {
                               if (value!.isEmpty)
-                                return 'Last name cannot be empty';
+                                return "${AppLocalizations.of(context)!.pleaseEnterLastName} ";
+                              //'Last name cannot be empty';
                               return null;
                             }),
                           ),
                         ],
                       ),
-                      buildTextFormField(phoneController, 'Mobile Number',
-                          (value) {
-                        if (value!.isEmpty) return 'Mobile cannot be empty';
-                        return null;
-                      }),
-                      buildTextFormField(passwordController, 'Password',
+                      buildTextFormField(
+                        phoneController,
+                        "${AppLocalizations.of(context)!.phone} ",
+                        //'Mobile Number',
+
+                        (value) {
+                          if (value == null || value.isEmpty) {
+                            return "${AppLocalizations.of(context)!.pleaseEnterPhone}";
+                            //'Please enter Phone no.';
+                          } else if (!RegExp(r'^\d{1,13}$').hasMatch(value)) {
+                            return "${AppLocalizations.of(context)!.pleaseEnterValidPhone}";
+                            //'Please enter a valid Phone no.';
+                          }
+                          return null;
+                        },
+                      ),
+                      //     (value) {
+                      //   if (value!.isEmpty)
+                      //     return "${AppLocalizations.of(context)!.validMobile} ";
+                      //   //'Mobile cannot be empty';
+                      //   return null;
+                      // }),
+                      buildTextFormField(passwordController,
+                          "${AppLocalizations.of(context)!.password} ",
+                          //'Password',
                           (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter Password';
+                          return "${AppLocalizations.of(context)!.pleaseEnterPassword} ";
+                          // 'Please enter Password';
                         } else if (value.length < 8) {
-                          return 'Password must be at least 8 characters';
+                          return "${AppLocalizations.of(context)!.passwordMinLength} ";
+                          //'Password must be at least 8 characters';
                         } else if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]')
                             .hasMatch(value)) {
-                          return 'Password must contain a special character';
+                          return "${AppLocalizations.of(context)!.passwordSpecialChar} ";
+                          //'Password must contain a special character';
                         }
                         return null;
                       }, isObscure: true),
-                      buildTextFormField(
-                          confirmPasswordController, 'Confirm Password',
+                      buildTextFormField(confirmPasswordController,
+                          "${AppLocalizations.of(context)!.confirmPassword} ",
+                          //'Confirm Password',
                           (value) {
                         if (value!.isEmpty)
-                          return 'Confirm Password cannot be empty';
+                          return "${AppLocalizations.of(context)!.pleaseConfirmPassword} ";
+                        //'Confirm Password cannot be empty';
                         if (value != passwordController.text)
-                          return 'Passwords do not match';
+                          return "${AppLocalizations.of(context)!.passwordsDoNotMatch} ";
+                        //'Passwords do not match';
                         return null;
                       }, isObscure: true),
                       SizedBox(height: 5),
@@ -141,8 +178,8 @@ class RegisterService {
                           ),
 
                           Text(
-                            'I agree to ',
-                            //  "${AppLocalizations.of(context)!.iAgreeTo} ", // 'I agree to '
+                            // 'I agree to ',
+                            "${AppLocalizations.of(context)!.iagreeto} ", // 'I agree to '
                           ),
                           GestureDetector(
                             onTap: () {
@@ -161,9 +198,9 @@ class RegisterService {
                               ),
                             ),
                           ),
-                          Text(' and'
-                              // "${AppLocalizations.of(context)!.and} "
-                              ), // ' and '
+                          Text(
+                              //' and'
+                              "${AppLocalizations.of(context)!.and} "), // ' and '
                           GestureDetector(
                             onTap: () {
                               Navigator.push(
@@ -225,7 +262,8 @@ class RegisterService {
                                         }
                                       : null,
                                   child: Text(
-                                    'Register',
+                                    // 'Sign Up',
+                                    "${AppLocalizations.of(context)!.signUp} ",
                                     style: TextStyle(fontSize: 16),
                                   ),
                                 ),
@@ -295,29 +333,39 @@ class RegisterService {
         userProvider.setUser(user);
         await userProvider.saveUserData(user);
 
-        Get.snackbar(
-          "${AppLocalizations.of(context)!.loginSuccess}",
-          "${AppLocalizations.of(context)!.loginSuccessMsg}",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Acolors.primary,
-          colorText: Colors.white,
-          duration: Duration(seconds: 2),
-          titleText: Text(
-            "${AppLocalizations.of(context)!.loginSuccess}",
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          messageText: Text(
-            "${AppLocalizations.of(context)!.loginSuccessMsg}",
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-          ),
+        SuccessPopup.show(
+          context: context,
+          title: "${AppLocalizations.of(context)!.loginSuccess}",
+          subtitle:
+              "${AppLocalizations.of(context)!.youHaveBeenredirectedtohomescreen}",
+          icon: Icons.verified_user,
+          //   iconColor: Colors.blue,
+          navigateToScreen: HomeScreen(),
+          autoCloseDuration: 3,
         );
+        // Get.snackbar(
+        //   "${AppLocalizations.of(context)!.loginSuccess}",
+        //   "${AppLocalizations.of(context)!.loginSuccessMsg}",
+        //   snackPosition: SnackPosition.BOTTOM,
+        //   backgroundColor: Acolors.primary,
+        //   colorText: Colors.white,
+        //   duration: Duration(seconds: 2),
+        //   titleText: Text(
+        //     "${AppLocalizations.of(context)!.loginSuccess}",
+        //     style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        //   ),
+        //   messageText: Text(
+        //     "${AppLocalizations.of(context)!.loginSuccessMsg}",
+        //     style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        //   ),
+        // );
 
-        Navigator.of(context).pop(); // Close the bottom sheet
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomeScreen(),
-            ));
+        // Navigator.of(context).pop(); // Close the bottom sheet
+        // Navigator.pushReplacement(
+        //     context,
+        //     MaterialPageRoute(
+        //       builder: (context) => HomeScreen(),
+        //     ));
       } else if (responseBody.containsKey('message') &&
           responseBody['message'] == "User already exists.") {
         // User already exists - SHOW DIALOG INSTEAD OF JUST CONSOLE LOG

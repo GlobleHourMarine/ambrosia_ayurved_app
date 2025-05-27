@@ -1,3 +1,5 @@
+/*
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -160,18 +162,17 @@ class BulletPoint extends StatelessWidget {
     );
   }
 }
+*/
 
-
-
-/*
-
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TermsAndConditionsScreen1 extends StatelessWidget {
   const TermsAndConditionsScreen1({super.key});
 
-    void _launchCamikaraURL() async {
+  void _launchCamikaraURL() async {
     final Uri url = Uri.parse('https://ambrosiaayurved.in/');
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -179,7 +180,6 @@ class TermsAndConditionsScreen1 extends StatelessWidget {
       throw 'Could not launch $url';
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +203,6 @@ class TermsAndConditionsScreen1 extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
                 recognizer: TapGestureRecognizer()..onTap = _launchCamikaraURL,
-                
               ),
               TextSpan(
                 text: local.termsAndConditions_agreement,
@@ -262,8 +261,7 @@ class TermsAndConditionsScreen1 extends StatelessWidget {
           text: TextSpan(
             style: const TextStyle(color: Colors.black),
             children: [
-              TextSpan(
-                  text: local.termsAndConditions_orderCancellation),
+              TextSpan(text: local.termsAndConditions_orderCancellation),
             ],
           ),
         ),
@@ -310,7 +308,3 @@ class BulletPoint extends StatelessWidget {
     );
   }
 }
-
-
-
-*/

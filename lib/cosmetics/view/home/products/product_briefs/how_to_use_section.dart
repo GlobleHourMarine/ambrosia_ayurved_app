@@ -1,3 +1,4 @@
+import 'package:ambrosia_ayurved/cosmetics/view/home/products/product_briefs/foods_to_avoid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/products/product_briefs/3_months_plan.dart';
@@ -48,6 +49,8 @@ class HowToUseSection extends StatelessWidget {
           description: t.howToUseStep4Desc,
         ),
         ThreeMonthPlan(),
+        SizedBox(height: 25),
+        FoodsToAvoidSection(),
       ],
     );
   }

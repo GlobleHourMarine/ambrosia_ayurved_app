@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 
 class CancellationRefundPolicyScreen3 extends StatelessWidget {
@@ -169,8 +170,7 @@ class BulletPoint extends StatelessWidget {
 }
 
 
-
-/*
+*/
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -180,123 +180,118 @@ class CancellationRefundPolicyScreen3 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.policyUpdates,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        const SizedBox(height: 8),
-        Text(AppLocalizations.of(context)!.policyUpdatesDescription),
-        const SizedBox(height: 24),
-        Text(AppLocalizations.of(context)!.needHelp,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        const SizedBox(height: 8),
-        Text(AppLocalizations.of(context)!.helpDescription),
-        const SizedBox(height: 8),
-        Text('📧 ${AppLocalizations.of(context)!.email}',
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        Text('📞 ${AppLocalizations.of(context)!.phoneNumber}',
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 16),
-        Text(AppLocalizations.of(context)!.thankYou,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        Text(AppLocalizations.of(context)!.commitment),
-        const SizedBox(height: 24),
-        Text(AppLocalizations.of(context)!.nextSession,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 24),
-        Text(AppLocalizations.of(context)!.faqs,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        Text(AppLocalizations.of(context)!.faqDesignNote),
-        const SizedBox(height: 16),
+        Text(loc.policyUpdatesTitle,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        SizedBox(height: 8),
+        Text(loc.policyUpdatesDesc),
+        SizedBox(height: 24),
+        Text(loc.needHelpTitle,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        SizedBox(height: 8),
+        Text(loc.needHelpDesc),
+        SizedBox(height: 8),
+        Text(loc.emailCare, style: TextStyle(fontWeight: FontWeight.bold)),
+        Text(loc.phoneNumber, style: TextStyle(fontWeight: FontWeight.bold)),
+        SizedBox(height: 16),
+        Text(loc.thankYou, style: TextStyle(fontWeight: FontWeight.bold)),
+        Text(loc.commitment),
+        SizedBox(height: 24),
+        Text(loc.nextSession, style: TextStyle(fontWeight: FontWeight.bold)),
+        SizedBox(height: 24),
+        Text(loc.faqsTitle,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(loc.designNote),
+        SizedBox(height: 16),
         RichText(
           text: TextSpan(
-            style: const TextStyle(color: Colors.black),
+            style: TextStyle(color: Colors.black),
             children: [
-              const TextSpan(text: '❓ ', style: TextStyle(fontSize: 18)),
+              TextSpan(text: '❓ ', style: TextStyle(fontSize: 18)),
               TextSpan(
-                  text: '${AppLocalizations.of(context)!.faq1Title}\n',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: AppLocalizations.of(context)!.faq1Text1),
+                  text: '${loc.faq1Title}\n',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: loc.faq1Part1),
               TextSpan(
-                  text: AppLocalizations.of(context)!.faq1Text2,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: AppLocalizations.of(context)!.faq1Text3),
+                  text: loc.faq1Highlight,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: loc.faq1Part2),
               TextSpan(
-                  text: AppLocalizations.of(context)!.email,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: AppLocalizations.of(context)!.faq1Text4),
+                  text: loc.faq1Email,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: loc.faq1Part3),
               TextSpan(
-                  text: AppLocalizations.of(context)!.phoneNumber,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: AppLocalizations.of(context)!.faq1Text5)
+                  text: loc.faq1Phone,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: loc.faq1Part4),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         RichText(
           text: TextSpan(
-            style: const TextStyle(color: Colors.black),
+            style: TextStyle(color: Colors.black),
             children: [
-              const TextSpan(text: '❓ ', style: TextStyle(fontSize: 18)),
+              TextSpan(text: '❓ ', style: TextStyle(fontSize: 18)),
               TextSpan(
-                  text: '${AppLocalizations.of(context)!.faq2Title}\n',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: AppLocalizations.of(context)!.faq2Text1),
+                  text: '${loc.faq2Title}\n',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: loc.faq2AnswerPart1),
               TextSpan(
-                  text: AppLocalizations.of(context)!.faq2Text2,
-                  style: const TextStyle(fontWeight: FontWeight.bold))
+                  text: loc.faq2AnswerBold,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         RichText(
           text: TextSpan(
-            style: const TextStyle(color: Colors.black),
+            style: TextStyle(color: Colors.black),
             children: [
-              const TextSpan(text: '❓ ', style: TextStyle(fontSize: 18)),
+              TextSpan(text: '❓ ', style: TextStyle(fontSize: 18)),
               TextSpan(
-                  text: '${AppLocalizations.of(context)!.faq3Title}\n',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: AppLocalizations.of(context)!.faq3Text1),
+                  text: '${loc.faq3Title}\n',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: loc.faq3Part1),
               TextSpan(
-                  text: AppLocalizations.of(context)!.faq3Text2,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: AppLocalizations.of(context)!.faq3Text3),
+                  text: loc.faq3Time,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: loc.faq3Part2),
               TextSpan(
-                  text: AppLocalizations.of(context)!.faq3Text4,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: AppLocalizations.of(context)!.faq3Text5),
+                  text: loc.faq3Media,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: loc.faq3Part3),
               TextSpan(
-                  text: AppLocalizations.of(context)!.faq3Text6,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: AppLocalizations.of(context)!.faq3Text7)
+                  text: loc.faq3Action,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: loc.faq3Part4),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         RichText(
           text: TextSpan(
-            style: const TextStyle(color: Colors.black),
+            style: TextStyle(color: Colors.black),
             children: [
               TextSpan(
                   text: '❓ ',
-                  style: const TextStyle(fontSize: 18, color: Colors.red)),
+                  style: TextStyle(fontSize: 18, color: Colors.red)),
               TextSpan(
-                  text: '${AppLocalizations.of(context)!.faq4Title}\n',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: AppLocalizations.of(context)!.faq4Text1),
+                  text: '${loc.faq4Title}\n',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: loc.faq4Part1),
               TextSpan(
-                  text: AppLocalizations.of(context)!.faq4Text2,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: AppLocalizations.of(context)!.faq4Text3),
+                  text: loc.faq4Time,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: loc.faq4Part2),
             ],
           ),
         ),
-        BulletPoint(
-          text: AppLocalizations.of(context)!.faq4Bullet,
-          boldText: AppLocalizations.of(context)!.faq4BulletBold,
-        )
+        BulletPoint(text: loc.bulletPointText, boldText: loc.bulletPointBold),
       ],
     );
   }
@@ -338,6 +333,3 @@ class BulletPoint extends StatelessWidget {
     );
   }
 }
-
-
-*/

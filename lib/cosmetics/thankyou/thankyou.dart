@@ -90,8 +90,8 @@ class _CheckoutMessageViewState extends State<CheckoutMessageView>
                       // Animated Elements with Slower Staggered Entrance
                       _buildAnimatedText(
                         child: Text(
-                          // "${AppLocalizations.of(context)!.thank}",
-                          'Thank You!',
+                          "${AppLocalizations.of(context)!.thankYou}",
+                          //  'Thank You!',
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
@@ -106,8 +106,8 @@ class _CheckoutMessageViewState extends State<CheckoutMessageView>
 
                       _buildAnimatedText(
                         child: Text(
-                          //  "${AppLocalizations.of(context)!.}",
-                          "Your order has been placed successfully",
+                          "${AppLocalizations.of(context)!.orderPlaced}",
+                          //  "Your order has been placed successfully",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Acolors.primaryText.withOpacity(0.8),
@@ -124,7 +124,9 @@ class _CheckoutMessageViewState extends State<CheckoutMessageView>
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Text(
-                            "We're processing your order and will notify you when it's on the way.",
+                            AppLocalizations.of(context)!
+                                .orderProcessingMessage,
+                            //   "We're processing your order and will notify you when it's on the way.",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Acolors.primaryText.withOpacity(0.7),
@@ -161,8 +163,9 @@ class _CheckoutMessageViewState extends State<CheckoutMessageView>
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20)),
                           ),
-                          child: const Text(
-                            'Continue Shopping',
+                          child: Text(
+                            AppLocalizations.of(context)!.continueShopping,
+                            //   'Continue Shopping',
                             style: TextStyle(
                               fontSize: 18,
                               color: Acolors.primary,

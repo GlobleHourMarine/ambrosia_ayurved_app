@@ -1,3 +1,5 @@
+/*
+
 import 'package:flutter/material.dart';
 
 class ShippingAndDeliveryPolicyScreen1 extends StatelessWidget {
@@ -24,6 +26,7 @@ class ShippingAndDeliveryPolicyScreen1 extends StatelessWidget {
         SizedBox(height: 8),
         RichText(
           text: TextSpan(
+
             style: TextStyle(color: Colors.black),
             children: [
               TextSpan(
@@ -242,8 +245,7 @@ class BulletPoint extends StatelessWidget {
   }
 }
 
-
-/*
+*/
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -327,7 +329,8 @@ class ShippingAndDeliveryPolicyScreen1 extends StatelessWidget {
             style: const TextStyle(color: Colors.black),
             children: [
               TextSpan(
-                text: local.shippingAndDeliveryPolicy_incorrectAddressDisclaimer,
+                text:
+                    local.shippingAndDeliveryPolicy_incorrectAddressDisclaimer,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
@@ -371,7 +374,8 @@ class ShippingAndDeliveryPolicyScreen1 extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         RichText(
-          text: TextSpan(style: const TextStyle(color: Colors.black), children: [
+          text:
+              TextSpan(style: const TextStyle(color: Colors.black), children: [
             TextSpan(
               text: local.shippingAndDeliveryPolicy_thankYou,
               style: const TextStyle(fontWeight: FontWeight.bold),
@@ -385,7 +389,6 @@ class ShippingAndDeliveryPolicyScreen1 extends StatelessWidget {
     );
   }
 }
-
 
 class BulletPoint extends StatelessWidget {
   final String text;
@@ -405,5 +408,3 @@ class BulletPoint extends StatelessWidget {
     );
   }
 }
-
-*/

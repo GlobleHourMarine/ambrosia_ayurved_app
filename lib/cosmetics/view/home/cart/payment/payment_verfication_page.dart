@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -25,6 +26,8 @@ class PaymentVerificationPage extends StatefulWidget {
 }
 
 class _PaymentVerificationPageState extends State<PaymentVerificationPage> {
+  final _formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
@@ -33,62 +36,157 @@ class _PaymentVerificationPageState extends State<PaymentVerificationPage> {
     });
   }
 
-  Future<void> _requestCameraPermission() async {
-    final status = await Permission.camera.request();
+  Future<bool> _checkAndRequestPermissions() async {
+    try {
+      if (Platform.isAndroid) {
+        final androidInfo = await DeviceInfoPlugin().androidInfo;
+        final sdkInt = androidInfo.version.sdkInt;
 
-    if (status.isGranted) {
-      // Permission granted, proceed with camera access
-      _getImageFromCamera();
-    } else if (status.isDenied) {
-      // Permission denied, you might want to show a message
-      print('Camera permission denied');
-      // Optionally, show a dialog explaining why you need the permission
-    } else if (status.isPermanentlyDenied) {
-      // Permission permanently denied, take the user to app settings
-      openAppSettings();
+        Permission cameraPermission = Permission.camera;
+        Permission mediaPermission =
+            sdkInt >= 33 ? Permission.photos : Permission.storage;
+
+        var cameraStatus = await cameraPermission.status;
+        var mediaStatus = await mediaPermission.status;
+
+        if (cameraStatus.isPermanentlyDenied ||
+            mediaStatus.isPermanentlyDenied) {
+          return await _showSettingsDialog();
+        }
+
+        if (!cameraStatus.isGranted || !mediaStatus.isGranted) {
+          final shouldRequest = await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Permissions Needed'),
+                  content: const Text(
+                      'To add photos, we need access to your camera and media files.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('Continue'),
+                    ),
+                  ],
+                ),
+              ) ??
+              false;
+
+          if (!shouldRequest) return false;
+
+          if (!cameraStatus.isGranted) await cameraPermission.request();
+          if (!mediaStatus.isGranted) await mediaPermission.request();
+
+          cameraStatus = await cameraPermission.status;
+          mediaStatus = await mediaPermission.status;
+
+          if (cameraStatus.isGranted && mediaStatus.isGranted) return true;
+
+          if (cameraStatus.isPermanentlyDenied ||
+              mediaStatus.isPermanentlyDenied) {
+            return await _showSettingsDialog();
+          }
+
+          SnackbarMessage.showSnackbar(context, 'Permissions denied.');
+          return false;
+        }
+
+        return true;
+      } else if (Platform.isIOS) {
+        var cameraStatus = await Permission.camera.status;
+        var photosStatus = await Permission.photos.status;
+
+        if (cameraStatus.isPermanentlyDenied ||
+            photosStatus.isPermanentlyDenied) {
+          return await _showSettingsDialog();
+        }
+
+        if (!cameraStatus.isGranted || !photosStatus.isGranted) {
+          final shouldRequest = await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Permissions Needed'),
+                  content: const Text(
+                      'To add photos, we need access to your camera and photo library.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('Continue'),
+                    ),
+                  ],
+                ),
+              ) ??
+              false;
+
+          if (!shouldRequest) return false;
+
+          if (!cameraStatus.isGranted) await Permission.camera.request();
+          if (!photosStatus.isGranted) await Permission.photos.request();
+
+          cameraStatus = await Permission.camera.status;
+          photosStatus = await Permission.photos.status;
+
+          if (cameraStatus.isGranted && photosStatus.isGranted) return true;
+
+          if (cameraStatus.isPermanentlyDenied ||
+              photosStatus.isPermanentlyDenied) {
+            return await _showSettingsDialog();
+          }
+
+          SnackbarMessage.showSnackbar(context, 'Permissions denied.');
+          return false;
+        }
+
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      print("Permission error: $e");
+      SnackbarMessage.showSnackbar(context, 'Error requesting permissions: $e');
+      return false;
     }
   }
 
-  Future<void> _requestPhotosPermission() async {
-    final status = await Permission.photos.request();
-    if (status.isGranted) {
-      // Permission granted, proceed with gallery access
-      _getImageFromGallery();
-    } else if (status.isDenied) {
-      // Permission denied, you might want to show a message
-      print('Photos permission denied');
-      // Optionally, show a dialog explaining why you need the permission
-    } else if (status.isPermanentlyDenied) {
-      // Permission permanently denied, take the user to app settings
-      openAppSettings();
+// Add this helper method to your State class
+  Future<bool> _showSettingsDialog() async {
+    if (!mounted) return false;
+
+    SnackbarMessage.showSnackbar(
+        context, 'Permissions denied. Please enable them in app settings.');
+
+    final openSettings = await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Permissions Denied'),
+            content: const Text(
+                'Would you like to open app settings to enable permissions?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Not Now'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Open Settings'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+
+    if (openSettings) {
+      await openAppSettings();
     }
-  }
 
-  Future<void> _getImageFromCamera() async {
-    final picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.camera);
-    if (image != null) {
-      // Process the picked image (e.g., upload it)
-      print('Image picked from camera: ${image.path}');
-    }
-  }
-
-  Future<void> _getImageFromGallery() async {
-    final picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      // Process the picked image (e.g., upload it)
-      print('Image picked from gallery: ${image.path}');
-    }
-  }
-
-// Call these functions when the user initiates the image upload process
-  void _handleTakePhoto() {
-    _requestCameraPermission();
-  }
-
-  void _handleChooseFromGallery() {
-    _requestPhotosPermission();
+    return false;
   }
 
   final TextEditingController _transactionIdController =
@@ -99,33 +197,24 @@ class _PaymentVerificationPageState extends State<PaymentVerificationPage> {
   final FocusNode _transactionFocusNode = FocusNode();
 
   Future<void> _pickScreenshot() async {
-    // Request photos permission first
-    final status = await Permission.photos.request();
-    if (status.isGranted) {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    try {
+      final hasPermission = await _checkAndRequestPermissions();
+      if (!hasPermission) {
+        return; // Don't proceed if permissions not granted
+      }
+
+      final pickedFile =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
 
       if (pickedFile != null) {
         setState(() {
           _screenshot = File(pickedFile.path);
         });
       }
-    } else if (status.isDenied) {
-      // Permission denied, show a message
-      SnackbarMessage.showSnackbar(context, 'Photos permission denied'
-          //'${AppLocalizations.of(context)!.photoPermissionDenied}', // Localized message
-          );
-      print('Photos permission denied');
-    } else if (status.isPermanentlyDenied) {
-      // Permission permanently denied, take the user to app settings
-      SnackbarMessage.showSnackbar(
-        context, 'Photos Permission Permanently Denied',
-        //   '${AppLocalizations.of(context)!.photoPermissionPermanentlyDenied}', // Localized message
-      );
-      openAppSettings();
+    } catch (e) {
+      print("Error picking image: $e");
     }
   }
-
   // // Function to pick screenshot
   // Future<void> _pickScreenshot() async {
   //   final picker = ImagePicker();
@@ -142,9 +231,10 @@ class _PaymentVerificationPageState extends State<PaymentVerificationPage> {
       TextEditingController transactionIdController, File? screenshot) async {
     if (transactionIdController.text.isEmpty || screenshot == null) {
       SnackbarMessage.showSnackbar(
-          context,
-          //      "${AppLocalizations.of(context)!.}"
-          'Please enter transaction ID and upload screenshot');
+        context,
+        "${AppLocalizations.of(context)!.uploadScreenshot}",
+      );
+      //    'Please enter transaction ID and upload screenshot');
       return;
     }
 
@@ -153,17 +243,19 @@ class _PaymentVerificationPageState extends State<PaymentVerificationPage> {
           context: context,
           builder: (context) => AlertDialog(
             title: Text(
-                //  "${AppLocalizations.of(context)!.}"
-                "Confirm Order"),
-            content: Text("Are you sure you want to place this order?"),
+              "${AppLocalizations.of(context)!.confirmOrder}",
+              //  "Confirm Order"
+            ),
+            content:
+                Text("${AppLocalizations.of(context)!.confirmOrderPrompt}"),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text("Cancel"),
+                child: Text("${AppLocalizations.of(context)!.cancel}"),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text("Yes"),
+                child: Text("${AppLocalizations.of(context)!.yes}"),
               ),
             ],
           ),
@@ -220,50 +312,61 @@ class _PaymentVerificationPageState extends State<PaymentVerificationPage> {
         title: "${AppLocalizations.of(context)!.paymentVerification}",
         // 'Payment Verfication',
       ),
-      body: SingleChildScrollView(
-        // Prevents render overflow
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Container(
-            //   height: 70,
-            //   color: Acolors.primary,
-            //   child: Padding(
-            //     padding: const EdgeInsets.all(12),
-            //     child: Row(
-            //       children: [
-            //         Material(
-            //           color: Colors.white.withOpacity(0.21),
-            //           borderRadius: BorderRadius.circular(12),
-            //           child: const BackButton(
-            //             color: Acolors.white,
-            //           ),
-            //         ),
-            //         const SizedBox(width: 30),
-            //         const Text(
-            //           'Payment Verification',
-            //           style: TextStyle(fontSize: 24, color: Acolors.white),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
-            const SizedBox(height: 20),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Container(
+          //   height: 70,
+          //   color: Acolors.primary,
+          //   child: Padding(
+          //     padding: const EdgeInsets.all(12),
+          //     child: Row(
+          //       children: [
+          //         Material(
+          //           color: Colors.white.withOpacity(0.21),
+          //           borderRadius: BorderRadius.circular(12),
+          //           child: const BackButton(
+          //             color: Acolors.white,
+          //           ),
+          //         ),
+          //         const SizedBox(width: 30),
+          //         const Text(
+          //           'Payment Verification',
+          //           style: TextStyle(fontSize: 24, color: Acolors.white),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
+          const SizedBox(height: 5),
 
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
               child: Column(
                 children: [
-                  TextField(
+                  TextFormField(
                     controller: _transactionIdController,
                     focusNode: _transactionFocusNode,
-                    keyboardType: TextInputType.phone,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(18),
+                    ],
                     decoration: InputDecoration(
                       labelText:
                           "${AppLocalizations.of(context)!.enterTransactionId}",
-                      // 'Enter Transaction ID',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "${AppLocalizations.of(context)!.pleaseEnterTransactionId}";
+                      } else if (!RegExp(r'^\d{12,18}$').hasMatch(value)) {
+                        return "${AppLocalizations.of(context)!.pleaseEnterValidTransactionId}";
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 20),
                   GestureDetector(
@@ -294,57 +397,57 @@ class _PaymentVerificationPageState extends State<PaymentVerificationPage> {
                 ],
               ),
             ),
+          ),
 
-            // Payment Status
-            if (_paymentStatus != null)
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Text(
-                  _paymentStatus!,
-                  style: TextStyle(
-                    fontSize: 18,
-                    color:
-                        _paymentStatus == 'Payment data fetched successfully!'
-                            ? Colors.green
-                            : Colors.red,
-                  ),
-                ),
-              ),
-
-            const SizedBox(height: 280),
-            // Submit Button
+          // Payment Status
+          if (_paymentStatus != null)
             Padding(
-              padding: const EdgeInsets.all(24),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Acolors.primary,
-                    foregroundColor: Colors.white,
-                    textStyle: TextStyle(fontSize: 18),
-                  ),
-                  onPressed: _isLoading
-                      ? null
-                      : () {
-                          _transactionFocusNode
-                              .unfocus(); // Explicitly remove focus from the TextField
-                          FocusScope.of(context).unfocus(); // Extra safeguard
-
-                          handlePaymentAndOrder(
-                              context, _transactionIdController, _screenshot);
-                        },
-                  child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text(
-                          "${AppLocalizations.of(context)!.submitPayment}",
-                          //  'Submit Payment'
-                        ),
+              padding: const EdgeInsets.all(10.0),
+              child: Text(
+                _paymentStatus!,
+                style: TextStyle(
+                  fontSize: 18,
+                  color: _paymentStatus == 'Payment data fetched successfully!'
+                      ? Colors.green
+                      : Colors.red,
                 ),
               ),
             ),
-            const SizedBox(height: 30), // Extra space at bottom
-          ],
-        ),
+          Spacer(),
+
+          /// const SizedBox(height: 280),
+          // Submit Button
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Acolors.primary,
+                  foregroundColor: Colors.white,
+                  textStyle: TextStyle(fontSize: 18),
+                ),
+                onPressed: _isLoading
+                    ? null
+                    : () {
+                        _transactionFocusNode
+                            .unfocus(); // Explicitly remove focus from the TextField
+                        FocusScope.of(context).unfocus(); // Extra safeguard
+                        if (_formKey.currentState!.validate()) {
+                          handlePaymentAndOrder(
+                              context, _transactionIdController, _screenshot);
+                        }
+                      },
+                child: _isLoading
+                    ? CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        "${AppLocalizations.of(context)!.submitPayment}",
+                        //  'Submit Payment'
+                      ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -37,7 +37,7 @@ class PaymentDetailsProvider extends ChangeNotifier {
               .toList();
         } else {
           paymentDetails = []; // Ensure it's never null
-          SnackbarMessage.showSnackbar(context, 'No payment details found.');
+          // SnackbarMessage.showSnackbar(context, 'No payment details found.');
         }
       } else {
         paymentDetails = [];

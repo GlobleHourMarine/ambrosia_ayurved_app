@@ -19,11 +19,13 @@ class ReviewService {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
-
+        print(responseData);
         if (responseData["status"] == "success") {
           List<dynamic> reviewsJson = responseData["data"];
+
           return reviewsJson.map((json) => Review.fromJson(json)).toList();
         } else {
+          print(responseData);
           throw Exception(
               "Failed to fetch reviews: ${responseData["message"]}");
         }
@@ -31,6 +33,7 @@ class ReviewService {
         throw Exception("Server error: ${response.statusCode}");
       }
     } catch (e) {
+      print('$e');
       throw Exception("Error fetching reviews: $e");
     }
   }

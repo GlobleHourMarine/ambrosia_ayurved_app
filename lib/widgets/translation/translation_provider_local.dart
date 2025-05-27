@@ -13,6 +13,10 @@ class LanguageProvider extends ChangeNotifier {
       'name': 'Malyasia',
       'locale': 'ms',
     },
+    {
+      'name': 'العربية',
+      'locale': 'ar',
+    },
   ];
 
   late Locale _selectedLocale;
@@ -38,10 +42,8 @@ class LanguageProvider extends ChangeNotifier {
   void changeLanguage(String language) async {
     // print("🌐 Changing language to: $language");
     _selectedLocale = Locale(language);
-
     // Update Get.locale to keep both systems in sync
     Get.updateLocale(_selectedLocale);
-
     // Make sure to notify listeners before saving to SharedPreferences
     notifyListeners();
 

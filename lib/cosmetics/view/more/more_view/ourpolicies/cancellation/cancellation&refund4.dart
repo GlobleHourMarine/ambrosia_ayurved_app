@@ -1,3 +1,5 @@
+/*
+
 import 'package:flutter/material.dart';
 
 class CancellationRefundPolicyScreen4 extends StatelessWidget {
@@ -195,7 +197,7 @@ class BulletPoint extends StatelessWidget {
 
 
 
-/*
+*/
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -211,59 +213,88 @@ class CancellationRefundPolicyScreen4 extends StatelessWidget {
         BulletPoint(text: AppLocalizations.of(context)!.packagingIntact),
         BulletPoint(text: AppLocalizations.of(context)!.haveInvoiceOrOrderId),
         SizedBox(height: 24),
-
         RichText(
           text: TextSpan(
             style: TextStyle(color: Colors.black),
             children: [
-              TextSpan(text: '❓ ', style: TextStyle(fontSize: 18, color: Colors.red)),
-              TextSpan(text: AppLocalizations.of(context)!.areAllProductsReturnable, style: TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: AppLocalizations.of(context)!.noReturnConditionsIntro),
+              TextSpan(
+                  text: '❓ ',
+                  style: TextStyle(fontSize: 18, color: Colors.red)),
+              TextSpan(
+                  text: AppLocalizations.of(context)!.areAllProductsReturnable,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: AppLocalizations.of(context)!.noReturnConditionsIntro),
             ],
           ),
         ),
-        BulletPoint(text: AppLocalizations.of(context)!.productHasBeen, boldText: AppLocalizations.of(context)!.openedOrUsed),
-        BulletPoint(text: AppLocalizations.of(context)!.itsPast, boldText: AppLocalizations.of(context)!.fiveDaysSinceDelivery),
-        BulletPoint(text: AppLocalizations.of(context)!.youReturnIt, boldText: AppLocalizations.of(context)!.withoutOriginalPackaging),
-        BulletPoint(text: AppLocalizations.of(context)!.itsA, boldText: AppLocalizations.of(context)!.sampleOrFreebie),
-
+        BulletPoint(
+            text: AppLocalizations.of(context)!.productHasBeen,
+            boldText: AppLocalizations.of(context)!.openedOrUsed),
+        BulletPoint(
+            text: AppLocalizations.of(context)!.itsPast,
+            boldText: AppLocalizations.of(context)!.fiveDaysSinceDelivery),
+        BulletPoint(
+            text: AppLocalizations.of(context)!.youReturnIt,
+            boldText: AppLocalizations.of(context)!.withoutOriginalPackaging),
+        BulletPoint(
+            text: AppLocalizations.of(context)!.itsA,
+            boldText: AppLocalizations.of(context)!.sampleOrFreebie),
         SizedBox(height: 24),
         RichText(
           text: TextSpan(
             style: TextStyle(color: Colors.black),
             children: [
-              TextSpan(text: '❓ ', style: TextStyle(fontSize: 18, color: Colors.red)),
-              TextSpan(text: AppLocalizations.of(context)!.refundTimeline, style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: '❓ ',
+                  style: TextStyle(fontSize: 18, color: Colors.red)),
+              TextSpan(
+                  text: AppLocalizations.of(context)!.refundTimeline,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               TextSpan(text: AppLocalizations.of(context)!.refundProcessedInfo),
-              TextSpan(text: AppLocalizations.of(context)!.fiveToSevenDays, style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: AppLocalizations.of(context)!.fiveToSevenDays,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               TextSpan(text: AppLocalizations.of(context)!.toOriginalMethod),
             ],
           ),
         ),
-
         SizedBox(height: 24),
         RichText(
           text: TextSpan(
             style: TextStyle(color: Colors.black),
             children: [
-              TextSpan(text: '❓ ', style: TextStyle(fontSize: 18, color: Colors.red)),
-              TextSpan(text: AppLocalizations.of(context)!.codRefundQuestion, style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: '❓ ',
+                  style: TextStyle(fontSize: 18, color: Colors.red)),
+              TextSpan(
+                  text: AppLocalizations.of(context)!.codRefundQuestion,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               TextSpan(text: AppLocalizations.of(context)!.weWillContact),
-              TextSpan(text: AppLocalizations.of(context)!.bankOrUpiDetails, style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: AppLocalizations.of(context)!.bankOrUpiDetails,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               TextSpan(text: AppLocalizations.of(context)!.refundThrough),
-              TextSpan(text: AppLocalizations.of(context)!.bankTransfer, style: TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: AppLocalizations.of(context)!.withinFiveToSevenDays, style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: AppLocalizations.of(context)!.bankTransfer,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: AppLocalizations.of(context)!.withinFiveToSevenDays,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
         ),
-
         SizedBox(height: 24),
         RichText(
           text: TextSpan(
             style: TextStyle(color: Colors.black),
             children: [
-              TextSpan(text: '❓ ', style: TextStyle(fontSize: 18, color: Colors.red)),
-              TextSpan(text: AppLocalizations.of(context)!.payReturnShipping, style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: '❓ ',
+                  style: TextStyle(fontSize: 18, color: Colors.red)),
+              TextSpan(
+                  text: AppLocalizations.of(context)!.payReturnShipping,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               TextSpan(text: AppLocalizations.of(context)!.dependsOnReason),
             ],
           ),
@@ -276,27 +307,34 @@ class CancellationRefundPolicyScreen4 extends StatelessWidget {
           text: AppLocalizations.of(context)!.otherReasons,
           boldText: AppLocalizations.of(context)!.chargesMayApply,
         ),
-
         SizedBox(height: 24),
         RichText(
           text: TextSpan(
             style: TextStyle(color: Colors.black),
             children: [
-              TextSpan(text: '❓ ', style: TextStyle(fontSize: 18, color: Colors.red)),
-              TextSpan(text: AppLocalizations.of(context)!.wrongAddressQuestion, style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: '❓ ',
+                  style: TextStyle(fontSize: 18, color: Colors.red)),
+              TextSpan(
+                  text: AppLocalizations.of(context)!.wrongAddressQuestion,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               TextSpan(text: AppLocalizations.of(context)!.notResponsible),
-              TextSpan(text: AppLocalizations.of(context)!.failedDeliveryDisclaimer),
+              TextSpan(
+                  text: AppLocalizations.of(context)!.failedDeliveryDisclaimer),
             ],
           ),
         ),
-
         SizedBox(height: 24),
         RichText(
           text: TextSpan(
             style: TextStyle(color: Colors.black),
             children: [
-              TextSpan(text: '❓ ', style: TextStyle(fontSize: 18, color: Colors.red)),
-              TextSpan(text: AppLocalizations.of(context)!.exchangeProductQuestion, style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: '❓ ',
+                  style: TextStyle(fontSize: 18, color: Colors.red)),
+              TextSpan(
+                  text: AppLocalizations.of(context)!.exchangeProductQuestion,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               TextSpan(text: AppLocalizations.of(context)!.exchangePolicyNote),
             ],
           ),
@@ -342,7 +380,3 @@ class BulletPoint extends StatelessWidget {
     );
   }
 }
-
-
-
-*/

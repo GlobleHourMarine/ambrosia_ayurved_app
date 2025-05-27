@@ -1,4 +1,12 @@
 import 'dart:convert';
+import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/contact/contact_us_new.dart';
+import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/order_history/submit_review.dart';
+import 'package:ambrosia_ayurved/home/sign_in_new.dart';
+import 'package:ambrosia_ayurved/home/sign_up_new.dart';
+import 'package:ambrosia_ayurved/profile/new_forget_password.dart';
+import 'package:ambrosia_ayurved/widgets/address/address_form.dart';
+import 'package:ambrosia_ayurved/widgets/address/gemini_address/addressform_screen.dart';
+import 'package:ambrosia_ayurved/widgets/newaddresssection.dart';
 import 'package:get/get.dart';
 
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_page.dart';
@@ -76,28 +84,6 @@ class _BaseScaffoldState extends State<BaseScaffold> {
     }
   }
 
-  // Future<void> _fetchProfileImage() async {
-  //   try {
-  //     final response = await http.get(
-  //       Uri.parse('https://mmm.klizardtechnology.com/signup/get_profile'),
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       final data = json.decode(response.body);
-  //       setState(() {
-  //         _imageUrl = data['image']; // Adjust key as per API response
-  //       });
-  //     } else {
-  //       throw Exception('Failed to load profile image');
-  //     }
-  //   } catch (e) {
-  //     print('Error fetching profile image: $e');
-  //     setState(() {
-  //       _imageUrl = null; // Fallback to null if API call fails
-  //     });
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     // final translator = Provider.of<TranslationProvider>(context);
@@ -114,10 +100,8 @@ class _BaseScaffoldState extends State<BaseScaffold> {
         final currentLanguage = languageProvider.selectedLocale.languageCode;
         //  print("⚡ Building AppBar with language: $currentLanguage");
         return Scaffold(
-          // Set a background color
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
-            //   backgroundColor: Acolors.primary,
             flexibleSpace: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -132,14 +116,6 @@ class _BaseScaffoldState extends State<BaseScaffold> {
               ),
             ),
 
-            //  leading: Image.asset('assets/images/logoAA.png'),
-            //  Padding(
-            //   padding: const EdgeInsets.all(5.0),
-            //   child: CircleAvatar(
-            //     backgroundImage: AssetImage('assets/images/Ambrosia Ayurved.png'),
-            //     radius: 20,
-            //   ),
-            // ),
             title: Text(
               // AppLocalizations.of(context)!.
               widget.title,
@@ -628,7 +604,8 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ContactUsPage(),
+                          builder: (context) => ContactUsScreenNew(),
+                          // ContactUsPage(),
                         ));
                   },
                 ),
@@ -654,6 +631,57 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                   },
                 ),
 
+                //
+                //
+
+                // ListTile(
+                //   leading: Icon(
+                //     Icons.format_quote_outlined,
+                //     color: Acolors.primary,
+                //   ),
+                //   title: Text(
+                //     'add address',
+                //     //  '${AppLocalizations.of(context)!.faq}',
+                //     //   'FAQ',
+                //     //  AppLocalizations.of(context)!.contactUs,
+                //     style: TextStyle(fontSize: 18),
+                //   ),
+                //   onTap: () {
+                //     Navigator.pop(context);
+                //     Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //           builder: (context) => AddAddressScreen(),
+                //         ));
+                //   },
+                // ),
+
+                // ListTile(
+                //   leading: Icon(
+                //     Icons.format_quote_outlined,
+                //     //   color: Acolors.primary,
+                //   ),
+                //   title: Text(
+                //     'contact us 2',
+                //     //  '${AppLocalizations.of(context)!.faq}',
+                //     //   'FAQ',
+                //     //  AppLocalizations.of(context)!.contactUs,
+                //     style: TextStyle(fontSize: 18),
+                //   ),
+                //   onTap: () {
+                //     Navigator.pop(context);
+                //     Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //           builder: (context) => ContactUsScreen1(),
+                //         ));
+                //   },
+                // ),
+                //
+                //
+                //
+                //
+
                 ListTile(
                   leading: Icon(
                     user == null ? Icons.login_rounded : Icons.logout_rounded,
@@ -662,7 +690,7 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                   title: Text(
                     user == null
                         ? AppLocalizations.of(context)!.login
-                        : 'Logout',
+                        : AppLocalizations.of(context)!.logout,
                     style: TextStyle(fontSize: 18),
                   ),
                   onTap: () {
@@ -678,7 +706,7 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text("Logout"),
+                            title: Text(AppLocalizations.of(context)!.logout),
                             content: Text(
                               AppLocalizations.of(context)!.logoutmessage,
                               //    "Are you sure you want to logout?"
@@ -699,7 +727,9 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                                           listen: false)
                                       .logout(context);
                                 },
-                                child: Text("Logout"),
+                                child: Text(
+                                    //'a'
+                                    AppLocalizations.of(context)!.logout),
                               ),
                             ],
                           );
