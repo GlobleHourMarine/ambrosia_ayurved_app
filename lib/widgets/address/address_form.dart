@@ -406,7 +406,6 @@ class _AddressFormState extends State<AddressForm> {
     return TextFormField(
       decoration: InputDecoration(labelText: label),
       controller: TextEditingController(text: value),
-      readOnly: true,
     );
   }
 }

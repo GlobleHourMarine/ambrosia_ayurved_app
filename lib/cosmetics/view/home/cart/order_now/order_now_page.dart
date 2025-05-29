@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:ambrosia_ayurved/cosmetics/thankyou/thankyou.dart';
 import 'package:ambrosia_ayurved/home/home_screen.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
 import 'package:ambrosia_ayurved/cosmetics/common_widgets/shimmer_effect/shimmer_effect.dart';
@@ -20,6 +23,8 @@ import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_model.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ambrosia_ayurved/razorpay_service.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'package:phonepe_payment_sdk/phonepe_payment_sdk.dart';
 
 class OrderNowPage extends StatefulWidget {
   const OrderNowPage({super.key});
@@ -44,12 +49,21 @@ class _OrderNowPageState extends State<OrderNowPage> {
   late Razorpay _razorpay;
   bool _isLoading = false; // Loader State
 
+  // PhonePe configuration
+  final String phonePeMerchantId = "TEST-M22NOXGSL1P2A_25052";
+  final String phonePeSaltKey =
+      "MWRiMWMwMjAtNmRmMy00Mjk1LWI2N2EtZGNkMmU0MmVjOTQ1";
+  final int phonePeSaltIndex = 1;
+  final bool isPhonePeProd = false;
+
   void initState() {
     super.initState();
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    _pincodeController.addListener(_onPincodeChanged);
+    _initializePhonePeSDK();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final cartProvider = Provider.of<CartProvider>(context, listen: false);
@@ -60,6 +74,143 @@ class _OrderNowPageState extends State<OrderNowPage> {
       //     .fetchCartData(userProvider.id); // Ensure cart data is loaded
       grandTotalProvider.calculateGrandTotal(cartProvider.cartItems);
     });
+  }
+
+  Future<void> _initializePhonePeSDK() async {
+    try {
+      bool isInitialized = await PhonePePaymentSdk.init(
+        isPhonePeProd ? "PRODUCTION" : "SANDBOX", // Environment
+        phonePeMerchantId, // Merchant ID
+        "USER123", // flowId (unique user/session ID)
+        false, // enableLogging (disable in prod)
+      );
+      debugPrint("PhonePe SDK initialized: $isInitialized");
+    } catch (e) {
+      debugPrint("PhonePe init error: $e");
+    }
+  }
+
+  String _generatePhonePeChecksum(String input) {
+    final key = utf8.encode(phonePeSaltKey);
+    final bytes = utf8.encode(input);
+    final hmacSha256 = Hmac(sha256, key);
+    return hmacSha256.convert(bytes).toString();
+  }
+
+  Future<void> _startPhonePePayment(double amount) async {
+    setState(() => _isLoading = true);
+
+    final payload = {
+      "merchantId": phonePeMerchantId,
+      "merchantTransactionId": "TXN${DateTime.now().millisecondsSinceEpoch}",
+      "amount": (amount * 100).toInt(), // Amount in paise
+      "callbackUrl": "https://your-callback-url.com",
+      "paymentMode": {"type": "PAY_PAGE"}, // Standard checkout
+    };
+
+    try {
+      final response = await PhonePePaymentSdk.startTransaction(
+        jsonEncode(payload), // Request body (JSON string)
+        "yourapp://callback", // iOS URL scheme (Android: leave empty or use package name)
+      );
+
+      if (response != null) {
+        final status = response['status'].toString();
+        if (status == 'SUCCESS') {
+          _showPaymentSuccessDialog();
+        } else {
+          print(' Payment failed:${response['error']}');
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Payment failed: ${response['error']}")));
+        }
+      }
+    } catch (e) {
+      print('Error starting PhonePe payment: $e');
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _showPaymentSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text("Payment Successful!"),
+        content: Text("Your order has been placed."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.popUntil(ctx, (route) => route.isFirst),
+            child: Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onPincodeChanged() {
+    if (_pincodeController.text.length == 6) {
+      _fetchLocationData(_pincodeController.text);
+    }
+  }
+
+  Future<void> _fetchLocationData(String pincode) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Using Indian Postal Code API
+      final response = await http.get(
+        Uri.parse('https://api.postalpincode.in/pincode/$pincode'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data[0]['Status'] == 'Success') {
+          final postOfficeData = data[0]['PostOffice'][0];
+
+          setState(() {
+            _stateController.text = postOfficeData['State'] ?? '';
+            //  _districtController.text = postOfficeData['District'] ?? '';
+            _cityController.text = postOfficeData['Name'] ?? '';
+          });
+        } else {
+          _showSnackBar('Invalid pincode. Please enter a valid pincode.');
+          _clearLocationFields();
+        }
+      } else {
+        _showSnackBar('Failed to fetch location data. Please try again.');
+        _clearLocationFields();
+      }
+    } catch (e) {
+      _showSnackBar(
+          'Error fetching location data. Please check your internet connection.');
+      _clearLocationFields();
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _clearLocationFields() {
+    setState(() {
+      _stateController.clear();
+      //  _districtController.clear();
+      _cityController.clear();
+    });
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red[400],
+      ),
+    );
   }
 
   @override
@@ -186,6 +337,7 @@ class _OrderNowPageState extends State<OrderNowPage> {
   Widget _buildTextField(
     TextEditingController controller,
     String label, {
+    Widget? suffixIcon,
     String? Function(String?)? validator,
     TextInputType keyboardType = TextInputType.text,
   }) {
@@ -194,6 +346,7 @@ class _OrderNowPageState extends State<OrderNowPage> {
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
+        suffixIcon: suffixIcon,
         isDense: true,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -659,30 +812,30 @@ class _OrderNowPageState extends State<OrderNowPage> {
                       // const SizedBox(height: 10),
 
                       // Address and Mobile
-                      _buildTextField(_addressController,
-                          "${AppLocalizations.of(context)!.address}"),
-                      const SizedBox(width: 10),
-                      const SizedBox(height: 10),
-
-                      // City, State, and Pincode
                       Row(
                         children: [
                           Expanded(
-                            child: _buildTextField(_cityController,
-                                "${AppLocalizations.of(context)!.city}"),
+                            flex: 2,
+                            child: _buildTextField(_addressController,
+                                "${AppLocalizations.of(context)!.address}"),
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _buildTextField(_stateController,
-                                "${AppLocalizations.of(context)!.state}"),
-                          ),
-                          const SizedBox(width: 10),
-                          // Pincode (6 digits only)
+                          SizedBox(width: 10),
                           Expanded(
                             child: _buildTextField(
                               _pincodeController,
                               "${AppLocalizations.of(context)!.pincode}",
                               keyboardType: TextInputType.number,
+                              suffixIcon: _isLoading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: Padding(
+                                        padding: EdgeInsets.all(12.0),
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
+                                      ),
+                                    )
+                                  : null,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return "${AppLocalizations.of(context)!.enterPincode}";
@@ -694,6 +847,43 @@ class _OrderNowPageState extends State<OrderNowPage> {
                               },
                             ),
                           ),
+                        ],
+                      ),
+                      // const SizedBox(width: 10),
+                      const SizedBox(height: 10),
+
+                      // City, State, and Pincode
+                      Row(
+                        children: [
+                          // Expanded(
+                          //   child: _buildTextField(
+                          //     _pincodeController,
+                          //     "${AppLocalizations.of(context)!.pincode}",
+                          //     keyboardType: TextInputType.number,
+                          //     validator: (value) {
+                          //       if (value == null || value.isEmpty) {
+                          //         return "${AppLocalizations.of(context)!.enterPincode}";
+                          //       } else if (!RegExp(r'^\d{6}$')
+                          //           .hasMatch(value)) {
+                          //         return "${AppLocalizations.of(context)!.validPincode}";
+                          //       }
+                          //       return null;
+                          //     },
+                          //   ),
+                          // ),
+                          // SizedBox(width: 10),
+                          Expanded(
+                            // flex: 2,
+                            child: _buildTextField(_cityController,
+                                "${AppLocalizations.of(context)!.city}"),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _buildTextField(_stateController,
+                                "${AppLocalizations.of(context)!.state}"),
+                          ),
+                          //   const SizedBox(width: 10),
+                          // Pincode (6 digits only)
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -840,12 +1030,13 @@ class _OrderNowPageState extends State<OrderNowPage> {
 
                     if (success) {
                       //  _openRazorpayCheckout(grandTotalProvider.grandTotal);
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PaymentScreen(),
-                        ),
-                      );
+                      _startPhonePePayment(grandTotalProvider.grandTotal);
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => PaymentScreen(),
+                      //   ),
+                      // );
                     }
                     setState(() {
                       _isLoading = false;

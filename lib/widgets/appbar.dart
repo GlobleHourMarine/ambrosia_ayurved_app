@@ -634,27 +634,30 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                 //
                 //
 
-                // ListTile(
-                //   leading: Icon(
-                //     Icons.format_quote_outlined,
-                //     color: Acolors.primary,
-                //   ),
-                //   title: Text(
-                //     'add address',
-                //     //  '${AppLocalizations.of(context)!.faq}',
-                //     //   'FAQ',
-                //     //  AppLocalizations.of(context)!.contactUs,
-                //     style: TextStyle(fontSize: 18),
-                //   ),
-                //   onTap: () {
-                //     Navigator.pop(context);
-                //     Navigator.push(
-                //         context,
-                //         MaterialPageRoute(
-                //           builder: (context) => AddAddressScreen(),
-                //         ));
-                //   },
-                // ),
+//
+//
+
+                ListTile(
+                  leading: Icon(
+                    Icons.format_quote_outlined,
+                    color: Acolors.primary,
+                  ),
+                  title: Text(
+                    'add address',
+                    //  '${AppLocalizations.of(context)!.faq}',
+                    //   'FAQ',
+                    //  AppLocalizations.of(context)!.contactUs,
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddressSection(),
+                        ));
+                  },
+                ),
 
                 // ListTile(
                 //   leading: Icon(

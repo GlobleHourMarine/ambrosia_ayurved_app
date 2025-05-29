@@ -245,45 +245,45 @@ class _CustomerReviewSectionState extends State<CustomerReviewSection> {
   //   }
   // }
 
-  // Helper method to show full-screen image
-  void _showImageDialog(BuildContext context, String imageUrl) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.black,
-        child: Container(
-          child: Stack(
-            children: [
-              Center(
-                child: InteractiveViewer(
-                  child: Image.network(
-                    'https://ambrosiaayurved.in/$imageUrl',
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Center(
-                        child: Text(
-                          'Failed to load image',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 10,
-                right: 10,
-                child: IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: Icon(Icons.close, color: Colors.white, size: 30),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // // Helper method to show full-screen image
+  // void _showImageDialog(BuildContext context, String imageUrl) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => Dialog(
+  //       backgroundColor: Colors.black,
+  //       child: Container(
+  //         child: Stack(
+  //           children: [
+  //             Center(
+  //               child: InteractiveViewer(
+  //                 child: Image.network(
+  //                   'https://ambrosiaayurved.in/$imageUrl',
+  //                   fit: BoxFit.contain,
+  //                   errorBuilder: (context, error, stackTrace) {
+  //                     return Center(
+  //                       child: Text(
+  //                         'Failed to load image',
+  //                         style: TextStyle(color: Colors.white),
+  //                       ),
+  //                     );
+  //                   },
+  //                 ),
+  //               ),
+  //             ),
+  //             Positioned(
+  //               top: 10,
+  //               right: 10,
+  //               child: IconButton(
+  //                 onPressed: () => Navigator.of(context).pop(),
+  //                 icon: Icon(Icons.close, color: Colors.white, size: 30),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
