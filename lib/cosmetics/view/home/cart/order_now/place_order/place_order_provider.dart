@@ -13,12 +13,26 @@ class PlaceOrderProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _message;
   String? _orderId; // Store order ID
+  String? _addressId; // Store address ID
 
   bool get isLoading => _isLoading;
   String? get message => _message;
   String? get orderId => _orderId;
+  String? get addressId => _addressId;
+
+  // Method to set address ID
+  void setAddressId(String addressId) {
+    _addressId = addressId;
+    print('address id : $addressId');
+    notifyListeners();
+  }
 
   Future<void> placeOrder(BuildContext context) async {
+    if (_addressId == null) {
+      _message = "Address ID is required";
+      notifyListeners();
+      return;
+    }
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     final grandTotalProvider =
@@ -44,6 +58,7 @@ class PlaceOrderProvider with ChangeNotifier {
 
       final Map<String, String> orderData = {
         "user_id": userId,
+        "address_id": addressId!,
         "product_id": item.productId.toString(),
         "quantity": item.quantity.toString(),
         "product_price": item.price.toString(),
@@ -59,7 +74,7 @@ class PlaceOrderProvider with ChangeNotifier {
         );
 
         final responseData = jsonDecode(response.body);
-
+        print(responseData);
         if (responseData["status"] == "success" &&
             responseData['order_id'] != null) {
           _message = responseData["message"];

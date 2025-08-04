@@ -134,7 +134,7 @@ class _SignInScreenState extends State<SignInScreen> {
       print('Error: $e');
       Get.snackbar(
         "${AppLocalizations.of(context)!.error}",
-        "${AppLocalizations.of(context)!.loginError} : $e",
+        "${AppLocalizations.of(context)!.loginError} : Server Error",
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -160,276 +160,288 @@ class _SignInScreenState extends State<SignInScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color.fromARGB(166, 207, 250, 187),
-              seaGreen,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.05,
-                vertical: screenHeight * 0.02,
+    return BasePage(
+      fetchDataFunction: () async {},
+      child: Scaffold(
+        body: SafeArea(
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color.fromARGB(166, 207, 250, 187),
+                  seaGreen,
+                ],
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
+            ),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.05,
+                    vertical: screenHeight * 0.02,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      SizedBox(
-                        height: screenHeight * 0.37,
-                        child: Lottie.asset(
-                          'assets/images/login_1.json',
-                          fit: BoxFit.contain,
-                          repeat: true,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Lottie.network(
-                            'https://assets5.lottiefiles.com/packages/lf20_ktwnwv5m.json',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                      // SizedBox(height: screenHeight * 0.01),
                       Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "${AppLocalizations.of(context)!.welcomeMessage12}",
-                            //  'Welcome to Ambrosia Ayurved',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: screenWidth * 0.06,
-                              fontWeight: FontWeight.bold,
+                          SizedBox(
+                            height: screenHeight * 0.37,
+                            child: Lottie.asset(
+                              'assets/images/login_1.json',
+                              fit: BoxFit.contain,
+                              repeat: true,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Lottie.network(
+                                'https://assets5.lottiefiles.com/packages/lf20_ktwnwv5m.json',
+                                fit: BoxFit.contain,
+                              ),
                             ),
-                            //  textAlign: TextAlign.start,
                           ),
-                          SizedBox(height: screenHeight * 0.01),
-                          Text(
-                            "${AppLocalizations.of(context)!.signtodiabbeticfreejourney}",
-                            // 'Sign in to your diabetic free journey',
-                            style: TextStyle(
-                              color: Colors.black.withOpacity(0.9),
-                              fontSize: screenWidth * 0.04,
-                            ),
-                            //   textAlign: TextAlign.start,
+                          // SizedBox(height: screenHeight * 0.01),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "${AppLocalizations.of(context)!.welcomeMessage12}",
+                                //  'Welcome to Ambrosia Ayurved',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: screenWidth * 0.06,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                //  textAlign: TextAlign.start,
+                              ),
+                              SizedBox(height: screenHeight * 0.01),
+                              Text(
+                                "${AppLocalizations.of(context)!.signtodiabbeticfreejourney}",
+                                // 'Sign in to your diabetic free journey',
+                                style: TextStyle(
+                                  color: Colors.black.withOpacity(0.9),
+                                  fontSize: screenWidth * 0.04,
+                                ),
+                                //   textAlign: TextAlign.start,
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  SizedBox(height: screenHeight * 0.01),
-                  Card(
-                    elevation: 8,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.all(screenWidth * 0.06),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextFormField(
-                              controller: emailController,
-                              decoration: InputDecoration(
-                                label: Text(
-                                    "${AppLocalizations.of(context)!.email}"),
-                                hintText:
-                                    "${AppLocalizations.of(context)!.enterEmail}",
-                                labelStyle: TextStyle(color: seaGreen),
-                                prefixIcon: Icon(Icons.email, color: seaGreen),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(color: seaGreen),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(color: Colors.grey),
-                                ),
-                              ),
-                              keyboardType: TextInputType.emailAddress,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return "${AppLocalizations.of(context)!.pleaseEnterEmail}";
-                                } else if (!RegExp(
-                                        r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$')
-                                    .hasMatch(value)) {
-                                  return "${AppLocalizations.of(context)!.pleaseEnterValidEmail}";
-                                }
-                                return null;
-                              },
-                            ),
-                            SizedBox(height: screenHeight * 0.02),
-                            TextFormField(
-                              controller: passwordController,
-                              decoration: InputDecoration(
-                                label: Text(
-                                    "${AppLocalizations.of(context)!.password}"),
-                                hintText:
-                                    "${AppLocalizations.of(context)!.enterPassword}",
-                                labelStyle: TextStyle(color: seaGreen),
-                                prefixIcon: Icon(Icons.lock, color: seaGreen),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscureText
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                    color: seaGreen,
+                      SizedBox(height: screenHeight * 0.01),
+                      Card(
+                        elevation: 8,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(screenWidth * 0.06),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextFormField(
+                                  controller: emailController,
+                                  decoration: InputDecoration(
+                                    label: Text(
+                                        "${AppLocalizations.of(context)!.email}"),
+                                    hintText:
+                                        "${AppLocalizations.of(context)!.enterEmail}",
+                                    labelStyle: TextStyle(color: seaGreen),
+                                    prefixIcon:
+                                        Icon(Icons.email, color: seaGreen),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(color: seaGreen),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey),
+                                    ),
                                   ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _obscureText = !_obscureText;
-                                    });
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return "${AppLocalizations.of(context)!.pleaseEnterEmail}";
+                                    } else if (!RegExp(
+                                            r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$')
+                                        .hasMatch(value)) {
+                                      return "${AppLocalizations.of(context)!.pleaseEnterValidEmail}";
+                                    }
+                                    return null;
                                   },
                                 ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(color: seaGreen),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(color: Colors.grey),
-                                ),
-                              ),
-                              obscureText: _obscureText,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return "${AppLocalizations.of(context)!.pleaseEnterPassword}";
-                                }
-                                return null;
-                              },
-                            ),
-                            SizedBox(height: screenHeight * 0.02),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Theme(
-                                      data: Theme.of(context).copyWith(
-                                        unselectedWidgetColor: oliveGreen,
+                                SizedBox(height: screenHeight * 0.02),
+                                TextFormField(
+                                  controller: passwordController,
+                                  decoration: InputDecoration(
+                                    label: Text(
+                                        "${AppLocalizations.of(context)!.password}"),
+                                    hintText:
+                                        "${AppLocalizations.of(context)!.enterPassword}",
+                                    labelStyle: TextStyle(color: seaGreen),
+                                    prefixIcon:
+                                        Icon(Icons.lock, color: seaGreen),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscureText
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
+                                        color: seaGreen,
                                       ),
-                                      child: Checkbox(
-                                        value: _rememberMe,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _rememberMe = value!;
-                                          });
-                                        },
-                                        activeColor: seaGreen,
-                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscureText = !_obscureText;
+                                        });
+                                      },
                                     ),
-                                    Text(
-                                      "${AppLocalizations.of(context)!.rememberMe}",
-                                      style: TextStyle(color: oliveGreen),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(color: seaGreen),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey),
+                                    ),
+                                  ),
+                                  obscureText: _obscureText,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return "${AppLocalizations.of(context)!.pleaseEnterPassword}";
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                SizedBox(height: screenHeight * 0.02),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Theme(
+                                          data: Theme.of(context).copyWith(
+                                            unselectedWidgetColor: oliveGreen,
+                                          ),
+                                          child: Checkbox(
+                                            value: _rememberMe,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                _rememberMe = value!;
+                                              });
+                                            },
+                                            activeColor: seaGreen,
+                                          ),
+                                        ),
+                                        Text(
+                                          "${AppLocalizations.of(context)!.rememberMe}",
+                                          style: TextStyle(color: oliveGreen),
+                                        ),
+                                      ],
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                ForgetPasswordScreen(),
+                                          ),
+                                        );
+                                      },
+                                      child: Text(
+                                        "${AppLocalizations.of(context)!.forgotPassword}",
+                                        style: TextStyle(color: seaGreen),
+                                      ),
                                     ),
                                   ],
                                 ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            ForgetPasswordScreen(),
+                                SizedBox(height: screenHeight * 0.025),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: screenHeight * 0.05,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: seaGreen,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                    );
-                                  },
-                                  child: Text(
-                                    "${AppLocalizations.of(context)!.forgotPassword}",
-                                    style: TextStyle(color: seaGreen),
+                                      elevation: 2,
+                                    ),
+                                    onPressed: _isLoading
+                                        ? null
+                                        : () {
+                                            if (_formKey.currentState!
+                                                .validate()) {
+                                              loginUser(context);
+                                            }
+                                          },
+                                    child: _isLoading
+                                        ? CircularProgressIndicator(
+                                            color: Colors.white)
+                                        : Text(
+                                            "${AppLocalizations.of(context)!.signIn}",
+                                            style: TextStyle(
+                                              fontSize: screenWidth * 0.04,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: screenHeight * 0.025),
-                            SizedBox(
-                              width: double.infinity,
-                              height: screenHeight * 0.05,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: seaGreen,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  elevation: 2,
-                                ),
-                                onPressed: _isLoading
-                                    ? null
-                                    : () {
-                                        if (_formKey.currentState!.validate()) {
-                                          loginUser(context);
-                                        }
-                                      },
-                                child: _isLoading
-                                    ? CircularProgressIndicator(
-                                        color: Colors.white)
-                                    : Text(
-                                        "${AppLocalizations.of(context)!.signIn}",
-                                        style: TextStyle(
-                                          fontSize: screenWidth * 0.04,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.04),
-                  Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RegistrationScreen(),
-                            //   SignUpScreen(),
                           ),
-                        );
-                      },
-                      child: RichText(
-                        text: TextSpan(
-                          text:
-                              "${AppLocalizations.of(context)!.dontHaveAccount}",
-                          style: TextStyle(color: Colors.white),
-                          children: [
-                            TextSpan(
-                              text: "${AppLocalizations.of(context)!.signUp}",
-                              style: TextStyle(
-                                color: paleGreen,
-                                fontWeight: FontWeight.bold,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ],
                         ),
                       ),
-                    ),
+                      SizedBox(height: screenHeight * 0.04),
+                      Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RegistrationScreen(),
+                                //   SignUpScreen(),
+                              ),
+                            );
+                          },
+                          child: RichText(
+                            text: TextSpan(
+                              text:
+                                  "${AppLocalizations.of(context)!.dontHaveAccount}",
+                              style: TextStyle(color: Colors.white),
+                              children: [
+                                TextSpan(
+                                  text:
+                                      "${AppLocalizations.of(context)!.signUp}",
+                                  style: TextStyle(
+                                    color: paleGreen,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // SizedBox(height: screenHeight * 0.001),
+                    ],
                   ),
-                  // SizedBox(height: screenHeight * 0.001),
-                ],
+                ),
               ),
             ),
           ),
@@ -487,7 +499,7 @@ void showLoginSuccessPopup1(BuildContext context) {
     barrierDismissible: false, // User must not close it manually
     builder: (BuildContext context) {
       // Start a timer to navigate after 3 seconds
-      Timer(const Duration(seconds: 3), () {
+      Timer(const Duration(seconds: 2), () {
         Navigator.of(context).pop(); // Close the popup
         Navigator.pushReplacementNamed(context, '/home'); // Navigate to home
       });

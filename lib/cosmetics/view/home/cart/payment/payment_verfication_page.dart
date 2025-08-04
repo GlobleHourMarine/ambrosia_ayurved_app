@@ -20,6 +20,12 @@ import 'package:ambrosia_ayurved/cosmetics/common_widgets/snackbar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PaymentVerificationPage extends StatefulWidget {
+  final String addressId;
+  const PaymentVerificationPage({
+    Key? key,
+    required this.addressId,
+  }) : super(key: key);
+
   @override
   _PaymentVerificationPageState createState() =>
       _PaymentVerificationPageState();
@@ -273,6 +279,8 @@ class _PaymentVerificationPageState extends State<PaymentVerificationPage> {
       });
       final placeOrderProvider =
           Provider.of<PlaceOrderProvider>(context, listen: false);
+      // In your PaymentScreen or wherever you call placeOrder
+      placeOrderProvider.setAddressId(widget.addressId);
       await placeOrderProvider.placeOrder(context);
 
       // Ensure order ID is available after placing the order

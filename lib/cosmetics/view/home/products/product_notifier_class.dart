@@ -40,7 +40,7 @@ class ProductNotifier extends ChangeNotifier {
           name: 'Unknown', // Default name
           price: 0.0, // Default price
           description: 'No description available', // Default description
-          imageUrl: '', // Default image URL
+          imageUrl: [], // Default image URL
           quantity: 1, // Default quantity
           //  category: '',
         ),

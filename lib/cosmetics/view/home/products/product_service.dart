@@ -8,12 +8,15 @@ class ProductService {
   Future<List<Product>> fetchProducts() async {
     try {
       final response = await http.get(Uri.parse(apiUrl));
-
+      //  print('response');
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonData = json.decode(response.body);
-        if (jsonData["status"] == true) {
-          List<dynamic> productList = jsonData["data"];
-          return productList.map((json) => Product.fromJson(json)).toList();
+        if (jsonData["status"] == true && jsonData["data"] is List) {
+          List<Product> products = (jsonData["data"] as List)
+              .map((jsonItem) => Product.fromJson(jsonItem))
+              .toList();
+          print("✅ Product list fetched: ${products.length} items");
+          return products;
         } else {
           throw Exception(jsonData["message"]);
         }

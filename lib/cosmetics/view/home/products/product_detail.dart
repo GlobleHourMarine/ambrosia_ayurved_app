@@ -103,7 +103,7 @@ class _ProductDetailState extends State<ProductDetail> {
           body: ListView(
             children: [
               productDetailHeader(),
-              productImage(),
+              // productImage(),
               Container(
                 color: Acolors.white,
                 child: Column(
@@ -196,7 +196,9 @@ class _ProductDetailState extends State<ProductDetail> {
                     SizedBox(height: 50),
                     Divider(color: Acolors.primary),
                     SizedBox(height: 25),
-                    Benefits(),
+                    Benefits(
+                      productId: widget.product.id.toString(),
+                    ),
                     Ingredients(),
                     const SizedBox(height: 22),
                     const Divider(color: Acolors.primary),
@@ -218,66 +220,66 @@ class _ProductDetailState extends State<ProductDetail> {
     );
   }
 
-  SizedBox productImage() {
-    String imageUrlll = widget.product.imageUrl.startsWith("http")
-        ? widget.product.imageUrl
-        : "https://ambrosiaayurved.in/${widget.product.imageUrl}";
+  // SizedBox productImage() {
+  //   String imageUrlll = widget.product.imageUrl.startsWith("http")
+  //       ? widget.product.imageUrl
+  //       : "https://ambrosiaayurved.in/${widget.product.imageUrl}";
 
-    return SizedBox(
-      height: 370,
-      width: double.infinity,
-      child: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              height: 200,
-              decoration: const BoxDecoration(
-                color: Acolors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(35),
-                  topRight: Radius.circular(35),
-                ),
-              ),
-            ),
-          ),
-          Center(
-            child: Container(
-              decoration: BoxDecoration(
-                boxShadow: const [
-                  BoxShadow(
-                      blurRadius: 15,
-                      color: Acolors.primary,
-                      offset: Offset(0, 8)),
-                ],
-                borderRadius: BorderRadius.circular(250),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(250),
-                child: _isLoading
-                    ? const ShimmerEffect(width: 250, height: 250)
-                    : Image.network(
-                        imageUrlll,
-                        width: 320,
-                        height: 320,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, progress) {
-                          if (progress == null) return child;
-                          return const ShimmerEffect(width: 250, height: 250);
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return const ShimmerEffect(width: 250, height: 250);
-                        },
-                      ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  //   return SizedBox(
+  //     height: 370,
+  //     width: double.infinity,
+  //     child: Stack(
+  //       children: [
+  //         Positioned(
+  //           left: 0,
+  //           right: 0,
+  //           bottom: 0,
+  //           child: Container(
+  //             height: 200,
+  //             decoration: const BoxDecoration(
+  //               color: Acolors.white,
+  //               borderRadius: BorderRadius.only(
+  //                 topLeft: Radius.circular(35),
+  //                 topRight: Radius.circular(35),
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //         Center(
+  //           child: Container(
+  //             decoration: BoxDecoration(
+  //               boxShadow: const [
+  //                 BoxShadow(
+  //                     blurRadius: 15,
+  //                     color: Acolors.primary,
+  //                     offset: Offset(0, 8)),
+  //               ],
+  //               borderRadius: BorderRadius.circular(250),
+  //             ),
+  //             child: ClipRRect(
+  //               borderRadius: BorderRadius.circular(250),
+  //               child: _isLoading
+  //                   ? const ShimmerEffect(width: 250, height: 250)
+  //                   : Image.network(
+  //                       imageUrlll,
+  //                       width: 320,
+  //                       height: 320,
+  //                       fit: BoxFit.cover,
+  //                       loadingBuilder: (context, child, progress) {
+  //                         if (progress == null) return child;
+  //                         return const ShimmerEffect(width: 250, height: 250);
+  //                       },
+  //                       errorBuilder: (context, error, stackTrace) {
+  //                         return const ShimmerEffect(width: 250, height: 250);
+  //                       },
+  //                     ),
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Padding productDetailHeader() {
     return Padding(

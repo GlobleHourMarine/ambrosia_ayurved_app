@@ -9,18 +9,19 @@ class ReviewService {
   // Fetch reviews by product ID
   Future<List<Review>> fetchReviews(String productId) async {
     try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
+      final Uri url = Uri.parse('$apiUrl?product_id=$productId');
+
+      final response = await http.get(
+        url,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({"product_id": productId}),
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         print(responseData);
-        if (responseData["status"] == "success") {
+        if (responseData["status"] == true) {
           List<dynamic> reviewsJson = responseData["data"];
 
           return reviewsJson.map((json) => Review.fromJson(json)).toList();
@@ -37,6 +38,7 @@ class ReviewService {
       throw Exception("Error fetching reviews: $e");
     }
   }
+
   // review submission
 
   // Future<bool> submitReview(

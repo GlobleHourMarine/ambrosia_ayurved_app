@@ -68,8 +68,8 @@ class Ingredients extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            HowToUseSection(),
-            SizedBox(height: 20),
+            // HowToUseSection(),
+            // SizedBox(height: 20),
             // Ingredients Section
             Text(
               "${AppLocalizations.of(context)!.keyIngredients}",

@@ -17,6 +17,10 @@ class LanguageProvider extends ChangeNotifier {
       'name': 'العربية',
       'locale': 'ar',
     },
+    {
+      'name': 'Hindi',
+      'locale': 'hi',
+    },
   ];
 
   late Locale _selectedLocale;
@@ -50,9 +54,9 @@ class LanguageProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('selected_locale', language);
 
-    // Force rebuild of the entire app
-    Future.delayed(Duration(milliseconds: 100), () {
-      notifyListeners();
-    });
+    // // Force rebuild of the entire app
+    // Future.delayed(Duration(milliseconds: 100), () {
+    //   notifyListeners();
+    // });
   }
 }

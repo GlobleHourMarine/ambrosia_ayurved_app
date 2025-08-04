@@ -1,4 +1,9 @@
+import 'package:ambrosia_ayurved/cosmetics/common/contact_info.dart';
+import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/order_now_page.dart';
+import 'package:ambrosia_ayurved/firebase_options.dart';
 import 'package:ambrosia_ayurved/widgets/address/address_model.dart';
+import 'package:ambrosia_ayurved/widgets/notification_service.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
@@ -27,12 +32,14 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await NotificationService().initialize();
 
-  // Create UserProvider and load data before running the app
   final userProvider = UserProvider();
   await userProvider.loadUserFromPrefs();
 
-  // Create LanguageProvider and load saved locale
   final languageProvider = LanguageProvider();
   await languageProvider.loadSavedLocale();
 
@@ -40,10 +47,11 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: userProvider),
-        // ChangeNotifierProvider(create: (context) => UserProvider()),
+        //   ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider.value(value: languageProvider),
         // ChangeNotifierProvider(create: (context) => TranslationProvider()),
         //  ChangeNotifierProvider(create: (context) => Address()),
+        // ChangeNotifierProvider(create: (context) => AwbData()),
         ChangeNotifierProvider(create: (context) => ProductNotifier()),
         ChangeNotifierProvider(create: (context) => CartProvider()),
         ChangeNotifierProvider(create: (context) => PaymentProvider()),
@@ -83,6 +91,7 @@ class _MyAppState extends State<MyApp> {
             Locale('en'),
             Locale('ms'),
             Locale('ar'),
+            Locale('hi'),
           ],
           locale: currentLocale, // Set from provider
           fallbackLocale:
@@ -95,7 +104,8 @@ class _MyAppState extends State<MyApp> {
           ],
           //
           //
-          title: 'Ambrosia Ayurved',
+          title: ContactInfo.appName,
+
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Acolors.primary),
             useMaterial3: true,

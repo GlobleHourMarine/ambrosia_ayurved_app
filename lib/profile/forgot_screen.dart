@@ -339,161 +339,151 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
         child: FadeInUp(
           duration: const Duration(milliseconds: 1000),
           child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Expanded(
-              child: Column(
-                children: <Widget>[
-                  SizedBox(height: 20),
-                  SizedBox(
-                    // height: 300,
-                    child: Lottie.asset(
-                      'assets/images/forget_password_2.json',
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: <Widget>[
+                SizedBox(
+                  child: Lottie.asset(
+                    'assets/images/forget_password_2.json',
+                    fit: BoxFit.contain,
+                    repeat: true,
+                    errorBuilder: (context, error, stackTrace) =>
+                        Lottie.network(
+                      'https://assets5.lottiefiles.com/packages/lf20_ktwnwv5m.json', // Fallback animation
+                      height: 200,
                       fit: BoxFit.contain,
-                      repeat: true,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Lottie.network(
-                        'https://assets5.lottiefiles.com/packages/lf20_ktwnwv5m.json', // Fallback animation
-                        height: 200,
-                        fit: BoxFit.contain,
-                      ),
                     ),
                   ),
-
-                  //
-                  //
-
-                  // Title and subtitle
-                  SizedBox(height: 50),
-                  // Spacer(),
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      "${AppLocalizations.of(context)!.forgotPassword}",
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2E3E5C),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Don\'t worry! It happens. Please enter the email address associated with your account.',
+                ),
+                SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    "${AppLocalizations.of(context)!.forgotPassword}",
                     style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF8F9BB3),
-                      height: 1.5,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2E3E5C),
                     ),
                   ),
-                  const SizedBox(height: 40),
-                  //
+                ),
 
-                  TextFormField(
-                    controller: emailController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "${AppLocalizations.of(context)!.pleaseEnterEmail}";
-                        //    'Please enter Email';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      label: Text(
-                        "${AppLocalizations.of(context)!.email}",
-                        //  'Email'
-                      ),
-                      hintText: "${AppLocalizations.of(context)!.enterEmail}",
+                const SizedBox(height: 10),
+                const Text(
+                  'Don\'t worry! It happens. Please enter the email address associated with your account.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF8F9BB3),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                //
 
-                      // 'Enter Email',
-                      hintStyle: const TextStyle(
-                        color: Acolors.primary,
-                      ),
-                      prefixIcon: const Icon(Icons.email_outlined),
+                TextFormField(
+                  controller: emailController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "${AppLocalizations.of(context)!.pleaseEnterEmail}";
+                      //    'Please enter Email';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    label: Text(
+                      "${AppLocalizations.of(context)!.email}",
+                      //  'Email'
+                    ),
+                    hintText: "${AppLocalizations.of(context)!.enterEmail}",
 
-                      ///
+                    // 'Enter Email',
+                    hintStyle: const TextStyle(
+                      color: Acolors.primary,
+                    ),
+                    prefixIcon: const Icon(Icons.email_outlined),
 
-                      //
-                      border: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                            color: Acolors.primary // Default border color
-                            ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Acolors.primary, // Default border color
+                    ///
+
+                    //
+                    border: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                          color: Acolors.primary // Default border color
                           ),
-                          borderRadius: BorderRadius.circular(10)),
-                      enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
                         borderSide: const BorderSide(
                           color: Acolors.primary, // Default border color
                         ),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(10)),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: Acolors.primary, // Default border color
                       ),
-                      filled: true,
-                      fillColor:
-                          const Color(0xFFFFFFFF), // White background color
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    style: const TextStyle(
-                      color: Color(0xFF272829), // Text color red
-                    ),
+                    filled: true,
+                    fillColor:
+                        const Color(0xFFFFFFFF), // White background color
                   ),
-                  const SizedBox(height: 20.0),
-                  FadeInUp(
-                    duration: const Duration(milliseconds: 1200),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 100),
-                      child: ElevatedButton(
-                        onPressed: () => initiatePasswordReset(context),
-                        child: Text(
-                          "${AppLocalizations.of(context)!.resetPassword}",
-                          //  'Reset Password',
-                          style: TextStyle(
-                              color: Color.fromARGB(255, 255, 255, 255)),
-                        ),
-                        style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all<Color>(Acolors.primary),
-                        ),
-                      ),
-                    ),
+                  style: const TextStyle(
+                    color: Color(0xFF272829), // Text color red
                   ),
-                  const SizedBox(height: 20.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "${AppLocalizations.of(context)!.alreadyHaveAccount}",
-                        //    'Already have an account? ',
+                ),
+                const SizedBox(height: 20.0),
+                FadeInUp(
+                  duration: const Duration(milliseconds: 1200),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 80),
+                    child: ElevatedButton(
+                      onPressed: () => initiatePasswordReset(context),
+                      child: Text(
+                        "${AppLocalizations.of(context)!.resetPassword}",
+                        //  'Reset Password',
                         style: TextStyle(
-                          color: Colors.black45,
-                        ),
+                            color: Color.fromARGB(255, 255, 255, 255)),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SignInScreen(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          "${AppLocalizations.of(context)!.signIn}",
-                          // 'Sign in',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Acolors.primary),
-                        ),
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(Acolors.primary),
                       ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 20.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "${AppLocalizations.of(context)!.alreadyHaveAccount}",
+                      //    'Already have an account? ',
+                      style: TextStyle(
+                        color: Colors.black45,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignInScreen(),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        "${AppLocalizations.of(context)!.signIn}",
+                        // 'Sign in',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Acolors.primary),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 20.0,
+                ),
+              ],
             ),
           ),
         ),
@@ -503,15 +493,4 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
       // ),
     );
   }
-}
-
-void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => UserProvider(),
-      child: MaterialApp(
-        home: ForgetPasswordScreen(),
-      ),
-    ),
-  );
 }

@@ -145,52 +145,60 @@ class FoodsToAvoidSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final local = AppLocalizations.of(context)!;
 
-    return Container(
-      color: const Color(0xFFFCF8F1),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            local.foodsToAvoidTitle,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF997D00),
+    return Column(
+      children: [
+        SizedBox(height: 20),
+        Container(
+          color: const Color(0xFFFCF8F1),
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  local.foodsToAvoidTitle,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF997D00),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  local.foodsToAvoidIntro,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 15),
+                Column(
+                  children: [
+                    _foodCard(
+                      imagePath: 'assets/images/white_Sugar.webp',
+                      title: local.foodWhiteSugarTitle,
+                      description: local.foodWhiteSugarDesc1,
+                      description2: local.foodWhiteSugarDesc2,
+                    ),
+                    const SizedBox(height: 10),
+                    _foodCard(
+                      imagePath: 'assets/images/white_Rice.webp',
+                      title: local.foodWhiteRiceTitle,
+                      description: local.foodWhiteRiceDesc1,
+                      description2: local.foodWhiteRiceDesc2,
+                    ),
+                    const SizedBox(height: 10),
+                    _foodCard(
+                      imagePath: 'assets/images/potato.webp',
+                      title: local.foodPotatoesTitle,
+                      description: local.foodPotatoesDesc1,
+                      description2: local.foodPotatoesDesc2,
+                    ),
+                    const SizedBox(height: 5),
+                  ],
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            local.foodsToAvoidIntro,
-            style: const TextStyle(fontSize: 16),
-          ),
-          const SizedBox(height: 15),
-          Column(
-            children: [
-              _foodCard(
-                imagePath: 'assets/images/white_Sugar.webp',
-                title: local.foodWhiteSugarTitle,
-                description: local.foodWhiteSugarDesc1,
-                description2: local.foodWhiteSugarDesc2,
-              ),
-              const SizedBox(height: 10),
-              _foodCard(
-                imagePath: 'assets/images/white_Rice.webp',
-                title: local.foodWhiteRiceTitle,
-                description: local.foodWhiteRiceDesc1,
-                description2: local.foodWhiteRiceDesc2,
-              ),
-              const SizedBox(height: 10),
-              _foodCard(
-                imagePath: 'assets/images/potato.webp',
-                title: local.foodPotatoesTitle,
-                description: local.foodPotatoesDesc1,
-                description2: local.foodPotatoesDesc2,
-              ),
-              const SizedBox(height: 5),
-            ],
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

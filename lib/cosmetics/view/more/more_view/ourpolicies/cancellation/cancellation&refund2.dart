@@ -144,6 +144,9 @@ class CancellationRefundPolicyScreen2 extends StatelessWidget {
         const SizedBox(height: 8),
         BulletPoint(text: loc.refundInspectNotify),
         BulletPoint(text: loc.refundApproved, boldText: loc.refundTimeWindow),
+        const SizedBox(height: 8),
+        BulletPoint(text: loc.refundCreditInfo),
+        const SizedBox(height: 8),
         BulletPoint(
             text: loc.refundCod,
             boldText: loc.refundCodMethod,

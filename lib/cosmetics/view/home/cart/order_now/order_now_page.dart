@@ -1,6 +1,8 @@
 import 'dart:convert';
-
+import 'dart:math';
 import 'package:ambrosia_ayurved/cosmetics/thankyou/thankyou.dart';
+import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/address/address_fetch_service.dart';
+import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/bill_summary_section.dart';
 import 'package:ambrosia_ayurved/home/home_screen.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
@@ -16,13 +18,13 @@ import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/order_grandt
 import 'package:ambrosia_ayurved/cosmetics/view/home/products/products_model.dart';
 import 'package:ambrosia_ayurved/provider/user_provider.dart';
 import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/new_cart/provider.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_page.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_model.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:ambrosia_ayurved/razorpay_service.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:phonepe_payment_sdk/phonepe_payment_sdk.dart';
 
@@ -34,36 +36,43 @@ class OrderNowPage extends StatefulWidget {
 }
 
 class _OrderNowPageState extends State<OrderNowPage> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  AddressModel? selectedAddress;
+  // PhonePe Configuration
+  static const String merchantId = "M22NOXGSL1P2A";
+  static const String saltKey =
+      "MWRiMWMwMjAtNmRmMy00Mjk1LWI2N2EtZGNkMmU0MmVjOTQ1";
+  static const int saltIndex = 1;
+  static const String environment =
+      "SANDBOX"; // Change to "PRODUCTION" for live
+  static const String appId = "TEST-M22NOXGSL1P2A_25052";
+  // Base URLs for PhonePe API
+  static const String sandboxBaseUrl =
+      "https://api-preprod.phonepe.com/apis/hermes";
+  static const String productionBaseUrl = "https://api.phonepe.com/apis/hermes";
+
+  final _formKey = GlobalKey<FormState>();
+  //final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   // Form controllers
+
   final TextEditingController _fnameController = TextEditingController();
   final TextEditingController _lnameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _districtController = TextEditingController();
   final TextEditingController _stateController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _countryController = TextEditingController();
   final TextEditingController _pincodeController = TextEditingController();
+  bool _isPhonePeInitialized = false;
 
-  late Razorpay _razorpay;
   bool _isLoading = false; // Loader State
-
-  // PhonePe configuration
-  final String phonePeMerchantId = "TEST-M22NOXGSL1P2A_25052";
-  final String phonePeSaltKey =
-      "MWRiMWMwMjAtNmRmMy00Mjk1LWI2N2EtZGNkMmU0MmVjOTQ1";
-  final int phonePeSaltIndex = 1;
-  final bool isPhonePeProd = false;
 
   void initState() {
     super.initState();
-    _razorpay = Razorpay();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    _initializePhonePe();
+
     _pincodeController.addListener(_onPincodeChanged);
-    _initializePhonePeSDK();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final cartProvider = Provider.of<CartProvider>(context, listen: false);
@@ -75,79 +84,233 @@ class _OrderNowPageState extends State<OrderNowPage> {
       grandTotalProvider.calculateGrandTotal(cartProvider.cartItems);
     });
   }
+//s
+// phone pe
+//
 
-  Future<void> _initializePhonePeSDK() async {
+  // Initialize PhonePe SDK
+  Future<void> _initializePhonePe() async {
     try {
+      String flowId = "FLOW_${DateTime.now().millisecondsSinceEpoch}";
       bool isInitialized = await PhonePePaymentSdk.init(
-        isPhonePeProd ? "PRODUCTION" : "SANDBOX", // Environment
-        phonePeMerchantId, // Merchant ID
-        "USER123", // flowId (unique user/session ID)
-        false, // enableLogging (disable in prod)
-      );
-      debugPrint("PhonePe SDK initialized: $isInitialized");
-    } catch (e) {
-      debugPrint("PhonePe init error: $e");
-    }
-  }
-
-  String _generatePhonePeChecksum(String input) {
-    final key = utf8.encode(phonePeSaltKey);
-    final bytes = utf8.encode(input);
-    final hmacSha256 = Hmac(sha256, key);
-    return hmacSha256.convert(bytes).toString();
-  }
-
-  Future<void> _startPhonePePayment(double amount) async {
-    setState(() => _isLoading = true);
-
-    final payload = {
-      "merchantId": phonePeMerchantId,
-      "merchantTransactionId": "TXN${DateTime.now().millisecondsSinceEpoch}",
-      "amount": (amount * 100).toInt(), // Amount in paise
-      "callbackUrl": "https://your-callback-url.com",
-      "paymentMode": {"type": "PAY_PAGE"}, // Standard checkout
-    };
-
-    try {
-      final response = await PhonePePaymentSdk.startTransaction(
-        jsonEncode(payload), // Request body (JSON string)
-        "yourapp://callback", // iOS URL scheme (Android: leave empty or use package name)
+        environment,
+        merchantId, // Use merchantId instead of appId
+        flowId,
+        true, // Enable logging for debug
       );
 
-      if (response != null) {
-        final status = response['status'].toString();
-        if (status == 'SUCCESS') {
-          _showPaymentSuccessDialog();
-        } else {
-          print(' Payment failed:${response['error']}');
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Payment failed: ${response['error']}")));
-        }
+      setState(() {
+        _isPhonePeInitialized = isInitialized;
+      });
+
+      if (isInitialized) {
+        print("PhonePe SDK initialized successfully");
+      } else {
+        print("PhonePe SDK initialization failed");
       }
     } catch (e) {
-      print('Error starting PhonePe payment: $e');
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
-    } finally {
-      setState(() => _isLoading = false);
+      print("Error initializing PhonePe: $e");
     }
   }
 
-  void _showPaymentSuccessDialog() {
+// Generate unique order ID
+  String _generateOrderId() {
+    return "ORDER_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(10000)}";
+  }
+
+  // Generate unique transaction ID
+  String _generateTransactionId() {
+    return "TXN_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(10000)}";
+  }
+
+  // Generate checksum for API calls
+  String _generateChecksum(String payload, String endpoint) {
+    String data = payload + endpoint + saltKey;
+    var bytes = utf8.encode(data);
+    var digest = sha256.convert(bytes);
+    return "${digest.toString()}###$saltIndex";
+  }
+
+  // Create payment request directly (no separate auth token needed for SDK)
+  Future<void> _startPhonePePayment(double amount) async {
+    if (!_isPhonePeInitialized) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('PhonePe SDK not initialized')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      String transactionId = _generateTransactionId();
+      String orderId = _generateOrderId();
+      String merchantUserId =
+          "USER_${DateTime.now().millisecondsSinceEpoch}"; // 1. Create the payload (ensure all required fields are included)
+// 1. Generate the payload (JSON)
+      Map<String, dynamic> payload = {
+        "merchantId": merchantId,
+        "merchantTransactionId":
+            "TXN_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(10000)}",
+        "amount": (amount * 100).toInt(), // Amount in paise
+        "merchantUserId": "USER_${DateTime.now().millisecondsSinceEpoch}",
+        "redirectUrl": "https://webhook.site/redirect-url",
+        "redirectMode": "POST", // Changed from REDIRECT to POST
+        "callbackUrl": "https://webhook.site/callback-url",
+        "mobileNumber": "9999999999",
+        "paymentInstrument": {"type": "PAY_PAGE"}
+      };
+
+// 2. Encode payload to base64
+      String payloadString = jsonEncode(payload);
+// Ensure no trailing newlines or spaces
+      String base64Payload = base64.encode(utf8.encode(payloadString)).trim();
+      print("Base64 Payload: $base64Payload");
+// 3. Generate checksum (SHA256 of base64Payload + endpoint + saltKey)
+      String checksumInput = base64Payload + "/pg/v1/pay" + saltKey;
+
+      String checksum = sha256.convert(utf8.encode(checksumInput)).toString() +
+          "###$saltIndex";
+
+      // Create the request for PhonePe SDK
+      Map<String, dynamic> phonePeRequest = {
+        "merchantId": merchantId,
+        "merchantTransactionId": transactionId,
+        "merchantUserId": merchantUserId,
+        "merchantOrderId": orderId,
+        "amount": (amount * 100).toInt(),
+        "callbackUrl": "https://webhook.site/callback-url",
+        "paymentInstrument": {"type": "PAY_PAGE"}
+      };
+
+      String requestString = jsonEncode(phonePeRequest);
+      String appSchema = "phonepe://"; // PhonePe's URL scheme
+      String decoded = utf8.decode(base64.decode(base64Payload));
+      print("Decoded payload: $decoded");
+      print("PhonePe Request: $requestString");
+
+      // Start transaction using PhonePe SDK
+      Map<dynamic, dynamic>? result = await PhonePePaymentSdk.startTransaction(
+        base64Payload, // ✅ Base64-encoded payload
+        "phonepe://",
+      );
+
+      print("PhonePe Result: $result");
+
+      if (result != null) {
+        String status = result['status'].toString();
+
+        if (status == 'SUCCESS') {
+          // Check payment status to confirm
+          await _checkPaymentStatus(transactionId);
+        } else {
+          String error = result['error']?.toString() ?? 'Unknown error';
+          _showPaymentFailed("Payment failed: $error");
+        }
+      } else {
+        _showPaymentFailed("Payment was interrupted");
+      }
+    } catch (e) {
+      print("Payment error: $e");
+      _showPaymentFailed("Payment failed: ${e.toString()}");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // Check payment status using PhonePe API
+  Future<void> _checkPaymentStatus(String transactionId) async {
+    try {
+      String endpoint = "/pg/v1/status/$merchantId/$transactionId";
+      String baseUrl =
+          environment == "SANDBOX" ? sandboxBaseUrl : productionBaseUrl;
+
+      // Create checksum for status check
+      String checksum = _generateChecksum("", endpoint);
+
+      final response = await http.get(
+        Uri.parse("$baseUrl$endpoint"),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-VERIFY': checksum,
+          'X-MERCHANT-ID': merchantId,
+        },
+      );
+
+      print("Status Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          String paymentState = responseData['data']['state'];
+          if (paymentState == 'COMPLETED') {
+            _showPaymentSuccess();
+          } else if (paymentState == 'FAILED') {
+            _showPaymentFailed("Payment failed");
+          } else {
+            _showPaymentFailed("Payment status: $paymentState");
+          }
+        } else {
+          _showPaymentFailed("Payment verification failed");
+        }
+      } else {
+        _showPaymentFailed("Failed to verify payment status");
+      }
+    } catch (e) {
+      print("Error checking payment status: $e");
+      _showPaymentFailed("Payment verification failed");
+    }
+  }
+
+  void _showPaymentSuccess() {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text("Payment Successful!"),
-        content: Text("Your order has been placed."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.popUntil(ctx, (route) => route.isFirst),
-            child: Text("OK"),
-          ),
-        ],
-      ),
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Payment Successful'),
+          content: Text('Your payment has been processed successfully!'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Navigate to success page or order confirmation
+                Navigator.pushReplacementNamed(context, '/order-success');
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
+
+  void _showPaymentFailed(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Payment Failed'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+//
+//phone pe
+//
 
   void _onPincodeChanged() {
     if (_pincodeController.text.length == 6) {
@@ -215,7 +378,6 @@ class _OrderNowPageState extends State<OrderNowPage> {
 
   @override
   void dispose() {
-    _razorpay.clear();
     // Dispose all controllers
     _fnameController.dispose();
     _lnameController.dispose();
@@ -233,104 +395,9 @@ class _OrderNowPageState extends State<OrderNowPage> {
   //
   //
   //
-
-  // Razorpay payment handlers
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    // Payment success logic
-    print(response);
-
-    Future.delayed(Duration(seconds: 1));
-    Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CheckoutMessageView(),
-        ));
-
-    // showDialog(
-    //   context: context,
-    //   builder: (BuildContext context) => AlertDialog(
-    //     title: Text("Payment Successful"),
-    //     content: Text(
-    //         "Payment ID: ${response.paymentId} , order id : ${response.orderId} , "
-    //         //response.data
-    //         ),
-    //     actions: [
-    //       TextButton(
-    //         onPressed: () {
-    //           Navigator.pop(context); // Close dialog
-    //           Navigator.pushReplacement(
-    //               context,
-    //               MaterialPageRoute(
-    //                 builder: (context) => HomeScreen(),
-    //               ));
-    //           // You might want to navigate to order confirmation page here
-    //         },
-    //         child: Text("OK"),
-    //       )
-    //     ],
-    //   ),
-    // );
-
-    // Here you can also save the order to your database
-  }
-
-  void _handlePaymentError(PaymentFailureResponse response) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text("Payment Failed"),
-        content: Text("Code: ${response.code}\nMessage: ${response.message}"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("OK"),
-          )
-        ],
-      ),
-    );
-  }
-
-  void _handleExternalWallet(ExternalWalletResponse response) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text("External Wallet Selected"),
-        content: Text("Wallet: ${response.walletName}"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("OK"),
-          )
-        ],
-      ),
-    );
-  }
-
-  void _openRazorpayCheckout(double amount) {
-    var options = {
-      'key': 'rzp_test_J4DBKJFYTiyeCf',
-      'amount': amount * 100, // Convert to paise
-      'name': 'Ambrosia Ayurved',
-      'description': 'Order Payment',
-      'prefill': {
-        'contact': _mobileController.text,
-        'email': _emailController.text,
-        'name': '${_fnameController.text} ${_lnameController.text}'
-      },
-      'external': {
-        'wallets': ['paytm']
-      }
-    };
-
-    try {
-      _razorpay.open(options);
-    } catch (e) {
-      debugPrint('Error: $e');
-    }
-  }
-
   //
   //
+
   //
   //
 
@@ -340,6 +407,7 @@ class _OrderNowPageState extends State<OrderNowPage> {
     Widget? suffixIcon,
     String? Function(String?)? validator,
     TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return TextFormField(
       controller: controller,
@@ -354,8 +422,84 @@ class _OrderNowPageState extends State<OrderNowPage> {
       validator: validator ??
           (value) => value == null || value.isEmpty ? '$label' : null,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
     );
   }
+
+// // create shiprocket order
+//   Future<void> _createOrder() async {
+//     if (_isLoading) return; // Prevent multiple clicks
+
+//     setState(() => _isLoading = true);
+
+//     final userProvider = Provider.of<UserProvider>(context);
+//     final cartProvider = Provider.of<CartProvider>(context);
+//     final grandTotalProvider =
+//         Provider.of<GrandTotalProvider>(context, listen: false);
+
+//     // final cartList = cartProvider.cartItems;
+
+//     try {
+//       // List<Map<String, dynamic>> orderItems =
+//       //     cartProvider.cartItems.map((cartItem) {
+//       //   return {
+//       //     "name":
+//       //         cartItem.productName, // Adjust according to your product model
+//       //     "sku": "AYUR${cartItem.productId}", // Use SKU or generate one
+//       //     "units": cartItem.quantity,
+//       //     "selling_price": cartItem.price, // Adjust for your price field
+//       //     "discount": "", // You can calculate discount if available
+//       //     "tax": "", // Add tax if applicable
+//       //     "hsn": 123566 // Use HSN from product or default
+//       //   };
+//       // }).toList();
+
+//       await createShiprocketOrder(
+//         billingCustomerName: selectedAddress!.fname,
+//         billingLastName: selectedAddress!.lname,
+//         billingAddress: selectedAddress!.address,
+//         billingAddress2: "123",
+//         billingCity: selectedAddress!.city,
+//         billingPincode: selectedAddress!.pincode,
+//         billingState: selectedAddress!.state,
+//         billingCountry: selectedAddress!.country,
+//         billingEmail: userProvider.email,
+//         billingPhone: selectedAddress!.mobile,
+//         //   orderItems: orderItems,
+//         orderItems: [
+//           {
+//             "name": "Ambrosia ayurved",
+//             "sku": "AYUR123",
+//             "units": 2,
+//             "selling_price": 500,
+//             "discount": "",
+//             "tax": "",
+//             "hsn": 123456
+//           }
+//         ],
+//         paymentMethod: "Prepaid",
+//         shippingCharges: 50,
+//         giftwrapCharges: 0,
+//         transactionCharges: 10,
+//         totalDiscount: 100,
+//         subTotal: grandTotalProvider.grandTotal,
+//         length: 3,
+//         breadth: 2,
+//         height: 5,
+//         weight: 0.1,
+//       );
+
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text('Order created successfully!')),
+//       );
+//     } catch (e) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text('Error creating order: $e')),
+//       );
+//     } finally {
+//       setState(() => _isLoading = false);
+//     }
+//   }
 
   @override
   Widget build(BuildContext context) {
@@ -379,219 +523,847 @@ class _OrderNowPageState extends State<OrderNowPage> {
         title: "${AppLocalizations.of(context)!.orderNow}",
         //  'Order Now',
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Container(
-          //   height: 70,
-          //   color: Acolors.primary,
-          //   child: Padding(
-          //     padding: const EdgeInsets.all(12),
-          //     child: Row(
-          //       // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //       children: [
-          //         Material(
-          //           color: Colors.white.withOpacity(0.21),
-          //           borderRadius: BorderRadius.circular(12),
-          //           child: const BackButton(
-          //             color: Acolors.white,
-          //           ),
-          //         ),
-          //         const SizedBox(width: 30),
-          //         const Text(
-          //           'Order Now',
-          //           style: TextStyle(fontSize: 24, color: Acolors.white),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
-          // const SizedBox(height: 2),
-          cartProvider.isLoading
-              ? Center(child: CircularProgressIndicator())
-              :
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                cartProvider.isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : SizedBox(height: 2),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: cartList.length,
+                  itemBuilder: (context, index) {
+                    final item = cartList[index];
+                    print(item.description);
+                    // Access the provider
+                    final totalPriceProvider =
+                        Provider.of<ItemTotalPriceProvider>(context,
+                            listen: false);
+                    // Calculate total price using provider
+                    double totalPrice = totalPriceProvider.calculateTotalPrice(
+                      item.price.toString(),
+                      item.quantity.toString(),
+                    );
 
-              // Card(
-              //     elevation: 3,
-              //     child: Padding(
-              //       padding: EdgeInsets.symmetric(horizontal: 27, vertical: 10),
-              //       child: Row(
-              //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //         children: [
-              //           Text(
-              //             "${AppLocalizations.of(context)!.productDetails}",
-              //             //'Product Details'
-              //           ),
-              //           Text(
-              //             "${AppLocalizations.of(context)!.totalPrice}",
-              //             // 'Total price'
-              //           ),
-              //         ],
-              //       ),
-              //     ),
-              //   ),
-              SizedBox(height: 5),
-          Expanded(
-            child: ListView.builder(
-              itemCount: cartList.length,
-              itemBuilder: (context, index) {
-                final item = cartList[index];
-                print(item.description);
-                // Access the provider
-                final totalPriceProvider =
-                    Provider.of<ItemTotalPriceProvider>(context, listen: false);
-                // Calculate total price using provider
-                double totalPrice = totalPriceProvider.calculateTotalPrice(
-                  item.price.toString(),
-                  item.quantity.toString(),
-                );
+                    //
 
-                //
-                //
-                // Convert price to double
-                double price = double.tryParse(item.price.toString()) ?? 0.0;
-                int quantity = int.tryParse(item.quantity.toString()) ?? 1;
-                double basePricePerItem = price / 1.12;
+                    // Convert price to double
+                    double price =
+                        double.tryParse(item.price.toString()) ?? 0.0;
+                    int quantity = int.tryParse(item.quantity.toString()) ?? 1;
+                    double basePricePerItem = price / 1.12;
 
-                //
-                double gstPerItem = price - basePricePerItem;
+                    //
+                    double gstPerItem = price - basePricePerItem;
 
-                //
-                double baseTotal = basePricePerItem * quantity;
-                double gstTotal = gstPerItem * quantity;
-                double totalWithGst = price * quantity;
+                    //
+                    double baseTotal = basePricePerItem * quantity;
+                    double gstTotal = gstPerItem * quantity;
+                    double totalWithGst = price * quantity;
 
-//
-                // // Ensure price is treated as a double
-                // double itemPrice =
-                //     double.tryParse(item.price.toString()) ?? 0.0;
+                    // double itemPrice =
+                    //     double.tryParse(item.price.toString()) ?? 0.0;
 
-                // // Ensure quantity is treated as an integer (in case it's a String)
-                // int itemQuantity =
-                //     int.tryParse(item.quantity.toString()) ?? 1;
+                    // // Ensure quantity is treated as an integer (in case it's a String)
+                    // int itemQuantity =
+                    //     int.tryParse(item.quantity.toString()) ?? 1;
 
-                // double totalPrice = itemPrice * itemQuantity;
+                    // double totalPrice = itemPrice * itemQuantity;
 
-                return Card(
-                    elevation: 3,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 100, // Adjust as needed
-                                height: 120, // Adjust as needed
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(
-                                    'https://ambrosiaayurved.in/${item.image}',
-                                    fit: BoxFit.fill,
-                                    loadingBuilder: (context, child, progress) {
-                                      if (progress == null) return child;
-                                      return const ShimmerEffect(
-                                          width: 100, height: 100);
-                                    },
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const ShimmerEffect(
-                                          width: 100, height: 100);
-                                    },
+                    return Card(
+                      elevation: 3,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 100, // Adjust as needed
+                                  height: 120, // Adjust as needed
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.network(
+                                      'https://ambrosiaayurved.in/${item.image}',
+                                      fit: BoxFit.fill,
+                                      loadingBuilder:
+                                          (context, child, progress) {
+                                        if (progress == null) return child;
+                                        return const ShimmerEffect(
+                                            width: 100, height: 100);
+                                      },
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return const ShimmerEffect(
+                                            width: 100, height: 100);
+                                      },
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 20),
-                              //
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Directionality(
-                                      textDirection: TextDirection.ltr,
-                                      child: Text(
-                                        AppLocalizations.of(context)!.a5product,
-                                        //  item.productName,
+                                const SizedBox(width: 20),
+                                //
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      //    Directionality(
+                                      //  textDirection: TextDirection.ltr,
+                                      // child:
+                                      Text(
+                                        //  AppLocalizations.of(context)!.a5product,
+                                        item.productName,
                                         style: TextStyle(
                                           fontWeight: FontWeight.w700,
-                                          fontSize: 20,
+                                          fontSize: 16,
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(height: 3),
-                                    Text(
-                                      AppLocalizations.of(context)!
-                                          .descriptionproduct,
-                                      //  item.description,
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
+                                      //    ),
+                                      //  SizedBox(height: 3),
+                                      Text(
+                                        // AppLocalizations.of(context)!
+                                        //     .descriptionproduct,
+                                        item.description,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          // fontWeight: FontWeight.w700,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      //
+                                      //
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(height: 8),
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.2),
+                                                  spreadRadius: 1,
+                                                  blurRadius: 3,
+                                                  offset: Offset(0, 1),
+                                                ),
+                                              ],
+                                            ),
+                                            padding: EdgeInsets.all(5),
+                                            child: Column(
+                                              children: [
+                                                // Price breakdown header
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Text(
+                                                      // "Price Break Down : ",
+                                                      "${AppLocalizations.of(context)!.priceBreakDown}",
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 12,
+                                                        color: Acolors.primary,
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                              horizontal: 6,
+                                                              vertical: 0),
+                                                      decoration: BoxDecoration(
+                                                        color: Acolors.primary
+                                                            .withOpacity(0.1),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8),
+                                                        border: Border.all(
+                                                            color: Acolors
+                                                                .primary
+                                                                .withOpacity(
+                                                                    0.3)),
+                                                      ),
+                                                      child: Text(
+                                                        "Rs ${totalWithGst.toStringAsFixed(2)}",
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 14,
+                                                          color:
+                                                              Acolors.primary,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Divider(
+                                                    height: 5, thickness: 1),
+
+                                                // Base price row
+                                                Row(
+                                                  children: [
+                                                    Icon(Icons.circle,
+                                                        size: 8,
+                                                        color:
+                                                            Colors.grey[700]),
+                                                    SizedBox(width: 3),
+                                                    Text(
+                                                      //  'Base Price : ',
+                                                      "${AppLocalizations.of(context)!.basePrice} (${item.quantity})",
+                                                      style: TextStyle(
+                                                          fontSize: 12,
+                                                          color:
+                                                              Colors.grey[700]),
+                                                    ),
+                                                    Spacer(),
+                                                    Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                              horizontal: 6,
+                                                              vertical: 2),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.grey[200],
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(4),
+                                                      ),
+                                                      child: Text(
+                                                        "Rs ${baseTotal.toStringAsFixed(2)}",
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          fontSize: 14,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(height: 1),
+
+                                                // GST row
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Icon(Icons.circle,
+                                                            size: 8,
+                                                            color: Colors
+                                                                .grey[700]),
+                                                        SizedBox(width: 3),
+                                                        Text(
+                                                          "${AppLocalizations.of(context)!.gst} (${item.quantity})",
+                                                          //  "Gst  (12%) :",
+                                                          style: TextStyle(
+                                                              fontSize: 12,
+                                                              color: Colors
+                                                                  .grey[700]),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        // Text(
+                                                        //   "Rs ${gstPerItem.toStringAsFixed(2)} × ${item.quantity}",
+                                                        //   style: TextStyle(
+                                                        //       fontSize: 14,
+                                                        //       color: Colors
+                                                        //           .grey[700]),
+                                                        // ),
+                                                        // SizedBox(width: 8),
+                                                        Container(
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal: 6,
+                                                                  vertical: 2),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Colors
+                                                                .grey[200],
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        4),
+                                                          ),
+                                                          child: Text(
+                                                            "Rs ${gstTotal.toStringAsFixed(2)}",
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              fontSize: 14,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+
+                                                //    Divider(height: 5, thickness: 1),
+                                                // Total row with highlight
+                                                /*    Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: [
+                                                    Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                              horizontal: 10,
+                                                              vertical: 4),
+                                                      decoration: BoxDecoration(
+                                                        color: Acolors.primary
+                                                            .withOpacity(0.1),
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                                8),
+                                                        border: Border.all(
+                                                            color: Acolors.primary
+                                                                .withOpacity(
+                                                                    0.3)),
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          Text(
+                                                            "${AppLocalizations.of(context)!.total}: ",
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight.bold,
+                                                              fontSize: 14,
+                                                            ),
+                                                          ),
+                                                          Consumer<
+                                                              GrandTotalProvider>(
+                                                            builder: (context,
+                                                                grandTotalProvider,
+                                                                child) {
+                                                              return Text(
+                                                                "Rs ${grandTotalProvider.grandTotal.toStringAsFixed(2)}",
+                                                                //  "₹${totalWithGst.toStringAsFixed(2)}",
+                                                                style: TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  fontSize: 16,
+                                                                  color: Acolors
+                                                                      .primary,
+                                                                ),
+                                                              );
+                                                            },
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                */
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                //
+                              ],
+                            ),
+                            /*
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Row(
+                                //   children: [],
+                                // ),
+                                const SizedBox(height: 8),
+                          
+                                // Price Card with shadow and rounded corners
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.2),
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: Offset(0, 1),
+                                      ),
+                                    ],
+                                  ),
+                                  padding: EdgeInsets.all(8),
+                                  child: Column(
+                                    children: [
+                                      // Price breakdown header
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            // "Price Break Down : ",
+                                            "${AppLocalizations.of(context)!.priceBreakDown}",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 14,
+                                              color: Acolors.primary,
+                                            ),
+                                          ),
+                                          Text(
+                                            "Rs ${totalWithGst.toStringAsFixed(2)}",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color: Acolors.primary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Divider(height: 12, thickness: 1),
+                          
+                                      // Base price row
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Icon(Icons.circle,
+                                                  size: 8,
+                                                  color: Colors.grey[700]),
+                                              SizedBox(width: 6),
+                                              Text(
+                                                //  'Base Price : ',
+                                                "${AppLocalizations.of(context)!.basePrice}:",
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.grey[700]),
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                "Rs ${basePricePerItem.toStringAsFixed(2)} × ${item.quantity}",
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.grey[700]),
+                                              ),
+                                              SizedBox(width: 8),
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 6, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey[200],
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  "Rs ${baseTotal.toStringAsFixed(2)}",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 8),
+                          
+                                      // GST row
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Icon(Icons.circle,
+                                                  size: 8,
+                                                  color: Colors.grey[700]),
+                                              SizedBox(width: 6),
+                                              Text(
+                                                "${AppLocalizations.of(context)!.gst}",
+                                                //  "Gst  (12%) :",
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.grey[700]),
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                "Rs ${gstPerItem.toStringAsFixed(2)} × ${item.quantity}",
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.grey[700]),
+                                              ),
+                                              SizedBox(width: 8),
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 6, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey[200],
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  "Rs ${gstTotal.toStringAsFixed(2)}",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                          
+                                      Divider(height: 12, thickness: 1),
+                                      // Total row with highlight
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: Acolors.primary
+                                                  .withOpacity(0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              border: Border.all(
+                                                  color: Acolors.primary
+                                                      .withOpacity(0.3)),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  "${AppLocalizations.of(context)!.total}: ",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                                Consumer<GrandTotalProvider>(
+                                                  builder: (context,
+                                                      grandTotalProvider, child) {
+                                                    return Text(
+                                                      "Rs ${grandTotalProvider.grandTotal.toStringAsFixed(2)}",
+                                                      //  "₹${totalWithGst.toStringAsFixed(2)}",
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 16,
+                                                        color: Acolors.primary,
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            */
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+
+                //
+                //
+                //
+
+                //
+                //
+                //
+                // const Padding(
+                //   padding: const EdgeInsets.symmetric(horizontal: 23),
+                //   child: Text(
+                //     'Address :',
+                //     style: TextStyle(
+                //         color: Colors.black,
+                //         fontSize: 18,
+                //         fontWeight: FontWeight.w600),
+                //   ),
+                // ),
+                // Address Form Section
+                // Padding(
+                //   padding: const EdgeInsets.all(2.0),
+                //   child: Card(
+                //     elevation: 4,
+                //     child: Padding(
+                //       padding: const EdgeInsets.all(16.0),
+                //       child: Form(
+                //         key: _formKey,
+                //         child: Column(
+                //           crossAxisAlignment: CrossAxisAlignment.start,
+                //           children: [
+                //             Text(
+                //               "${AppLocalizations.of(context)!.shippingAddress}",
+                //               // 'Shipping Address',
+                //               style: TextStyle(
+                //                 fontSize: 18,
+                //                 fontWeight: FontWeight.bold,
+                //               ),
+                //             ),
+                //             const SizedBox(height: 16),
+
+                //             // First name and Last name
+
+                //             Row(
+                //               children: [
+                //                 Expanded(
+                //                   child: _buildTextField(
+                //                       _fnameController,
+                //                       inputFormatters: [
+                //                         FilteringTextInputFormatter.allow(
+                //                             RegExp(r'[a-zA-Z]')),
+                //                       ],
+                //                       "${AppLocalizations.of(context)!.firstName}"),
+                //                 ),
+                //                 const SizedBox(width: 10),
+                //                 Expanded(
+                //                   child: _buildTextField(
+                //                       _lnameController,
+                //                       inputFormatters: [
+                //                         FilteringTextInputFormatter.allow(
+                //                             RegExp(r'[a-zA-Z]')),
+                //                       ],
+                //                       "${AppLocalizations.of(context)!.lastName}"),
+                //                 ),
+                //               ],
+                //             ),
+                //             const SizedBox(height: 10),
+
+                //             // // Email
+                //             // _buildTextField(_emailController, 'Email'),
+                //             // const SizedBox(height: 10),
+
+                //             // Address and Mobile
+                //             Row(
+                //               children: [
+                //                 Expanded(
+                //                   flex: 2,
+                //                   child: _buildTextField(_addressController,
+                //                       "${AppLocalizations.of(context)!.address}"),
+                //                 ),
+                //                 SizedBox(width: 10),
+                //                 Expanded(
+                //                   child: _buildTextField(
+                //                     _pincodeController,
+                //                     "${AppLocalizations.of(context)!.pincode}",
+                //                     keyboardType: TextInputType.number,
+                //                     suffixIcon: _isLoading
+                //                         ? const SizedBox(
+                //                             width: 20,
+                //                             height: 20,
+                //                             child: Padding(
+                //                               padding: EdgeInsets.all(12.0),
+                //                               child: CircularProgressIndicator(
+                //                                   strokeWidth: 2),
+                //                             ),
+                //                           )
+                //                         : null,
+                //                     validator: (value) {
+                //                       if (value == null || value.isEmpty) {
+                //                         return "${AppLocalizations.of(context)!.enterPincode}";
+                //                       } else if (!RegExp(r'^\d{6}$')
+                //                           .hasMatch(value)) {
+                //                         return "${AppLocalizations.of(context)!.validPincode}";
+                //                       }
+                //                       return null;
+                //                     },
+                //                     inputFormatters: [
+                //                       FilteringTextInputFormatter.digitsOnly,
+                //                       LengthLimitingTextInputFormatter(6),
+                //                     ],
+                //                   ),
+                //                 ),
+                //               ],
+                //             ),
+                //             // const SizedBox(width: 10),
+                //             const SizedBox(height: 10),
+
+                //             // City, State, and Pincode
+                //             Row(
+                //               children: [
+                //                 // Expanded(
+                //                 //   child: _buildTextField(
+                //                 //     _pincodeController,
+                //                 //     "${AppLocalizations.of(context)!.pincode}",
+                //                 //     keyboardType: TextInputType.number,
+                //                 //     validator: (value) {
+                //                 //       if (value == null || value.isEmpty) {
+                //                 //         return "${AppLocalizations.of(context)!.enterPincode}";
+                //                 //       } else if (!RegExp(r'^\d{6}$')
+                //                 //           .hasMatch(value)) {
+                //                 //         return "${AppLocalizations.of(context)!.validPincode}";
+                //                 //       }
+                //                 //       return null;
+                //                 //     },
+                //                 //   ),
+                //                 // ),
+                //                 // SizedBox(width: 10),
+                //                 Expanded(
+                //                   // flex: 2,
+                //                   child: _buildTextField(_cityController,
+                //                       "${AppLocalizations.of(context)!.city}"),
+                //                 ),
+                //                 const SizedBox(width: 10),
+                //                 Expanded(
+                //                   child: _buildTextField(_stateController,
+                //                       "${AppLocalizations.of(context)!.state}"),
+                //                 ),
+                //                 //   const SizedBox(width: 10),
+                //                 // Pincode (6 digits only)
+                //               ],
+                //             ),
+                //             const SizedBox(height: 10),
+
+                //             // Country
+                //             Row(
+                //               children: [
+                //                 Expanded(
+                //                     child: _buildTextField(_countryController,
+                //                         "${AppLocalizations.of(context)!.country}")),
+                //                 const SizedBox(width: 10),
+                //                 // Mobile (12 digits only)
+                //                 Expanded(
+                //                   child: _buildTextField(
+                //                     _mobileController,
+                //                     "${AppLocalizations.of(context)!.mobile}",
+                //                     keyboardType: TextInputType.number,
+                //                     validator: (value) {
+                //                       if (value == null || value.isEmpty) {
+                //                         return "${AppLocalizations.of(context)!.enterMobile}";
+                //                       } else if (!RegExp(r'^\d{10,13}$')
+                //                           .hasMatch(value)) {
+                //                         return "${AppLocalizations.of(context)!.validMobile}";
+                //                       }
+                //                       return null;
+                //                     },
+                //                     inputFormatters: [
+                //                       FilteringTextInputFormatter.digitsOnly,
+                //                       LengthLimitingTextInputFormatter(13),
+                //                     ],
+                //                   ),
+                //                 ),
+                //               ],
+                //             ),
+                //           ],
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Row(
+                      //   children: [],
+                      // ),
+                      const SizedBox(height: 8),
+
+                      // Price Card with shadow and rounded corners
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              spreadRadius: 1,
+                              blurRadius: 3,
+                              offset: Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        padding: EdgeInsets.all(8),
+                        child: Column(
+                          children: [
+                            // Price breakdown header
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Bill Summary',
+                                  // "Price Break Down : ",
+                                  // "${AppLocalizations.of(context)!.priceBreakDown}",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    color: Acolors.primary,
+                                  ),
+                                ),
+                                Consumer<GrandTotalProvider>(
+                                  builder:
+                                      (context, grandTotalProvider, child) {
+                                    return Text(
+                                      "Rs ${grandTotalProvider.grandTotal.toStringAsFixed(2)}",
                                       style: TextStyle(
-                                        // fontWeight: FontWeight.w700,
-                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: Acolors.primary,
                                       ),
-                                    ),
-                                  ],
+                                    );
+                                  },
                                 ),
-                              ),
-                              //
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Row(
-                              //   children: [],
-                              // ),
-                              const SizedBox(height: 8),
+                              ],
+                            ),
+                            // Text(
+                            //   "Rs ${totalWithGst.toStringAsFixed(2)}",
+                            //   style: TextStyle(
+                            //     fontWeight: FontWeight.bold,
+                            //     fontSize: 16,
+                            //     color: Acolors.primary,
+                            //   ),
+                            // ),
+                            //      ],
+                            //  ),
+                            Divider(height: 12, thickness: 1),
+                            Consumer<GrandTotalProvider>(
+                              builder: (context, grandTotalProvider, child) {
+                                double grandTotal =
+                                    grandTotalProvider.grandTotal;
+                                double basePrice = grandTotal /
+                                    1.12; // Calculate base price (grandTotal / (1 + 0.12))
+                                double gstAmount = grandTotal -
+                                    basePrice; // Calculate GST amount
 
-                              // Price Card with shadow and rounded corners
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.2),
-                                      spreadRadius: 1,
-                                      blurRadius: 3,
-                                      offset: Offset(0, 1),
-                                    ),
-                                  ],
-                                ),
-                                padding: EdgeInsets.all(8),
-                                child: Column(
+                                return Column(
                                   children: [
-                                    // Price breakdown header
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          // "Price Break Down : ",
-                                          "${AppLocalizations.of(context)!.priceBreakDown}",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 14,
-                                            color: Acolors.primary,
-                                          ),
-                                        ),
-                                        Text(
-                                          "Rs ${totalWithGst.toStringAsFixed(2)}",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                            color: Acolors.primary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Divider(height: 12, thickness: 1),
-
-                                    // Base price row
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
@@ -603,45 +1375,32 @@ class _OrderNowPageState extends State<OrderNowPage> {
                                                 color: Colors.grey[700]),
                                             SizedBox(width: 6),
                                             Text(
-                                              //  'Base Price : ',
-                                              "${AppLocalizations.of(context)!.basePrice}:",
+                                              "${AppLocalizations.of(context)!.basePrice}",
                                               style: TextStyle(
                                                   fontSize: 14,
                                                   color: Colors.grey[700]),
                                             ),
                                           ],
                                         ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              "Rs ${basePricePerItem.toStringAsFixed(2)} × ${item.quantity}",
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Colors.grey[700]),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[200],
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            "Rs ${basePrice.toStringAsFixed(2)}",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14,
                                             ),
-                                            SizedBox(width: 8),
-                                            Container(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 6, vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey[200],
-                                                borderRadius:
-                                                    BorderRadius.circular(4),
-                                              ),
-                                              child: Text(
-                                                "Rs ${baseTotal.toStringAsFixed(2)}",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
+                                          ),
                                         ),
                                       ],
                                     ),
                                     SizedBox(height: 8),
-
                                     // GST row
                                     Row(
                                       mainAxisAlignment:
@@ -655,431 +1414,509 @@ class _OrderNowPageState extends State<OrderNowPage> {
                                             SizedBox(width: 6),
                                             Text(
                                               "${AppLocalizations.of(context)!.gst}",
-                                              //  "Gst  (12%) :",
                                               style: TextStyle(
                                                   fontSize: 14,
                                                   color: Colors.grey[700]),
                                             ),
                                           ],
                                         ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              "Rs ${gstPerItem.toStringAsFixed(2)} × ${item.quantity}",
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Colors.grey[700]),
-                                            ),
-                                            SizedBox(width: 8),
-                                            Container(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 6, vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey[200],
-                                                borderRadius:
-                                                    BorderRadius.circular(4),
-                                              ),
-                                              child: Text(
-                                                "Rs ${gstTotal.toStringAsFixed(2)}",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-
-                                    Divider(height: 12, thickness: 1),
-
-                                    // Total row with highlight
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
                                         Container(
                                           padding: EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 4),
+                                              horizontal: 6, vertical: 2),
                                           decoration: BoxDecoration(
-                                            color: Acolors.primary
-                                                .withOpacity(0.1),
+                                            color: Colors.grey[200],
                                             borderRadius:
-                                                BorderRadius.circular(8),
-                                            border: Border.all(
-                                                color: Acolors.primary
-                                                    .withOpacity(0.3)),
+                                                BorderRadius.circular(4),
                                           ),
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                "${AppLocalizations.of(context)!.total}: ",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              Consumer<GrandTotalProvider>(
-                                                builder: (context,
-                                                    grandTotalProvider, child) {
-                                                  return Text(
-                                                    "Rs ${grandTotalProvider.grandTotal.toStringAsFixed(2)}",
-                                                    //  "₹${totalWithGst.toStringAsFixed(2)}",
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 16,
-                                                      color: Acolors.primary,
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            ],
+                                          child: Text(
+                                            "Rs ${gstAmount.toStringAsFixed(2)}",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14,
+                                            ),
                                           ),
                                         ),
                                       ],
                                     ),
                                   ],
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ));
-              },
-            ),
-          ),
+                                );
+                              },
+                            ),
+                            // Base price row
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            //   children: [
+                            //     Row(
+                            //       children: [
+                            //         Icon(Icons.circle,
+                            //             size: 8, color: Colors.grey[700]),
+                            //         SizedBox(width: 6),
+                            //         Text(
+                            //           //  'Base Price : ',
+                            //           "${AppLocalizations.of(context)!.basePrice}:",
+                            //           style: TextStyle(
+                            //               fontSize: 14, color: Colors.grey[700]),
+                            //         ),
+                            //       ],
+                            //     ),
+                            //     Row(
+                            //       children: [
+                            //         Text(
+                            //           "Rs ${basePricePerItem.toStringAsFixed(2)} × ${item.quantity}",
+                            //           style: TextStyle(
+                            //               fontSize: 14, color: Colors.grey[700]),
+                            //         ),
+                            //         SizedBox(width: 8),
+                            //         Container(
+                            //           padding: EdgeInsets.symmetric(
+                            //               horizontal: 6, vertical: 2),
+                            //           decoration: BoxDecoration(
+                            //             color: Colors.grey[200],
+                            //             borderRadius: BorderRadius.circular(4),
+                            //           ),
+                            //           child: Text(
+                            //             "Rs ${baseTotal.toStringAsFixed(2)}",
+                            //             style: TextStyle(
+                            //               fontWeight: FontWeight.w500,
+                            //               fontSize: 14,
+                            //             ),
+                            //           ),
+                            //         ),
+                            //       ],
+                            //     ),
+                            //   ],
+                            // ),
+                            // SizedBox(height: 8),
 
-          //
-          //
-          //
+                            // // GST row
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            //   children: [
+                            //     Row(
+                            //       children: [
+                            //         Icon(Icons.circle,
+                            //             size: 8, color: Colors.grey[700]),
+                            //         SizedBox(width: 6),
+                            //         Text(
+                            //           "${AppLocalizations.of(context)!.gst}",
+                            //           //  "Gst  (12%) :",
+                            //           style: TextStyle(
+                            //               fontSize: 14, color: Colors.grey[700]),
+                            //         ),
+                            //       ],
+                            //     ),
+                            //     Row(
+                            //       children: [
+                            //         Text(
+                            //           "Rs ${gstPerItem.toStringAsFixed(2)} × ${item.quantity}",
+                            //           style: TextStyle(
+                            //               fontSize: 14, color: Colors.grey[700]),
+                            //         ),
+                            //         SizedBox(width: 8),
+                            //         Container(
+                            //           padding: EdgeInsets.symmetric(
+                            //               horizontal: 6, vertical: 2),
+                            //           decoration: BoxDecoration(
+                            //             color: Colors.grey[200],
+                            //             borderRadius: BorderRadius.circular(4),
+                            //           ),
+                            //           child: Text(
+                            //             "Rs ${gstTotal.toStringAsFixed(2)}",
+                            //             style: TextStyle(
+                            //               fontWeight: FontWeight.w500,
+                            //               fontSize: 14,
+                            //             ),
+                            //           ),
+                            //         ),
+                            //       ],
+                            //     ),
+                            //   ],
+                            // ),
 
-          //
-          //
-          //
-          // const Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 23),
-          //   child: Text(
-          //     'Address :',
-          //     style: TextStyle(
-          //         color: Colors.black,
-          //         fontSize: 18,
-          //         fontWeight: FontWeight.w600),
-          //   ),
-          // ),
-          // Address Form Section
-          Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: Card(
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${AppLocalizations.of(context)!.shippingAddress}",
-                        // 'Shipping Address',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // First name and Last name
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildTextField(_fnameController,
-                                "${AppLocalizations.of(context)!.firstName}"),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _buildTextField(_lnameController,
-                                "${AppLocalizations.of(context)!.lastName}"),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-
-                      // // Email
-                      // _buildTextField(_emailController, 'Email'),
-                      // const SizedBox(height: 10),
-
-                      // Address and Mobile
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: _buildTextField(_addressController,
-                                "${AppLocalizations.of(context)!.address}"),
-                          ),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: _buildTextField(
-                              _pincodeController,
-                              "${AppLocalizations.of(context)!.pincode}",
-                              keyboardType: TextInputType.number,
-                              suffixIcon: _isLoading
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: Padding(
-                                        padding: EdgeInsets.all(12.0),
-                                        child: CircularProgressIndicator(
-                                            strokeWidth: 2),
+                            Divider(height: 12, thickness: 1),
+                            // Total row with highlight
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Acolors.primary.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                        color:
+                                            Acolors.primary.withOpacity(0.3)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "${AppLocalizations.of(context)!.total}: ",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
                                       ),
-                                    )
-                                  : null,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return "${AppLocalizations.of(context)!.enterPincode}";
-                                } else if (!RegExp(r'^\d{6}$')
-                                    .hasMatch(value)) {
-                                  return "${AppLocalizations.of(context)!.validPincode}";
-                                }
-                                return null;
-                              },
+                                      Consumer<GrandTotalProvider>(
+                                        builder: (context, grandTotalProvider,
+                                            child) {
+                                          return Text(
+                                            "Rs ${grandTotalProvider.grandTotal.toStringAsFixed(2)}",
+                                            //  "₹${totalWithGst.toStringAsFixed(2)}",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color: Acolors.primary,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                      // const SizedBox(width: 10),
-                      const SizedBox(height: 10),
-
-                      // City, State, and Pincode
-                      Row(
-                        children: [
-                          // Expanded(
-                          //   child: _buildTextField(
-                          //     _pincodeController,
-                          //     "${AppLocalizations.of(context)!.pincode}",
-                          //     keyboardType: TextInputType.number,
-                          //     validator: (value) {
-                          //       if (value == null || value.isEmpty) {
-                          //         return "${AppLocalizations.of(context)!.enterPincode}";
-                          //       } else if (!RegExp(r'^\d{6}$')
-                          //           .hasMatch(value)) {
-                          //         return "${AppLocalizations.of(context)!.validPincode}";
-                          //       }
-                          //       return null;
-                          //     },
-                          //   ),
-                          // ),
-                          // SizedBox(width: 10),
-                          Expanded(
-                            // flex: 2,
-                            child: _buildTextField(_cityController,
-                                "${AppLocalizations.of(context)!.city}"),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _buildTextField(_stateController,
-                                "${AppLocalizations.of(context)!.state}"),
-                          ),
-                          //   const SizedBox(width: 10),
-                          // Pincode (6 digits only)
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-
-                      // Country
-                      Row(
-                        children: [
-                          Expanded(
-                              child: _buildTextField(_countryController,
-                                  "${AppLocalizations.of(context)!.country}")),
-                          const SizedBox(width: 10),
-                          // Mobile (12 digits only)
-                          Expanded(
-                            child: _buildTextField(
-                              _mobileController,
-                              "${AppLocalizations.of(context)!.mobile}",
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return "${AppLocalizations.of(context)!.enterMobile}";
-                                } else if (!RegExp(r'^\d{10}$')
-                                    .hasMatch(value)) {
-                                  return "${AppLocalizations.of(context)!.validMobile}";
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ),
-          ),
 
-          // const Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 23),
-          //   child: Text(
-          //     'Address :',
-          //     style: TextStyle(
-          //         color: Colors.black,
-          //         fontSize: 18,
-          //         fontWeight: FontWeight.w600),
-          //   ),
-          // ),
+                AddressSelectionWidget(
+                  title: "Select Delivery Address",
+                  onAddressSelected: (AddressModel address) {
+                    setState(() {
+                      selectedAddress = address;
+                    });
+                    print('Selected: ${address.fname} ${address.lname}');
+                  },
+                ),
 
-          // /// Address Input Field
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-          //   child: Form(
-          //     key: _formKey,
-          //     child: TextFormField(
-          //       controller: _addressController,
-          //       maxLines: 3,
-          //       decoration: InputDecoration(
-          //         labelText: "Enter your Address",
-          //         alignLabelWithHint: true,
-          //         border: OutlineInputBorder(
-          //           borderRadius: BorderRadius.circular(10),
-          //         ),
-          //       ),
-          //       validator: (value) {
-          //         if (value == null || value.trim().isEmpty) {
-          //           return "Address cannot be empty";
-          //         }
-          //         return null;
-          //       },
-          //     ),
-          //   ),
-          // ),
-
-          if (cartList.isNotEmpty)
-            Consumer<GrandTotalProvider>(
-              builder: (context, grandTotalProvider, child) {
-                return Card(
-                  elevation: 3,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "${AppLocalizations.of(context)!.grandTotal} ",
-                          //  "Grand Total : ",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          "Rs ${grandTotalProvider.grandTotal.toStringAsFixed(2)}",
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                // Show selected address info
+                if (selectedAddress != null)
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    child: Text(
+                      'Delivering to: ${selectedAddress!.fname} ${selectedAddress!.lname}',
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
-                );
-              },
-            ),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Acolors.primary,
-                    foregroundColor: Acolors.white),
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    final cartProvider =
-                        Provider.of<CartProvider>(context, listen: false);
-                    final userProvider =
-                        Provider.of<UserProvider>(context, listen: false);
-                    String userId = userProvider.id;
-                    final grandTotalProvider =
-                        Provider.of<GrandTotalProvider>(context, listen: false);
 
-                    // Get the list of productIds from cart
-                    List<String> productIds = cartProvider.cartItems
-                        .map((item) => item.productId.toString())
-                        .toList();
-                    print(' product id: $productIds');
+                // const Padding(
+                //   padding: const EdgeInsets.symmetric(horizontal: 23),
+                //   child: Text(
+                //     'Address :',
+                //     style: TextStyle(
+                //         color: Colors.black,
+                //         fontSize: 18,
+                //         fontWeight: FontWeight.w600),
+                //   ),
+                // ),
+                // /// Address Input Field
+                // Padding(
+                //   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                //   child: Form(
+                //     key: _formKey,
+                //     child: TextFormField(
+                //       controller: _addressController,
+                //       maxLines: 3,
+                //       decoration: InputDecoration(
+                //         labelText: "Enter your Address",
+                //         alignLabelWithHint: true,
+                //         border: OutlineInputBorder(
+                //           borderRadius: BorderRadius.circular(10),
+                //         ),
+                //       ),
+                //       validator: (value) {
+                //         if (value == null || value.trim().isEmpty) {
+                //           return "Address cannot be empty";
+                //         }
+                //         return null;
+                //       },
+                //     ),
+                //   ),
+                // ),
 
-                    // Save address information
-                    final addressProvider =
-                        Provider.of<AddressProvider>(context, listen: false);
-                    bool success =
-                        await addressProvider.saveCheckoutInformation(
-                      productId: productIds.toString(),
-                      userid: userId,
-                      fname: _fnameController.text,
-                      lname: _lnameController.text,
-                      address: _addressController.text,
-                      city: _cityController.text,
-                      state: _stateController.text,
-                      mobile: _mobileController.text,
-                      country: _countryController.text,
-                      pincode: _pincodeController.text,
-                      context: context,
-                    );
+                // if (cartList.isNotEmpty)
+                //   Consumer<GrandTotalProvider>(
+                //     builder: (context, grandTotalProvider, child) {
+                //       return Card(
+                //         elevation: 3,
+                //         child: Padding(
+                //           padding: const EdgeInsets.symmetric(
+                //               horizontal: 20, vertical: 10),
+                //           child: Row(
+                //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //             children: [
+                //               Text(
+                //                 "${AppLocalizations.of(context)!.grandTotal} ",
+                //                 //  "Grand Total : ",
+                //                 style: TextStyle(
+                //                     fontSize: 18, fontWeight: FontWeight.bold),
+                //               ),
+                //               Text(
+                //                 "Rs ${grandTotalProvider.grandTotal.toStringAsFixed(2)}",
+                //                 style: const TextStyle(
+                //                     fontSize: 18, fontWeight: FontWeight.bold),
+                //               ),
+                //             ],
+                //           ),
+                //         ),
+                //       );
+                //     },
+                //   ),
+                const SizedBox(height: 10),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            backgroundColor: Acolors.primary,
+                            foregroundColor: Acolors.white),
+                        onPressed: _isLoading
+                            ? null
+                            : () async {
+                                setState(() => _isLoading = true);
 
-                    if (success) {
-                      //  _openRazorpayCheckout(grandTotalProvider.grandTotal);
-                      _startPhonePePayment(grandTotalProvider.grandTotal);
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) => PaymentScreen(),
-                      //   ),
-                      // );
-                    }
-                    setState(() {
-                      _isLoading = false;
-                    });
-                  }
+                                try {
+                                  if (selectedAddress == null) {
+                                    SnackbarMessage.showSnackbar(context,
+                                        'Please select a delivery address');
+                                    return;
+                                  }
+                                  final userProvider =
+                                      Provider.of<UserProvider>(context,
+                                          listen: false);
+                                  final cartProvider =
+                                      Provider.of<CartProvider>(context,
+                                          listen: false);
+                                  final grandTotalProvider =
+                                      Provider.of<GrandTotalProvider>(context,
+                                          listen: false);
 
-                  // if (_formKey.currentState!.validate()) {
-                  //   await addressProvider.updateAddress(
-                  //       context, _addressController.text);
-                  //   if (addressProvider.message.isNotEmpty) {
-                  //     SnackbarMessage.showSnackbar(
-                  //         context, addressProvider.message);
-                  //   }
+                                  List<Map<String, dynamic>> orderItems =
+                                      cartProvider.cartItems.map((cartItem) {
+                                    return {
+                                      "name": cartItem.productName,
+                                      "sku": "AYUR${cartItem.productId}",
+                                      "units": cartItem.quantity,
+                                      "selling_price": cartItem.price,
+                                      "discount":
+                                          "", // You can calculate discount if available
+                                      "tax": "", // Add tax if applicable
+                                      "hsn":
+                                          123566 // Use HSN from product or default
+                                    };
+                                  }).toList();
 
-                  //   if (addressProvider.address != null) {
-                  //     {
-                  //       Navigator.push(
-                  //         context,
-                  //         MaterialPageRoute(
-                  //           builder: (context) => PaymentScreen(),
-                  //         ),
-                  //       );
-                  //     }
-                  //   }
-                  // }
-                },
-                child: _isLoading || addressProvider.isLoading
-                    ? const CircularProgressIndicator(color: Acolors.white)
-                    : Text(
-                        "${AppLocalizations.of(context)!.proceedToCheckout}",
-                        // "Proceed to Checkout",
+                                  await createShiprocketOrder(
+                                      billingCustomerName:
+                                          selectedAddress!.fname,
+                                      billingLastName: selectedAddress!.lname,
+                                      billingAddress: selectedAddress!.address,
+                                      billingAddress2: "",
+                                      billingCity: selectedAddress!.city,
+                                      billingPincode: selectedAddress!.pincode,
+                                      billingState: selectedAddress!.state,
+                                      billingCountry: selectedAddress!.country,
+                                      billingEmail: userProvider.email,
+                                      billingPhone: selectedAddress!.mobile,
+                                      orderItems: orderItems,
+                                      paymentMethod: "Prepaid",
+                                      shippingCharges: 0,
+                                      giftwrapCharges: 0,
+                                      transactionCharges: 0,
+                                      totalDiscount: 0,
+                                      subTotal: grandTotalProvider.grandTotal,
+                                      length: 9,
+                                      breadth: 7,
+                                      height: 2,
+                                      weight: 0.1,
+                                      context: context);
+                                } catch (e) {
+                                  print(e);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text('Error creating order')),
+                                  );
+                                } finally {
+                                  if (mounted) {
+                                    setState(() => _isLoading = false);
+                                  }
+                                }
+                              },
+                        child: _isLoading
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ),
+                              )
+                            : Text("Create Shiprocket Order"),
+                      )
+                      /* 
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        backgroundColor: Acolors.primary,
+                        foregroundColor: Acolors.white,
                       ),
-              ),
+                      onPressed: () async {
+                        final grandTotalProvider =
+                            Provider.of<GrandTotalProvider>(context,
+                                listen: false);
+        
+                        if (selectedAddress == null) {
+                          SnackbarMessage.showSnackbar(
+                              context, 'Please select a delivery address');
+                          return;
+                        }
+        
+                        if (!_isPhonePeInitialized) {
+                          SnackbarMessage.showSnackbar(context,
+                              'PhonePe is not initialized. Please try again.');
+                          return;
+                        }
+        
+                        // Start PhonePe payment with grand total
+                        await _startPhonePePayment(grandTotalProvider.grandTotal);
+                        /*    
+                         print("Button pressed!");
+            
+                        // Remove form validation since there's no Form widget
+                        print("Selected address: $selectedAddress");
+                        print(
+                            "AddressProvider loading: ${addressProvider.isLoading}");
+            
+                        // Only check for selected address
+                        if (selectedAddress == null) {
+                          print("No address selected");
+                          SnackbarMessage.showSnackbar(
+                              context, 'Please select a delivery address');
+                          return;
+                        }
+            
+                        print("Address selected: ${selectedAddress!.id}");
+            
+                        setState(() {
+                          _isLoading = true;
+                        });
+            
+                        try {
+                          print("Navigating to PaymentScreen...");
+            
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PaymentScreen(
+                                addressId: selectedAddress!.id,
+                              ),
+                            ),
+                          );
+                        } catch (e) {
+                          print("Error occurred: $e");
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: ${e.toString()}')),
+                          );
+                        } finally {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+            */
+                        if (_formKey.currentState!.validate()) {
+                          if (selectedAddress == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content:
+                                      Text('Please select a delivery address')),
+                            );
+                            return;
+                          }
+        
+                          setState(() {
+                            _isLoading = true;
+                          });
+        
+                          final cartProvider =
+                              Provider.of<CartProvider>(context, listen: false);
+                          final userProvider =
+                              Provider.of<UserProvider>(context, listen: false);
+                          String userId = userProvider.id;
+                          final grandTotalProvider =
+                              Provider.of<GrandTotalProvider>(context,
+                                  listen: false);
+        
+                          // Get the list of productIds from cart
+                          // List<String> productIds = cartProvider.cartItems
+                          //     .map((item) => item.productId.toString())
+                          //     .toList();
+                          // print(' product id: $productIds');
+        
+                          // Save address information
+                          //   final addressProvider =
+                          //     Provider.of<AddressProvider>(context, listen: false);
+                          //   bool success =
+                          //     await addressProvider.saveCheckoutInformation(
+                          //   //
+                          //   address_type: "home",
+                          //   district: _districtController.text,
+                          //   userid: userId,
+                          //   fname: _fnameController.text,
+                          //   lname: _lnameController.text,
+                          //   address: _addressController.text,
+                          //   city: _cityController.text,
+                          //   state: _stateController.text,
+                          //   mobile: _mobileController.text,
+                          //   country: _countryController.text,
+                          //   pincode: _pincodeController.text,
+                          //   context: context,
+                          // );
+        
+                          //     if (success) {
+                          
+                          //   _startPhonePePayment(grandTotalProvider.grandTotal);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  PaymentScreen(addressId: selectedAddress!.id),
+                            ),
+                          );
+                          //      }
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+                      },
+                      child: _isLoading || addressProvider.isLoading
+                          ? const CircularProgressIndicator(color: Acolors.white)
+                          : Text(
+                              "${AppLocalizations.of(context)!.proceedToCheckout}",
+                              // "Proceed to Checkout",
+                            ),
+                    ),
+                    */
+                      ),
+                ),
+                SizedBox(height: 5),
+              ],
             ),
           ),
-          SizedBox(height: 10),
-        ],
+        ),
       ),
     );
   }
 }
-
-
 
 /*
 import 'package:flutter/material.dart';
@@ -1279,8 +2116,6 @@ class OrderNowPage extends StatelessWidget {
   }
 }
 */
-
-
 
 /*
 class OrderNowPage extends StatelessWidget {
@@ -1482,4 +2317,318 @@ class OrderNowPage extends StatelessWidget {
     );
   }
 }
+*/
+
+// shiprocket code
+
+Future<void> createShiprocketOrder({
+  required String billingCustomerName,
+  required String billingLastName,
+  required String billingAddress,
+  required String billingAddress2,
+  required String billingCity,
+  required String billingPincode,
+  required String billingState,
+  required String billingCountry,
+  required String billingEmail,
+  required String billingPhone,
+  required List<Map<String, dynamic>> orderItems,
+  required String paymentMethod,
+  required double shippingCharges,
+  required double giftwrapCharges,
+  required double transactionCharges,
+  required double totalDiscount,
+  required double subTotal,
+  required double length,
+  required double breadth,
+  required double height,
+  required double weight,
+  required BuildContext context,
+}) async {
+  // Generate unique order ID (timestamp + random 4-digit number)
+  final random = Random();
+  final orderId =
+      'ORDER_${DateTime.now().millisecondsSinceEpoch}-${random.nextInt(9000) + 1000}';
+
+  // Get current date and time in required format
+  final now = DateTime.now();
+  final orderDate = DateFormat('yyyy-MM-dd HH:mm').format(now);
+
+  const bearerToken =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjY4NTkzMDcsInNvdXJjZSI6InNyLWF1dGgtaW50IiwiZXhwIjoxNzUxNzk5Njk5LCJqdGkiOiJQcGNxYmJjbllzTU5LT1FQIiwiaWF0IjoxNzUwOTM1Njk5LCJpc3MiOiJodHRwczovL3NyLWF1dGguc2hpcHJvY2tldC5pbi9hdXRob3JpemUvdXNlciIsIm5iZiI6MTc1MDkzNTY5OSwiY2lkIjo2NTE3MTM5LCJ0YyI6MzYwLCJ2ZXJib3NlIjpmYWxzZSwidmVuZG9yX2lkIjowLCJ2ZW5kb3JfY29kZSI6IiJ9.2HUjE-3fSCP9jf-5uer7Khas3rwC0bSt3mJAIgu5KqE';
+
+  var headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $bearerToken'
+  };
+
+  var requestBody = {
+    "order_id": orderId,
+    "order_date": orderDate,
+    "pickup_location": "warehouse",
+    "comment": "Ambrosia",
+    "reseller_name": "Ambrosia Ayurved",
+    "company_name": "Ambrosia Ayurved",
+    "billing_customer_name": billingCustomerName,
+    "billing_last_name": billingLastName,
+    "billing_address": billingAddress,
+    "billing_address_2": billingAddress2,
+    "billing_city": billingCity,
+    "billing_pincode": billingPincode,
+    "billing_state": billingState,
+    "billing_country": billingCountry,
+    "billing_email": billingEmail,
+    "billing_phone": billingPhone,
+    "shipping_is_billing": true,
+    "shipping_customer_name": "",
+    "shipping_last_name": "",
+    "shipping_address": "",
+    "shipping_address_2": "",
+    "shipping_city": "",
+    "shipping_pincode": "",
+    "shipping_country": "",
+    "shipping_state": "",
+    "shipping_email": "",
+    "shipping_phone": "",
+    "order_items": orderItems,
+    "payment_method": paymentMethod,
+    "shipping_charges": shippingCharges,
+    "giftwrap_charges": giftwrapCharges,
+    "transaction_charges": transactionCharges,
+    "total_discount": totalDiscount,
+    "sub_total": subTotal,
+    "length": length,
+    "breadth": breadth,
+    "height": height,
+    "weight": weight
+  };
+
+  var request = http.Request('POST',
+      Uri.parse('https://apiv2.shiprocket.in/v1/external/orders/create/adhoc'));
+
+  request.body = json.encode(requestBody);
+  request.headers.addAll(headers);
+  print(requestBody);
+
+  try {
+    http.StreamedResponse response = await request.send();
+    final responseString = await response.stream.bytesToString();
+    final responseData = json.decode(responseString);
+
+    if (response.statusCode == 200) {
+      print('Order created successfully!');
+      print('Order ID: $orderId');
+      print(responseData);
+
+      final shipmentId = responseData['shipment_id'];
+      if (shipmentId != null) {
+        List<int> shipmentIds = [shipmentId as int];
+        // Call AWB assignment after successful order creation
+        final awbResult = await assignAwbToShipment(
+          token: bearerToken,
+          shipmentIds: shipmentIds,
+        );
+
+        if (awbResult['success'] == true) {
+          final awbCode =
+              awbResult['data']['response']['data']['awb_code']?.toString();
+
+          // Store it in a variable for further use
+          String assignedAwbCode =
+              awbCode ?? ''; // Provide empty string as fallback
+
+          print('AWB assigned successfully!');
+          print('AWB Number: $assignedAwbCode');
+          SnackbarMessage.showSnackbar(context,
+              'Order and AWB assigned successfully! AWB: $assignedAwbCode');
+          // In your original file where you get the AWB
+          // final awbData = Provider.of<AwbData>(context, listen: false);
+          // awbData.setAwbCode(assignedAwbCode);
+
+          final result = await generatePickupRequest(
+              token: bearerToken, shipmentIds: shipmentIds);
+          if (result['success'] == true) {
+            SnackbarMessage.showSnackbar(context, 'Order Created successfully');
+            print('Pickup generated successfully!');
+            print('Response: ${result['data']}');
+            // Handle success - show confirmation to user
+          } else {
+            print('Failed to generate pickup: ${result['error']}');
+            // Handle error - show error message to user
+          }
+        } else {
+          print('AWB assignment failed: ${awbResult['error']}');
+          SnackbarMessage.showSnackbar(context,
+              'Order created but AWB assignment failed: ${awbResult['error']}');
+        }
+      }
+      // Example usage
+      // if (shipmentId != null) {
+      //   List<int> shipmentIds = [shipmentId as int];
+      //   final result = await generatePickupRequest(
+      //       token: bearerToken, shipmentIds: shipmentIds
+      //       // Convert to int and wrap in list
+      //       );
+      //   if (result['success'] == true) {
+      //     SnackbarMessage.showSnackbar(context, 'Order Created successfully');
+      //     print('Pickup generated successfully!');
+      //     print('Response: ${result['data']}');
+      // Handle success - show confirmation to user
+      // } else {
+      //   print('Failed to generate pickup: ${result['error']}');
+      //   // Handle error - show error message to user
+      // }
+      // }
+    } else {
+      print('Error creating order: ${response.reasonPhrase}');
+      print('Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Exception occurred: $e');
+  }
+}
+
+//
+// assgin awb
+Future<Map<String, dynamic>> assignAwbToShipment({
+  required String token,
+  required List<int> shipmentIds,
+}) async {
+  // Set up headers
+  final headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
+
+  // Create request
+  final request = http.Request(
+    'POST',
+    Uri.parse('https://apiv2.shiprocket.in/v1/external/courier/assign/awb'),
+  );
+
+  // Set request body
+  request.body = json.encode({
+    "shipment_id": shipmentIds,
+  });
+
+  // Add headers
+  request.headers.addAll(headers);
+
+  try {
+    // Send request
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+    final responseData = json.decode(responseBody);
+
+    if (response.statusCode == 200) {
+      return {
+        'success': true,
+        'data': responseData,
+        'awb_number': responseData['awb_number']
+            ?.toString(), // Extract AWB number if available
+      };
+    } else {
+      return {
+        'success': false,
+        'error': responseData['message'] ?? response.reasonPhrase,
+        'statusCode': response.statusCode,
+      };
+    }
+  } catch (e) {
+    return {
+      'success': false,
+      'error': e.toString(),
+    };
+  }
+}
+
+//
+//generate pickup
+
+Future<Map<String, dynamic>> generatePickupRequest({
+  required String token,
+  required List<int> shipmentIds,
+}) async {
+  // Setup headers
+  final headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
+
+  // Create request
+  final request = http.Request(
+    'POST',
+    Uri.parse(
+        'https://apiv2.shiprocket.in/v1/external/courier/generate/pickup'),
+  );
+
+  // Set request body
+  request.body = json.encode({
+    "shipment_id": shipmentIds,
+  });
+
+  // Add headers
+  request.headers.addAll(headers);
+
+  try {
+    // Send request
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+    final responseData = json.decode(responseBody);
+
+    if (response.statusCode == 200) {
+      return {
+        'success': true,
+        'data': responseData,
+      };
+    } else {
+      return {
+        'success': false,
+        'error': responseData['message'] ?? response.reasonPhrase,
+        'statusCode': response.statusCode,
+      };
+    }
+  } catch (e) {
+    return {
+      'success': false,
+      'error': e.toString(),
+    };
+  }
+}
+
+// Example usage:
+/*
+createShiprocketOrder(
+  billingCustomerName: "Naruto",
+  billingLastName: "Uzumaki",
+  billingAddress: "House 221B, Leaf Village",
+  billingAddress2: "Near Hokage House",
+  billingCity: "New Delhi",
+  billingPincode: "110002",
+  billingState: "Delhi",
+  billingCountry: "India",
+  billingEmail: "naruto@uzumaki.com",
+  billingPhone: "9876543210",
+  orderItems: [
+    {
+      "name": "Kunai",
+      "sku": "chakra123",
+      "units": 10,
+      "selling_price": 900,
+      "discount": "",
+      "tax": "",
+      "hsn": 441122
+    }
+  ],
+  paymentMethod: "Prepaid",
+  shippingCharges: 0,
+  giftwrapCharges: 0,
+  transactionCharges: 0,
+  totalDiscount: 0,
+  subTotal: 9000,
+  length: 10,
+  breadth: 15,
+  height: 20,
+  weight: 2.5,
+);
 */

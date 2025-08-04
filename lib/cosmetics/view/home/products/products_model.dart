@@ -5,7 +5,7 @@ class Product {
   final double price; // Ensure this is still a String
   final int quantity;
   // final String category;
-  final String imageUrl;
+  final List<String> imageUrl;
 
   Product({
     required this.id,
@@ -30,7 +30,7 @@ class Product {
       // category: json['category'],
       quantity:
           json['quantity'] != null ? int.parse(json['quantity'].toString()) : 0,
-      imageUrl: json['image'] ?? '',
+      imageUrl: json['image'] != null ? List<String>.from(json['image']) : [],
     );
   }
 }
@@ -56,3 +56,5 @@ class Product {
   });
 }
 */
+
+

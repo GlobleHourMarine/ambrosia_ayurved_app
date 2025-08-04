@@ -9,6 +9,12 @@ class Carousel extends StatefulWidget {
 
 class _CarouselState extends State<Carousel> {
   final List<String> imageUrls = [
+    // 'assets/images/c11.jpg',
+    // 'assets/images/c22.jpg',
+    // 'assets/images/c33.jpg',
+    // 'assets/images/c44.jpg',
+    // 'assets/images/c66.jpg',
+
     'assets/images/carosel.3.webp',
     'assets/images/carosel.4.webp',
     'assets/images/carosel.1.webp',

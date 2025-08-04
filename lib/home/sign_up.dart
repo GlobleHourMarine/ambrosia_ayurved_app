@@ -532,215 +532,181 @@ class _SignUpScreenState extends State<SignUpScreen> {
       fetchDataFunction: () async {},
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: CustomScaffold(
-          child: Column(
-            children: [
-              const Expanded(
-                flex: 2,
-                child: SizedBox(height: 10),
-              ),
-              Expanded(
-                flex: 7,
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(25.0, 50.0, 25.0, 20.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(40.0),
-                      topRight: Radius.circular(40.0),
+        body: SafeArea(
+          child: CustomScaffold(
+            child: Column(
+              children: [
+                const Expanded(
+                  flex: 2,
+                  child: SizedBox(height: 10),
+                ),
+                Expanded(
+                  flex: 7,
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(25.0, 50.0, 25.0, 20.0),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(40.0),
+                        topRight: Radius.circular(40.0),
+                      ),
                     ),
-                  ),
-                  child: SingleChildScrollView(
-                    child: Form(
-                      key: _formSignupKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            "${AppLocalizations.of(context)!.getStarted}",
-                            //  'Get Started',
-                            style: TextStyle(
-                              fontSize: 30.0,
-                              fontWeight: FontWeight.w900,
-                              color: lightColorScheme.primary,
+                    child: SingleChildScrollView(
+                      child: Form(
+                        key: _formSignupKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              "${AppLocalizations.of(context)!.getStarted}",
+                              //  'Get Started',
+                              style: TextStyle(
+                                fontSize: 30.0,
+                                fontWeight: FontWeight.w900,
+                                color: lightColorScheme.primary,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 40.0),
+                            const SizedBox(height: 40.0),
 
-                          // Full Name Input
-                          Row(
-                            children: [
-                              Expanded(
-                                child: makeInput(
-                                  hint:
-                                      "${AppLocalizations.of(context)!.firstName}",
-                                  // 'First Name',
-                                  icon: Icons.person_outline,
-                                  controller: fnameController,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return "${AppLocalizations.of(context)!.pleaseEnterFirstName}";
-                                      //  'Please enter first name';
-                                    }
-                                    return null;
-                                  },
+                            // Full Name Input
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: makeInput(
+                                    hint:
+                                        "${AppLocalizations.of(context)!.firstName}",
+                                    // 'First Name',
+                                    icon: Icons.person_outline,
+                                    controller: fnameController,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "${AppLocalizations.of(context)!.pleaseEnterFirstName}";
+                                        //  'Please enter first name';
+                                      }
+                                      return null;
+                                    },
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 5),
-                              Expanded(
-                                child: makeInput(
-                                  hint:
-                                      "${AppLocalizations.of(context)!.lastName}",
-                                  //   'Last Name',
-                                  icon: Icons.person_outline,
-                                  controller: lnameController,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return "${AppLocalizations.of(context)!.pleaseEnterLastName}";
-                                      // 'Please enter last name';
-                                    }
-                                    return null;
-                                  },
+                                const SizedBox(width: 5),
+                                Expanded(
+                                  child: makeInput(
+                                    hint:
+                                        "${AppLocalizations.of(context)!.lastName}",
+                                    //   'Last Name',
+                                    icon: Icons.person_outline,
+                                    controller: lnameController,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "${AppLocalizations.of(context)!.pleaseEnterLastName}";
+                                        // 'Please enter last name';
+                                      }
+                                      return null;
+                                    },
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
 
-                          const SizedBox(height: 25.0),
+                            const SizedBox(height: 25.0),
 
-                          // Email Input with Email Validation
-                          makeInput(
-                            hint: "${AppLocalizations.of(context)!.email}",
-                            //   'Email',
-                            icon: Icons.email_outlined,
-                            controller: emailController,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "${AppLocalizations.of(context)!.pleaseEnterEmail}";
-                                //  'Please enter Email';
-                              } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                                  .hasMatch(value)) {
-                                return "${AppLocalizations.of(context)!.pleaseEnterValidEmail}";
-                                // 'Please enter a valid email';
-                              }
-                              return null;
-                            },
-                          ),
-                          /*   SizedBox(height: 10),
-                          DropdownButtonFormField<String>(
-                            icon: Icon(Icons.flag_sharp),
-                            value: selectedCountry,
-                            hint: Text('Select Country'),
-                            items: countries.map((country) {
-                              return DropdownMenuItem<String>(
-                                value: country['name'],
-                                child: Text(country['name']!),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedCountry = value;
-
-                                // Get the selected country code
-                                String countryCode = countries.firstWhere(
-                                    (country) =>
-                                        country['name'] == value)['code']!;
-
-                                // Automatically update the CountryController with the country code
-                                CountryController.text = countryCode;
-
-                                // Update the phone controller with the country code if it is not already added
-                                if (!phoneController.text
-                                    .startsWith(countryCode)) {
-                                  phoneController.text =
-                                      countryCode; // Set the country code in phone number
+                            // Email Input with Email Validation
+                            makeInput(
+                              hint: "${AppLocalizations.of(context)!.email}",
+                              //   'Email',
+                              icon: Icons.email_outlined,
+                              controller: emailController,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "${AppLocalizations.of(context)!.pleaseEnterEmail}";
+                                  //  'Please enter Email';
+                                } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                    .hasMatch(value)) {
+                                  return "${AppLocalizations.of(context)!.pleaseEnterValidEmail}";
+                                  // 'Please enter a valid email';
                                 }
-                              });
-                            },
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please select a country';
-                              }
-                              return null;
-                            },
-                          ),
-*/
-                          const SizedBox(height: 25.0),
-
-                          makeInput(
-                            hint: "${AppLocalizations.of(context)!.phone}",
-                            //  'Phone no.',
-                            icon: Icons.phone,
-                            controller: phoneController,
-                            keyboardType: TextInputType.phone,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "${AppLocalizations.of(context)!.pleaseEnterPhone}";
-                                //'Please enter Phone no.';
-                              } else if (!RegExp(r'^\d{1,13}$')
-                                  .hasMatch(value)) {
-                                return "${AppLocalizations.of(context)!.pleaseEnterValidPhone}";
-                                //'Please enter a valid Phone no.';
-                              }
-                              return null;
-                            },
-                          ),
-
-                          const SizedBox(height: 25.0),
-
-                          // makeInput(
-                          //   hint: 'Country Code',
-                          //   icon: Icons.code,
-                          //   controller: CountryController,
-                          //   validator: (value) {
-                          //     if (value == null || value.isEmpty) {
-                          //       return 'Please select a country';
-                          //     }
-                          //     return null;
-                          //   },
-                          // ),
-
-                          // Password Input with Password Validation
-                          makeInput(
-                            hint: "${AppLocalizations.of(context)!.password}",
-                            // 'Password',
-                            icon: Icons.lock_outline,
-                            controller: passwordController,
-                            obscureText: !_isPasswordVisible,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _isPasswordVisible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _isPasswordVisible = !_isPasswordVisible;
-                                });
+                                return null;
                               },
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "${AppLocalizations.of(context)!.pleaseEnterPassword}";
-                                //   'Please enter Password';
-                              } else if (value.length < 8) {
-                                return "${AppLocalizations.of(context)!.passwordMinLength}";
-                                //  'Password must be at least 8 characters';
-                              } else if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]')
-                                  .hasMatch(value)) {
-                                return "${AppLocalizations.of(context)!.passwordSpecialChar}";
-                                // 'Password must contain at least one special character';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 25),
-                          makeInput(
-                              hint:
-                                  "${AppLocalizations.of(context)!.confirmPassword}",
-                              //  'Confirm Password',
+                            /*   SizedBox(height: 10),
+                            DropdownButtonFormField<String>(
+                              icon: Icon(Icons.flag_sharp),
+                              value: selectedCountry,
+                              hint: Text('Select Country'),
+                              items: countries.map((country) {
+                                return DropdownMenuItem<String>(
+                                  value: country['name'],
+                                  child: Text(country['name']!),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedCountry = value;
+          
+                                  // Get the selected country code
+                                  String countryCode = countries.firstWhere(
+                                      (country) =>
+                                          country['name'] == value)['code']!;
+          
+                                  // Automatically update the CountryController with the country code
+                                  CountryController.text = countryCode;
+          
+                                  // Update the phone controller with the country code if it is not already added
+                                  if (!phoneController.text
+                                      .startsWith(countryCode)) {
+                                    phoneController.text =
+                                        countryCode; // Set the country code in phone number
+                                  }
+                                });
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please select a country';
+                                }
+                                return null;
+                              },
+                            ),
+          */
+                            const SizedBox(height: 25.0),
+
+                            makeInput(
+                              hint: "${AppLocalizations.of(context)!.phone}",
+                              //  'Phone no.',
+                              icon: Icons.phone,
+                              controller: phoneController,
+                              keyboardType: TextInputType.phone,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "${AppLocalizations.of(context)!.pleaseEnterPhone}";
+                                  //'Please enter Phone no.';
+                                } else if (!RegExp(r'^\d{1,13}$')
+                                    .hasMatch(value)) {
+                                  return "${AppLocalizations.of(context)!.pleaseEnterValidPhone}";
+                                  //'Please enter a valid Phone no.';
+                                }
+                                return null;
+                              },
+                            ),
+
+                            const SizedBox(height: 25.0),
+
+                            // makeInput(
+                            //   hint: 'Country Code',
+                            //   icon: Icons.code,
+                            //   controller: CountryController,
+                            //   validator: (value) {
+                            //     if (value == null || value.isEmpty) {
+                            //       return 'Please select a country';
+                            //     }
+                            //     return null;
+                            //   },
+                            // ),
+
+                            // Password Input with Password Validation
+                            makeInput(
+                              hint: "${AppLocalizations.of(context)!.password}",
+                              // 'Password',
                               icon: Icons.lock_outline,
-                              controller: ConfirmPasswordController,
+                              controller: passwordController,
                               obscureText: !_isPasswordVisible,
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -756,164 +722,200 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return "${AppLocalizations.of(context)!.pleaseConfirmPassword}";
-                                  //  'Please confirm your password';
-                                } else if (value != passwordController.text) {
-                                  return "${AppLocalizations.of(context)!.passwordMismatch}";
-                                  // 'Passwords do not match';
+                                  return "${AppLocalizations.of(context)!.pleaseEnterPassword}";
+                                  //   'Please enter Password';
+                                } else if (value.length < 8) {
+                                  return "${AppLocalizations.of(context)!.passwordMinLength}";
+                                  //  'Password must be at least 8 characters';
+                                } else if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]')
+                                    .hasMatch(value)) {
+                                  return "${AppLocalizations.of(context)!.passwordSpecialChar}";
+                                  // 'Password must contain at least one special character';
                                 }
-                              }),
-                          const SizedBox(height: 25.0),
-                          // Agree to Privacy Policy and Terms Section
-                          Row(
-                            //   crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Checkbox(
-                                value: _agreedToPolicy,
-                                onChanged: (bool? value) {
-                                  setState(() {
-                                    _agreedToPolicy = value ?? false;
-                                  });
-                                },
-                              ),
-
-                              Text(
-                                // 'I agree to ',
-                                "${AppLocalizations.of(context)!.iagreeto} ",
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          PrivacyPolicyScreen(),
-                                    ),
-                                  );
-                                },
-                                child: Text(
-                                  "${AppLocalizations.of(context)!.privacyPolicy}",
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                  //'and'
-                                  "${AppLocalizations.of(context)!.and} "), // ' and '
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            TermsAndConditionsScreen()),
-                                  );
-                                },
-                                child: Text(
-                                  "${AppLocalizations.of(context)!.termsConditions}",
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 15),
-
-                          // Optional Section for Referral Code
-                          /*   Container(
-                            alignment: Alignment.centerLeft,
-                          ),
-                          makeInput(
-                            hint: 'Referred By',
-                            icon: Icons.share,
-                            controller: referralCodeController,
-                            validator: (value) {
-                              return null;
-                            },
-                          ),
-
-                          const SizedBox(height: 25.0),
-*/
-                          // Sign Up Button
-                          Container(
-                            padding:
-                                const EdgeInsets.fromLTRB(20.0, 0, 20.0, 0),
-                            width: 250,
-                            child: MaterialButton(
-                              height: 50,
-                              onPressed: () {
-                                if (_formSignupKey.currentState!.validate()) {
-                                  if (!_agreedToPolicy) {
-                                    SnackbarMessage.showSnackbar(context,
-                                        "${AppLocalizations.of(context)!.agreePrivacyTerms}");
-                                    return;
-                                  }
-                                  registerUser(context);
-                                }
+                                return null;
                               },
-                              color: Acolors.primary,
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                "${AppLocalizations.of(context)!.signUp}",
-                                // "Sign up",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 19,
-                                  color: Colors.white,
+                            ),
+                            const SizedBox(height: 25),
+                            makeInput(
+                                hint:
+                                    "${AppLocalizations.of(context)!.confirmPassword}",
+                                //  'Confirm Password',
+                                icon: Icons.lock_outline,
+                                controller: ConfirmPasswordController,
+                                obscureText: !_isPasswordVisible,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _isPasswordVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _isPasswordVisible = !_isPasswordVisible;
+                                    });
+                                  },
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return "${AppLocalizations.of(context)!.pleaseConfirmPassword}";
+                                    //  'Please confirm your password';
+                                  } else if (value != passwordController.text) {
+                                    return "${AppLocalizations.of(context)!.passwordMismatch}";
+                                    // 'Passwords do not match';
+                                  }
+                                }),
+                            const SizedBox(height: 25.0),
+                            // Agree to Privacy Policy and Terms Section
+                            Row(
+                              //   crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Checkbox(
+                                  value: _agreedToPolicy,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      _agreedToPolicy = value ?? false;
+                                    });
+                                  },
+                                ),
+
+                                Text(
+                                  // 'I agree to ',
+                                  "${AppLocalizations.of(context)!.iagreeto} ",
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            PrivacyPolicyScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: Text(
+                                    "${AppLocalizations.of(context)!.privacyPolicy}",
+                                    style: TextStyle(
+                                      color: Colors.blue,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                    //'and'
+                                    "${AppLocalizations.of(context)!.and} "), // ' and '
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              TermsAndConditionsScreen()),
+                                    );
+                                  },
+                                  child: Text(
+                                    "${AppLocalizations.of(context)!.termsConditions}",
+                                    style: TextStyle(
+                                      color: Colors.blue,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 15),
+
+                            // Optional Section for Referral Code
+                            /*   Container(
+                              alignment: Alignment.centerLeft,
+                            ),
+                            makeInput(
+                              hint: 'Referred By',
+                              icon: Icons.share,
+                              controller: referralCodeController,
+                              validator: (value) {
+                                return null;
+                              },
+                            ),
+          
+                            const SizedBox(height: 25.0),
+          */
+                            // Sign Up Button
+                            Container(
+                              padding:
+                                  const EdgeInsets.fromLTRB(20.0, 0, 20.0, 0),
+                              width: 250,
+                              child: MaterialButton(
+                                height: 50,
+                                onPressed: () {
+                                  if (_formSignupKey.currentState!.validate()) {
+                                    if (!_agreedToPolicy) {
+                                      SnackbarMessage.showSnackbar(context,
+                                          "${AppLocalizations.of(context)!.agreePrivacyTerms}");
+                                      return;
+                                    }
+                                    registerUser(context);
+                                  }
+                                },
+                                color: Acolors.primary,
+                                elevation: 2,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  "${AppLocalizations.of(context)!.signUp}",
+                                  // "Sign up",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 19,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
 
-                          const SizedBox(height: 25.0),
+                            const SizedBox(height: 25.0),
 
-                          // Sign in Option
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "${AppLocalizations.of(context)!.alreadyHaveAccount}",
-                                // 'Already have an account? ',
-                                style: TextStyle(
-                                  color: Color.fromARGB(207, 241, 8, 8),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const SignInScreen()),
-                                  );
-                                },
-                                child: Text(
-                                  "${AppLocalizations.of(context)!.signIn}",
-                                  //  'Sign in',
+                            // Sign in Option
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "${AppLocalizations.of(context)!.alreadyHaveAccount}",
+                                  // 'Already have an account? ',
                                   style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Acolors.primary,
+                                    color: Color.fromARGB(207, 241, 8, 8),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const SignInScreen()),
+                                    );
+                                  },
+                                  child: Text(
+                                    "${AppLocalizations.of(context)!.signIn}",
+                                    //  'Sign in',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Acolors.primary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
 
-                          const SizedBox(height: 20.0),
-                        ],
+                            const SizedBox(height: 20.0),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

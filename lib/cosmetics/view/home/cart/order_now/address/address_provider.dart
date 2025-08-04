@@ -234,7 +234,6 @@ class AddressProvider with ChangeNotifier {
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:ambrosia_ayurved/models/user_model.dart';
 import 'package:ambrosia_ayurved/provider/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:ambrosia_ayurved/cosmetics/common_widgets/snackbar.dart';
@@ -253,25 +252,28 @@ class AddressProvider with ChangeNotifier {
   String? userid;
   String? fname;
   String? lname;
+  String? district;
   String? address;
   String? city;
   String? state;
   String? mobile;
   String? country;
   String? pincode;
+  String? address_type;
 
   // Method to save address information
   Future<bool> saveCheckoutInformation({
     required String userid,
-    required String productId,
     required String fname,
     required String lname,
+    required String district,
     required String address,
     required String city,
     required String state,
     required String mobile,
     required String country,
     required String pincode,
+    required String address_type,
     required BuildContext context,
   }) async {
     try {
@@ -288,24 +290,24 @@ class AddressProvider with ChangeNotifier {
 
       // API endpoint
       final String apiUrl =
-          'https://ambrosiaayurved.in/api/save_checkout_information_api';
+          'https://ambrosiaayurved.in/api/add_multiple_address';
 
       // Request body
       final Map<String, dynamic> requestBody = {
-        'product_id': productId,
+        //
+
         'user_id': userid,
         'fname': fname,
         'lname': lname,
         'address': address,
         'city': city,
         'state': state,
+        "district": district,
+        "address_type": address_type,
         'mobile': mobile,
         'country': country,
         'pincode': pincode,
       };
-
-      print("Sending request with product ID: $productId");
-      print("User ID being sent: $userid");
 
       // Make the POST request
       final response = await http.post(
@@ -325,11 +327,13 @@ class AddressProvider with ChangeNotifier {
         this.fname = fname;
         this.lname = lname;
         this.address = address;
+        this.district = district;
         this.city = city;
         this.state = state;
         this.mobile = mobile;
         this.country = country;
         this.pincode = pincode;
+        this.address_type = address_type;
 
         // Set success message from response or default
         _message = responseData['message'] ?? 'Address saved successfully';

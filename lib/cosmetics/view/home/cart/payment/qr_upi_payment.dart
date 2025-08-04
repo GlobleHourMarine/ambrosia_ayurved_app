@@ -9,9 +9,8 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class QrUpiPayment extends StatelessWidget {
-  const QrUpiPayment({
-    Key? key,
-  }) : super(key: key);
+  final String addressId;
+  const QrUpiPayment({Key? key, required this.addressId}) : super(key: key);
 
   final String upiId = '7006900393@ptsbi';
 
@@ -96,7 +95,7 @@ class QrUpiPayment extends StatelessWidget {
             Spacer(),
 
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: EdgeInsets.all(10),
               child: SizedBox(
                 width: 350,
                 child: ElevatedButton(
@@ -108,7 +107,9 @@ class QrUpiPayment extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PaymentVerificationPage(),
+                          builder: (context) => PaymentVerificationPage(
+                            addressId: addressId,
+                          ),
                         ));
                   },
                   child: Text(

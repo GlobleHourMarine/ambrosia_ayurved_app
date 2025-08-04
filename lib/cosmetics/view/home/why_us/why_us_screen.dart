@@ -93,7 +93,7 @@ class WhyUsScreen extends StatelessWidget {
 
           /// **Section 2**
           Padding(
-            padding: const EdgeInsets.only(left: 1, right: 20),
+            padding: const EdgeInsets.only(left: 1, right: 5),
             child: Stack(
               children: [
                 Positioned(

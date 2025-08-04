@@ -10,9 +10,8 @@ import 'package:ambrosia_ayurved/cosmetics/view/home/cart/payment/payment_provid
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PaymentScreen extends StatefulWidget {
-  const PaymentScreen({
-    Key? key,
-  }) : super(key: key);
+  final String addressId;
+  const PaymentScreen({Key? key, required this.addressId}) : super(key: key);
   @override
   _PaymentScreenState createState() => _PaymentScreenState();
 }
@@ -20,6 +19,7 @@ class PaymentScreen extends StatefulWidget {
 class _PaymentScreenState extends State<PaymentScreen> {
   String selectedPaymentMethod = "UPI";
   bool isLoading = false;
+
   Future<bool> showOrderConfirmationDialog(BuildContext context) async {
     return await showDialog(
           context: context,
@@ -56,33 +56,27 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Future<void> handlePaymentAndOrder(
     BuildContext context,
   ) async {
-    // Validate transaction ID and screenshot
-
     // Show Order Confirmation Dialog
     bool confirm = await showDialog(
           context: context,
           builder: (context) => AlertDialog(
             title: Text(
               "${AppLocalizations.of(context)!.confirmOrder}",
-              //  "Confirm Order"
             ),
             content: Text(
               "${AppLocalizations.of(context)!.confirmOrderPrompt}",
-              // "Are you sure you want to place this order?"
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
                 child: Text(
                   "${AppLocalizations.of(context)!.cancel}",
-                  // "Cancel"
                 ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 child: Text(
                   "${AppLocalizations.of(context)!.yes}",
-                  // "Yes"
                 ),
               ),
             ],
@@ -90,22 +84,54 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ) ??
         false; // If dialog is dismissed, default to false
 
-    // If user confirms, place order and clear cart
+    // If user confirms, place order first
     if (confirm) {
       final placeOrderProvider =
           Provider.of<PlaceOrderProvider>(context, listen: false);
 
-      await placeOrderProvider.placeOrder(context);
+      try {
+        // In your PaymentScreen or wherever you call placeOrder
+        placeOrderProvider.setAddressId(widget.addressId);
+        await placeOrderProvider.placeOrder(context);
+        // Check if order was placed successfully
+        final orderId = placeOrderProvider.orderId;
 
-      // Ensure order ID is available after placing the order
-      final orderId = placeOrderProvider.orderId;
-      await Provider.of<PaymentProvider>(context, listen: false).processPayment(
-        context,
-        orderId.toString(),
-      );
-      // place order
+        if (orderId != null && orderId.toString().isNotEmpty) {
+          print("Order placed successfully with ID: $orderId");
+
+          // Only proceed to payment if order was successful
+          await Provider.of<PaymentProvider>(context, listen: false)
+              .processPayment(
+            context,
+            orderId.toString(),
+          );
+        } else {
+          // Order failed - show error message
+          print("Order placement failed - no order ID received");
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Order placement failed. Please try again.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        // Handle any errors during order placement
+        print("Error placing order: $e");
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error placing order: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
-    // Process Payment
   }
 
   @override
@@ -210,7 +236,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => QrUpiPayment(),
+                      builder: (context) =>
+                          QrUpiPayment(addressId: widget.addressId),
                     ),
                   );
                 } else if (paymentMethod ==

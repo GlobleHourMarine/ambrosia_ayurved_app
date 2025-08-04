@@ -239,6 +239,7 @@ class FooterPageState extends State<FooterPage> {
 */
 
 // the working one
+import 'package:ambrosia_ayurved/cosmetics/common/contact_info.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:footer/footer.dart';
@@ -276,7 +277,8 @@ class FooterNew extends StatelessWidget {
               children: [
                 _buildIcon(
                   FontAwesomeIcons.phone,
-                  'tel:01762-458122',
+                  ContactInfo.phoneUrl,
+                  // 'tel:+918000057233',
                   Acolors.primary,
                 ), // Replace with actual phone number
                 _buildIcons(
@@ -286,17 +288,22 @@ class FooterNew extends StatelessWidget {
                 ), // Replace with actual email
                 _buildIcon(
                   FontAwesomeIcons.earth,
-                  'https://ambrosiaayurved.in/',
+                  ContactInfo.websiteUrl,
+                  //  'https://ambrosiaayurved.in/',
                   Colors.lightGreen,
                 ),
                 _buildIcon(
                   FontAwesomeIcons.instagram,
-                  'https://www.instagram.com/ambrosia.ayurved',
+                  ContactInfo.instagramUrl,
+
+                  //'https://www.instagram.com/ambrosia.ayurved',
                   Colors.amber,
                 ),
                 _buildIcon(
                   FontAwesomeIcons.squareFacebook,
-                  'https://www.facebook.com/profile.php?id=61574148759468',
+                  ContactInfo.facebookUrl,
+
+                  // 'https://www.facebook.com/profile.php?id=61574148759468',
                   Colors.blue,
                 ), // Replace with actual Facebook link
               ],

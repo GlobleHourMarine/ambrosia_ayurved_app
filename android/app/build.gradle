@@ -11,8 +11,10 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+apply plugin: 'com.google.gms.google-services'
+
 android {
-    namespace = "com.name.ambrosia_ayurved"
+    namespace = "com.app.ambrosiaayurved"
     compileSdk = flutter.compileSdkVersion 
     ndkVersion = flutter.ndkVersion
 
@@ -27,10 +29,10 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.name.ambrosia_ayurved"
+        applicationId = "com.app.ambrosiaayurved"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -48,10 +50,22 @@ android {
 
 buildTypes {
     release {
-        signingConfig signingConfigs.release
-          minifyEnabled false
-        shrinkResources false
+          // Enable ProGuard/R8 obfuscation
+            minifyEnabled true
+            shrinkResources true
+            
+            // Point to your ProGuard rules file
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            
+            // Signing config (if you have one)
+            signingConfig signingConfigs.release
     }
+
+       debug {
+            // Disable obfuscation for debug builds
+            minifyEnabled false
+            shrinkResources false
+        }
 }
     }
 

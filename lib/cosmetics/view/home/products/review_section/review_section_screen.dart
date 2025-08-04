@@ -291,146 +291,159 @@ class _CustomerReviewSectionState extends State<CustomerReviewSection> {
 
     return Padding(
       padding: const EdgeInsets.all(12.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.green),
-          borderRadius: BorderRadius.circular(5),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 20),
-            Text(
-              '${AppLocalizations.of(context)!.customerReviews}',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.green),
+              borderRadius: BorderRadius.circular(5),
             ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Row(
-                children: [
-                  const SizedBox(height: 10),
-                  buildStarRating(averageRating.toInt()),
-                  const SizedBox(width: 10),
-                  Text(
-                    "${averageRating.toStringAsFixed(1)} / 5.0",
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 20),
+                Text(
+                  '${AppLocalizations.of(context)!.customerReviews}',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    children: [
+                      const SizedBox(height: 10),
+                      buildStarRating(averageRating.toInt()),
+                      const SizedBox(width: 10),
+                      Text(
+                        "${averageRating.toStringAsFixed(1)} / 5.0",
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const Spacer(),
+                      Text(
+                          '${AppLocalizations.of(context)!.basedOnReviews(reviews.length)}'),
+                      const SizedBox(width: 10),
+                    ],
                   ),
-                  const Spacer(),
-                  Text(
-                      '${AppLocalizations.of(context)!.basedOnReviews(reviews.length)}'),
-                  const SizedBox(width: 10),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : reviews.isEmpty
-                    ? Padding(
-                        padding: EdgeInsets.all(10.0),
-                        child: Text(
-                            '${AppLocalizations.of(context)!.noReviewsYet}',
-                            style: TextStyle(fontSize: 16)),
-                      )
-                    : Column(
-                        children: [
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: reviewsToShow,
-                            itemBuilder: (context, index) {
-                              final review = reviews[index];
-                              return Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.green),
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        review.fname,
-                                        style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : reviews.isEmpty
+                        ? Padding(
+                            padding: EdgeInsets.all(10.0),
+                            child: Text(
+                                '${AppLocalizations.of(context)!.noReviewsYet}',
+                                style: TextStyle(fontSize: 16)),
+                          )
+                        : Column(
+                            children: [
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: reviewsToShow,
+                                itemBuilder: (context, index) {
+                                  final review = reviews[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.green),
+                                        borderRadius: BorderRadius.circular(5),
                                       ),
-                                      const SizedBox(height: 5),
-                                      Text(
-                                        review.date,
-                                        style: const TextStyle(
-                                            color: Colors.grey, fontSize: 16),
-                                      ),
-                                      const SizedBox(height: 5),
-                                      // Media files display - UPDATED PART
-                                      if (review.filePath.isNotEmpty) ...[
-                                        SingleChildScrollView(
-                                          scrollDirection: Axis.horizontal,
-                                          child: Row(
-                                            children: review.filePath
-                                                .map<Widget>(
-                                                  (path) => Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            right: 8.0),
-                                                    child: _buildMediaWidget(
-                                                        path,
-                                                        context,
-                                                        review.filePath),
-                                                    //_buildMediaWidget(
-                                                    //  path, context),
-                                                  ),
-                                                )
-                                                .toList(),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            review.fname,
+                                            style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold),
                                           ),
-                                        ),
-                                        const SizedBox(height: 5),
-                                      ],
-                                      buildStarRating(int.parse(review.rating)),
-                                      const SizedBox(height: 5),
-                                      Text(
-                                        review.message,
-                                        style: const TextStyle(fontSize: 16),
+                                          const SizedBox(height: 5),
+                                          Text(
+                                            review.date,
+                                            style: const TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 16),
+                                          ),
+                                          const SizedBox(height: 5),
+                                          // Media files display - UPDATED PART
+                                          if (review.filePath.isNotEmpty) ...[
+                                            SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: Row(
+                                                children: review.filePath
+                                                    .map<Widget>(
+                                                      (path) => Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                right: 8.0),
+                                                        child:
+                                                            _buildMediaWidget(
+                                                                path,
+                                                                context,
+                                                                review
+                                                                    .filePath),
+                                                        //_buildMediaWidget(
+                                                        //  path, context),
+                                                      ),
+                                                    )
+                                                    .toList(),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 5),
+                                          ],
+                                          buildStarRating(
+                                              int.parse(review.rating)),
+                                          const SizedBox(height: 5),
+                                          Text(
+                                            review.message,
+                                            style:
+                                                const TextStyle(fontSize: 16),
+                                          ),
+                                        ],
                                       ),
-                                    ],
+                                    ),
+                                  );
+                                },
+                              ),
+                              if (reviews.length > 4)
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      if (visibleReviewCount + 4 <
+                                          reviews.length) {
+                                        visibleReviewCount += 4;
+                                      } else if (visibleReviewCount <
+                                          reviews.length) {
+                                        visibleReviewCount =
+                                            reviews.length; // show all
+                                      } else {
+                                        visibleReviewCount =
+                                            4; // reset to initial
+                                      }
+                                    });
+                                  },
+                                  child: Text(
+                                    visibleReviewCount >= reviews.length
+                                        ? '${AppLocalizations.of(context)!.showLess}'
+                                        : '${AppLocalizations.of(context)!.readMore}',
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.green),
                                   ),
                                 ),
-                              );
-                            },
+                              const SizedBox(height: 10),
+                            ],
                           ),
-                          if (reviews.length > 4)
-                            TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  if (visibleReviewCount + 4 < reviews.length) {
-                                    visibleReviewCount += 4;
-                                  } else if (visibleReviewCount <
-                                      reviews.length) {
-                                    visibleReviewCount =
-                                        reviews.length; // show all
-                                  } else {
-                                    visibleReviewCount = 4; // reset to initial
-                                  }
-                                });
-                              },
-                              child: Text(
-                                visibleReviewCount >= reviews.length
-                                    ? '${AppLocalizations.of(context)!.showLess}'
-                                    : '${AppLocalizations.of(context)!.readMore}',
-                                style: TextStyle(
-                                    fontSize: 16, color: Colors.green),
-                              ),
-                            ),
-                          const SizedBox(height: 10),
-                        ],
-                      ),
-          ],
-        ),
+              ],
+            ),
+          ),
+          SizedBox(height: 40),
+        ],
       ),
     );
   }

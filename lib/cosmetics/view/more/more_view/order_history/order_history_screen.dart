@@ -252,359 +252,365 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       appBar: CustomAppBar(
         title: AppLocalizations.of(context)!.myOrders,
       ),
-      body: Column(
-        children: [
-          // Header
-          // Container(
-          //   height: 70,
-          //   color: Acolors.primary,
-          //   child: Padding(
-          //     padding: const EdgeInsets.all(12),
-          //     child: Row(
-          //       children: [
-          //         Material(
-          //           color: Colors.white.withOpacity(0.21),
-          //           borderRadius: BorderRadius.circular(12),
-          //           child: const BackButton(
-          //             color: Acolors.white,
-          //           ),
-          //         ),
-          //         const SizedBox(width: 30),
-          //         const Text(
-          //           'My Orders',
-          //           style: TextStyle(fontSize: 24, color: Acolors.white),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            // Container(
+            //   height: 70,
+            //   color: Acolors.primary,
+            //   child: Padding(
+            //     padding: const EdgeInsets.all(12),
+            //     child: Row(
+            //       children: [
+            //         Material(
+            //           color: Colors.white.withOpacity(0.21),
+            //           borderRadius: BorderRadius.circular(12),
+            //           child: const BackButton(
+            //             color: Acolors.white,
+            //           ),
+            //         ),
+            //         const SizedBox(width: 30),
+            //         const Text(
+            //           'My Orders',
+            //           style: TextStyle(fontSize: 24, color: Acolors.white),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
 
-          const SizedBox(height: 10),
+            const SizedBox(height: 10),
 
-          // Order List
-          Expanded(
-            child: orderProvider.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : orderProvider.orders.isEmpty
-                    ? Center(
-                        child: Text(
-                        AppLocalizations.of(context)!.noOrdersFound,
-                        //  'No orders found'
-                      ))
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(10),
-                        itemCount: orderProvider.orders.length,
-                        itemBuilder: (context, index) {
-                          final order = orderProvider.orders[index];
-                          // Debugging
-                          print(
-                              "Order ID: ${order.orderId}, Status: ${order.status}");
+            // Order List
+            Expanded(
+              child: orderProvider.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : orderProvider.orders.isEmpty
+                      ? Center(
+                          child: Text(
+                          AppLocalizations.of(context)!.noOrdersFound,
+                          //  'No orders found'
+                        ))
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(10),
+                          itemCount: orderProvider.orders.length,
+                          itemBuilder: (context, index) {
+                            final order = orderProvider.orders[index];
+                            // Debugging
+                            print(
+                                "Order ID: ${order.orderId}, Status: ${order.status}");
 
-                          // final bool isCancelled =
-                          //     _cancelRequests[order.orderId] ??
-                          //         false; // Fix here
-                          return InkWell(
-                            // onTap: () {
-                            //   Navigator.push(
-                            //       context,
-                            //       MaterialPageRoute(
-                            //         builder: (context) => TrackOrderScreen(
-                            //             orderId: order.orderId),
-                            //       ));
-                            // },
-                            child: Card(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              elevation: 3,
-                              child: Padding(
-                                padding: const EdgeInsets.all(15),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          '${AppLocalizations.of(context)!.order} #${order.orderId}',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
+                            // final bool isCancelled =
+                            //     _cancelRequests[order.orderId] ??
+                            //         false; // Fix here
+                            return InkWell(
+                              // onTap: () {
+                              //   Navigator.push(
+                              //       context,
+                              //       MaterialPageRoute(
+                              //         builder: (context) => TrackOrderScreen(
+                              //             orderId: order.orderId),
+                              //       ));
+                              // },
+                              child: Card(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                elevation: 3,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(15),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            '${AppLocalizations.of(context)!.order} #${order.orderId}',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
                                           ),
-                                        ),
 
-                                        // Updated Order Status Widget
+                                          // Updated Order Status Widget
 
-                                        Text(
-                                          getOrderStatusText(
-                                                  order.status, context)
-                                              .toUpperCase(),
-                                          style: TextStyle(
-                                            color: getOrderStatusColor(
-                                                order.status),
-                                            fontWeight: FontWeight.bold,
+                                          Text(
+                                            getOrderStatusText(
+                                                    order.status, context)
+                                                .toUpperCase(),
+                                            style: TextStyle(
+                                              color: getOrderStatusColor(
+                                                  order.status),
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                    const Divider(),
+                                        ],
+                                      ),
+                                      const Divider(),
 
-                                    // Product details
-                                    Row(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                              8), // Optional: Adds rounded corners
-                                          child: Image.network(
-                                            'https://ambrosiaayurved.in/${order.image}',
-                                            //    order.image, // Replace with your actual image URL field
-                                            width: 100, // Adjust size as needed
-                                            height: 100,
-                                            fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                              return const Icon(
-                                                  Icons.image_not_supported,
-                                                  color: Colors.grey,
-                                                  size: 100);
-                                            },
+                                      // Product details
+                                      Row(
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                                8), // Optional: Adds rounded corners
+                                            child: Image.network(
+                                              'https://ambrosiaayurved.in/${order.image}',
+                                              //    order.image, // Replace with your actual image URL field
+                                              width:
+                                                  100, // Adjust size as needed
+                                              height: 100,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
+                                                return const Icon(
+                                                    Icons.image_not_supported,
+                                                    color: Colors.grey,
+                                                    size: 100);
+                                              },
+                                            ),
                                           ),
-                                        ),
 
-                                        // const Icon(Icons.shopping_bag,
-                                        //     color: Acolors.primary, size: 30),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                ' ${order.productName}',
-                                                style: const TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight:
-                                                        FontWeight.w500),
-                                              ),
-                                              SizedBox(height: 2),
-                                              // Text(
-                                              //   'Product ID: ${order.productId}',
-                                              //   style: const TextStyle(
-                                              //       fontSize: 14),
-                                              // ),
-
-                                              Text(
-                                                //  'Quantity: ${order.productQuantity}',
-                                                '  ${AppLocalizations.of(context)!.quantity} : ${order.productQuantity}',
-                                                style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight:
-                                                        FontWeight.w400),
-                                              ),
-                                              SizedBox(height: 15),
-                                              Text(
-                                                '\ ${AppLocalizations.of(context)!.rs} ${order.productPrice}',
-                                                //   '\Rs ${order.productPrice}',
-                                                style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight:
-                                                        FontWeight.w500),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-
-                                    // Order total and date
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          ' ${AppLocalizations.of(context)!.total} : \Rs ${order.totalPrice}',
-                                          //   'Total: Rs ${order.totalPrice}',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${AppLocalizations.of(context)!.date} : ${order.date}',
-                                          //  'Date: ${order.date}',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Divider(),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        order.status == 0
-                                            ? Text(
-                                                AppLocalizations.of(context)!
-                                                    .cancelled,
-                                                //  'Cancelled',
-                                                style: TextStyle(
-                                                  color: Colors.red,
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
+                                          // const Icon(Icons.shopping_bag,
+                                          //     color: Acolors.primary, size: 30),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  ' ${order.productName}',
+                                                  style: const TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.w500),
                                                 ),
-                                              )
-                                            : order.status == 4
-                                                ? TextButton(
-                                                    onPressed: () {
-                                                      Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                SubmitReviewScreen(
-                                                              orderId:
-                                                                  order.orderId,
-                                                              productId: order
-                                                                  .productId,
-                                                            ),
-                                                          ));
+                                                SizedBox(height: 2),
+                                                // Text(
+                                                //   'Product ID: ${order.productId}',
+                                                //   style: const TextStyle(
+                                                //       fontSize: 14),
+                                                // ),
 
-                                                      // showReviewDialog(
-                                                      //   context,
-                                                      //   int.parse(order
-                                                      //       .productId), // Convert String to int
-                                                      //   int.parse(
-                                                      //       order.orderId),
-                                                      // );
-                                                    },
-                                                    child: Text(
-                                                      AppLocalizations.of(
-                                                              context)!
-                                                          .addAReview,
-                                                      //  "Add a Review",
-                                                      style: TextStyle(
-                                                        color: Colors.blue,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 16,
-                                                      ),
-                                                    ),
-                                                  )
-                                                : TextButton(
-                                                    onPressed: () {
-                                                      if (order.status == 1) {
-                                                        final orderProvider =
-                                                            Provider.of<
-                                                                    OrderProvider>(
-                                                                context,
-                                                                listen: false);
+                                                Text(
+                                                  //  'Quantity: ${order.productQuantity}',
+                                                  '  ${AppLocalizations.of(context)!.quantity} : ${order.productQuantity}',
+                                                  style: const TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w400),
+                                                ),
+                                                SizedBox(height: 15),
+                                                Text(
+                                                  '\ ${AppLocalizations.of(context)!.rs} ${order.productPrice}',
+                                                  //   '\Rs ${order.productPrice}',
+                                                  style: const TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w500),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
 
-                                                        // If order is pending, allow cancellation
-                                                        _showCancelDialog(
+                                      // Order total and date
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            ' ${AppLocalizations.of(context)!.total} : \Rs ${order.totalPrice}',
+                                            //   'Total: Rs ${order.totalPrice}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            '${AppLocalizations.of(context)!.date} : ${order.date}',
+                                            //  'Date: ${order.date}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Divider(),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          order.status == 0
+                                              ? Text(
+                                                  AppLocalizations.of(context)!
+                                                      .cancelled,
+                                                  //  'Cancelled',
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                )
+                                              : order.status == 4
+                                                  ? TextButton(
+                                                      onPressed: () {
+                                                        Navigator.push(
                                                             context,
-                                                            orderProvider,
-                                                            order.orderId);
-                                                      } else {
-                                                        showDialog(
-                                                          context: context,
-                                                          builder: (BuildContext
-                                                              context) {
-                                                            return AlertDialog(
-                                                              title: Text(
-                                                                  AppLocalizations.of(
-                                                                          context)!
-                                                                      .cannotCancelOrder
-                                                                  // "Cannot Cancel Order"
-                                                                  ),
-                                                              content: Text(
-                                                                AppLocalizations.of(
-                                                                        context)!
-                                                                    .cannotCancelMessage,
-                                                                //  "This order cannot be canceled because it is already being processed."
+                                                            MaterialPageRoute(
+                                                              builder: (context) =>
+                                                                  SubmitReviewScreen(
+                                                                orderId: order
+                                                                    .orderId,
+                                                                productId: order
+                                                                    .productId,
                                                               ),
-                                                              actions: [
-                                                                TextButton(
-                                                                  onPressed:
-                                                                      () {
-                                                                    Navigator.of(
-                                                                            context)
-                                                                        .pop(); // Close the dialog
-                                                                  },
-                                                                  child: Text(
+                                                            ));
+
+                                                        // showReviewDialog(
+                                                        //   context,
+                                                        //   int.parse(order
+                                                        //       .productId), // Convert String to int
+                                                        //   int.parse(
+                                                        //       order.orderId),
+                                                        // );
+                                                      },
+                                                      child: Text(
+                                                        AppLocalizations.of(
+                                                                context)!
+                                                            .addAReview,
+                                                        //  "Add a Review",
+                                                        style: TextStyle(
+                                                          color: Colors.blue,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 16,
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : TextButton(
+                                                      onPressed: () {
+                                                        if (order.status == 1) {
+                                                          final orderProvider =
+                                                              Provider.of<
+                                                                      OrderProvider>(
+                                                                  context,
+                                                                  listen:
+                                                                      false);
+
+                                                          // If order is pending, allow cancellation
+                                                          _showCancelDialog(
+                                                              context,
+                                                              orderProvider,
+                                                              order.orderId);
+                                                        } else {
+                                                          showDialog(
+                                                            context: context,
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
+                                                              return AlertDialog(
+                                                                title: Text(
                                                                     AppLocalizations.of(
                                                                             context)!
-                                                                        .ok,
-
-                                                                    //   "OK"
-                                                                  ),
+                                                                        .cannotCancelOrder
+                                                                    // "Cannot Cancel Order"
+                                                                    ),
+                                                                content: Text(
+                                                                  AppLocalizations.of(
+                                                                          context)!
+                                                                      .cannotCancelMessage,
+                                                                  //  "This order cannot be canceled because it is already being processed."
                                                                 ),
-                                                              ],
-                                                            );
-                                                          },
-                                                        );
-                                                      }
-                                                    },
-                                                    child: Text(
-                                                      AppLocalizations.of(
-                                                              context)!
-                                                          .cancelOrder,
-                                                      // "Cancel Order",
-                                                      style: TextStyle(
-                                                        color: Colors.red,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 16,
+                                                                actions: [
+                                                                  TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.of(
+                                                                              context)
+                                                                          .pop(); // Close the dialog
+                                                                    },
+                                                                    child: Text(
+                                                                      AppLocalizations.of(
+                                                                              context)!
+                                                                          .ok,
+
+                                                                      //   "OK"
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              );
+                                                            },
+                                                          );
+                                                        }
+                                                      },
+                                                      child: Text(
+                                                        AppLocalizations.of(
+                                                                context)!
+                                                            .cancelOrder,
+                                                        // "Cancel Order",
+                                                        style: TextStyle(
+                                                          color: Colors.red,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 16,
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                        if (order.status !=
-                                            0) // Hide "Track" button if order is cancelled
+                                          if (order.status !=
+                                              0) // Hide "Track" button if order is cancelled
 
-                                          const SizedBox(
-                                            height: 50,
-                                            child: VerticalDivider(
-                                              color: Colors.grey,
-                                              thickness: 1,
+                                            const SizedBox(
+                                              height: 50,
+                                              child: VerticalDivider(
+                                                color: Colors.grey,
+                                                thickness: 1,
+                                              ),
                                             ),
-                                          ),
-                                        if (order.status !=
-                                            0) // Show "Track" button only if order is not cancelled
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      TrackOrderScreen(
-                                                    orderId: order.orderId,
-                                                    orderStatus: order.status,
+                                          if (order.status !=
+                                              0) // Show "Track" button only if order is not cancelled
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        TrackOrderScreen(
+                                                      orderId: order.orderId,
+                                                      orderStatus: order.status,
+                                                    ),
                                                   ),
-                                                ),
-                                              );
-                                            },
-                                            child: Text(
-                                              AppLocalizations.of(context)!
-                                                  .track,
-                                              // "Track",
-                                              style: TextStyle(
-                                                  color: Acolors.primary,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16),
+                                                );
+                                              },
+                                              child: Text(
+                                                AppLocalizations.of(context)!
+                                                    .track,
+                                                // "Track",
+                                                style: TextStyle(
+                                                    color: Acolors.primary,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16),
+                                              ),
                                             ),
-                                          ),
-                                      ],
-                                    ),
-                                  ],
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-          ),
-        ],
+                            );
+                          },
+                        ),
+            ),
+          ],
+        ),
       ),
     );
   }

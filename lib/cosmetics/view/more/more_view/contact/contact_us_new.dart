@@ -1,4 +1,5 @@
 import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
+import 'package:ambrosia_ayurved/cosmetics/common/contact_info.dart';
 import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -130,286 +131,302 @@ class _ContactUsScreenNewState extends State<ContactUsScreenNew> {
       appBar: CustomAppBar(
         title: AppLocalizations.of(context)!.contactUs,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: SizedBox(
-                      //  height: 300,
-                      width: double.infinity,
-                      child: Lottie.asset(
-                        'assets/images/contact_us_1.json',
-                        //  fit: BoxFit.fill,
-                        repeat: true,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Lottie.network(
-                          'https://assets5.lottiefiles.com/packages/lf20_ktwnwv5m.json', // Fallback animation
-                          height: 200,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    '${AppLocalizations.of(context)?.contactUs} : ',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  _buildContactCard(
-                    AppLocalizations.of(context)?.phone ?? "Phone",
-                    FontAwesomeIcons.phone,
-                    'tel:01762-458122',
-                    '01762-458122',
-                    Acolors.primary,
-                  ),
-                  _buildContactCard(
-                    AppLocalizations.of(context)?.email ?? "Email",
-                    FontAwesomeIcons.envelope,
-                    'mailto:care@ambrosiaayurved.in',
-                    AppLocalizations.of(context)?.emailAddress ??
-                        "care@ambrosiaayurved.in",
-                    Colors.red,
-                  ),
-                  _buildContactCard(
-                    AppLocalizations.of(context)?.location ?? "Location",
-                    FontAwesomeIcons.mapMarkerAlt,
-                    'https://www.google.com/maps?q=3rd+floor+Motia,+MOTIAZ+ROYAL+BUSINESS+PARK,+28-B,+Zirakpur,+Punjab+140603',
-                    'Ambrosia Ayurved, 28-B, 3rd floor Motia, MOTIAZ ROYAL BUSINESS PARK, Zirakpur, Punjab 140603, India',
-                    Acolors.primary,
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    AppLocalizations.of(context)?.followUs ?? "Follow Us",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  _buildContactCard(
-                    AppLocalizations.of(context)?.facebook ?? "Facebook",
-                    FontAwesomeIcons.squareFacebook,
-                    'https://www.facebook.com/profile.php?id=61575172705272&sk=photos',
-                    AppLocalizations.of(context)?.facebookLink ??
-                        "facebook.com/Ambrosia ayurved",
-                    Colors.blue,
-                  ),
-                  _buildContactCard(
-                    AppLocalizations.of(context)?.instagram ?? "Instagram",
-                    FontAwesomeIcons.instagram,
-                    'https://www.instagram.com/ambrosia.ayurved',
-                    'Ambrosia Ayurved',
-                    Colors.orange,
-                  ),
-                  _buildContactCard(
-                    AppLocalizations.of(context)?.website ?? "Website",
-                    FontAwesomeIcons.earth,
-                    'https://ambrosiaayurved.in/',
-                    'www.ambrosiaayurved.in',
-                    Colors.blue,
-                  ),
-                  SizedBox(height: 24),
-
-                  // Text(
-                  //   'Send us a message',
-                  //   style: GoogleFonts.poppins(
-                  //     fontSize: 20,
-                  //     fontWeight: FontWeight.bold,
-                  //   ),
-                  // ),
-                  // SizedBox(height: 16),
-                  // Form(
-                  //   key: _formKey,
-                  //   child: Column(
-                  //     crossAxisAlignment: CrossAxisAlignment.stretch,
-                  //     children: [
-                  //       TextFormField(
-                  //         controller: _nameController,
-                  //         decoration: InputDecoration(
-                  //           labelText: 'Name',
-                  //           prefixIcon: Icon(Icons.person_outline),
-                  //           border: OutlineInputBorder(
-                  //             borderRadius: BorderRadius.circular(12),
-                  //             borderSide: BorderSide.none,
-                  //           ),
-                  //           filled: true,
-                  //           fillColor: Colors.grey.shade100,
-                  //           contentPadding: EdgeInsets.symmetric(vertical: 16),
-                  //         ),
-                  //         validator: (value) {
-                  //           if (value == null || value.isEmpty) {
-                  //             return 'Please enter your name';
-                  //           }
-                  //           return null;
-                  //         },
-                  //       ),
-                  //       SizedBox(height: 16),
-                  //       TextFormField(
-                  //         controller: _emailController,
-                  //         decoration: InputDecoration(
-                  //           labelText: 'Email',
-                  //           prefixIcon: Icon(Icons.email_outlined),
-                  //           border: OutlineInputBorder(
-                  //             borderRadius: BorderRadius.circular(12),
-                  //             borderSide: BorderSide.none,
-                  //           ),
-                  //           filled: true,
-                  //           fillColor: Colors.grey.shade100,
-                  //           contentPadding: EdgeInsets.symmetric(vertical: 16),
-                  //         ),
-                  //         keyboardType: TextInputType.emailAddress,
-                  //         validator: (value) {
-                  //           if (value == null || value.isEmpty) {
-                  //             return 'Please enter your email';
-                  //           }
-                  //           if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                  //               .hasMatch(value)) {
-                  //             return 'Please enter a valid email';
-                  //           }
-                  //           return null;
-                  //         },
-                  //       ),
-                  //       SizedBox(height: 16),
-                  //       TextFormField(
-                  //         controller: _messageController,
-                  //         decoration: InputDecoration(
-                  //           labelText: 'Message',
-                  //           prefixIcon: Icon(Icons.message_outlined),
-                  //           border: OutlineInputBorder(
-                  //             borderRadius: BorderRadius.circular(12),
-                  //             borderSide: BorderSide.none,
-                  //           ),
-                  //           filled: true,
-                  //           fillColor: Colors.grey.shade100,
-                  //           contentPadding: EdgeInsets.symmetric(vertical: 16),
-                  //           alignLabelWithHint: true,
-                  //         ),
-                  //         maxLines: 5,
-                  //         validator: (value) {
-                  //           if (value == null || value.isEmpty) {
-                  //             return 'Please enter your message';
-                  //           }
-                  //           return null;
-                  //         },
-                  //       ),
-                  //       SizedBox(height: 24),
-                  //       ElevatedButton(
-                  //         onPressed: _isSubmitting ? null : _submitForm,
-                  //         style: ElevatedButton.styleFrom(
-                  //           backgroundColor: Color(0xFF6A11CB),
-                  //           foregroundColor: Colors.white,
-                  //           padding: EdgeInsets.symmetric(vertical: 16),
-                  //           shape: RoundedRectangleBorder(
-                  //             borderRadius: BorderRadius.circular(12),
-                  //           ),
-                  //           elevation: 0,
-                  //         ),
-                  //         child: _isSubmitting
-                  //             ? SizedBox(
-                  //                 width: 20,
-                  //                 height: 20,
-                  //                 child: CircularProgressIndicator(
-                  //                   color: Colors.white,
-                  //                   strokeWidth: 2,
-                  //                 ),
-                  //               )
-                  //             : Text(
-                  //                 'SEND MESSAGE',
-                  //                 style: TextStyle(
-                  //                   fontWeight: FontWeight.bold,
-                  //                   fontSize: 16,
-                  //                 ),
-                  //               ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // SizedBox(height: 30),
-                  // Social Media Links
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.center,
-                  //   children: [
-                  //     _socialButton(Icons.facebook, Colors.blue),
-                  //     SizedBox(width: 16),
-                  //     _socialButton(Icons.email, Colors.red),
-                  //     SizedBox(width: 16),
-                  //     _socialButton(Icons.messenger_outline, Colors.purple),
-                  //     SizedBox(width: 16),
-                  //     _socialButton(Icons.alternate_email, Colors.teal),
-                  //   ],
-                  // ),
-
-                  /*
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Card(
-                        elevation: 0,
-                        color: Colors.grey.shade50,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: Colors.grey.shade200),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            children: [
-                              ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                      Color(0xFF6A11CB).withOpacity(0.1),
-                                  child: Icon(Icons.email_outlined,
-                                      color: Color(0xFF6A11CB)),
-                                ),
-                                title: Text('Email'),
-                                subtitle: Text('support@yourapp.com'),
-                              ),
-                              Divider(),
-                              ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                      Color(0xFF6A11CB).withOpacity(0.1),
-                                  child: Icon(Icons.phone_outlined,
-                                      color: Color(0xFF6A11CB)),
-                                ),
-                                title: Text('Phone'),
-                                subtitle: Text('(123) 456-7890'),
-                              ),
-                              Divider(),
-                              ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                      Color(0xFF6A11CB).withOpacity(0.1),
-                                  child: Icon(Icons.location_on_outlined,
-                                      color: Color(0xFF6A11CB)),
-                                ),
-                                title: Text('Address'),
-                                subtitle: Text(
-                                    '123 App Street, Silicon Valley, CA 94000'),
-                              ),
-                            ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: SizedBox(
+                        //  height: 300,
+                        width: double.infinity,
+                        child: Lottie.asset(
+                          'assets/images/contact_us_1.json',
+                          //  fit: BoxFit.fill,
+                          repeat: true,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Lottie.network(
+                            'https://assets5.lottiefiles.com/packages/lf20_ktwnwv5m.json', // Fallback animation
+                            height: 200,
+                            fit: BoxFit.contain,
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      '${AppLocalizations.of(context)?.contactUs} : ',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    _buildContactCard(
+                      AppLocalizations.of(context)?.phone ?? "Phone",
+                      FontAwesomeIcons.phone,
+                      ContactInfo.phoneUrl,
+                      ContactInfo.phoneNumber,
 
+                      // 'tel:+918000057233',
+                      // '+918000057233',
+                      Acolors.primary,
+                    ),
+                    _buildContactCard(
+                      AppLocalizations.of(context)?.email ?? "Email",
+                      FontAwesomeIcons.envelope,
+                      ContactInfo.emailUrl,
+                      //'mailto:care@ambrosiaayurved.in',
+                      //  AppLocalizations.of(context)?.emailAddress ??
+                      ContactInfo.emailAddress,
+                      //  "care@ambrosiaayurved.in",
+                      Colors.red,
+                    ),
+                    _buildContactCard(
+                      AppLocalizations.of(context)?.location ?? "Location",
+                      FontAwesomeIcons.mapMarkerAlt,
+                      ContactInfo.locationUrl,
+                      ContactInfo.locationAddress,
+                      // 'https://www.google.com/maps?q=3rd+floor+Motia,+MOTIAZ+ROYAL+BUSINESS+PARK,+28-B,+Zirakpur,+Punjab+140603',
+                      // 'Ambrosia Ayurved, 28-B, 3rd floor Motia, MOTIAZ ROYAL BUSINESS PARK, Zirakpur, Punjab 140603, India',
+                      Acolors.primary,
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      AppLocalizations.of(context)?.followUs ?? "Follow Us",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    _buildContactCard(
+                      AppLocalizations.of(context)?.facebook ?? "Facebook",
+                      FontAwesomeIcons.squareFacebook,
+                      ContactInfo.facebookUrl,
 
-                  */
-                ],
+                      ContactInfo.facebookName,
+                      //    'https://www.facebook.com/profile.php?id=61575172705272&sk=photos',
+                      //  AppLocalizations.of(context)?.facebookLink ??
+                      //    "facebook.com/Ambrosia ayurved",
+                      Colors.blue,
+                    ),
+                    _buildContactCard(
+                      AppLocalizations.of(context)?.instagram ?? "Instagram",
+                      FontAwesomeIcons.instagram,
+                      ContactInfo.instagramUrl,
+                      ContactInfo.instagramName,
+                      //   'https://www.instagram.com/ambrosia.ayurved',
+                      //  'Ambrosia Ayurved',
+                      Colors.orange,
+                    ),
+                    _buildContactCard(
+                      AppLocalizations.of(context)?.website ?? "Website",
+                      FontAwesomeIcons.earth,
+                      ContactInfo.websiteUrl,
+                      ContactInfo.websiteName,
+                      // 'https://ambrosiaayurved.in/',
+                      // 'www.ambrosiaayurved.in',
+                      Colors.blue,
+                    ),
+                    SizedBox(height: 24),
+
+                    // Text(
+                    //   'Send us a message',
+                    //   style: GoogleFonts.poppins(
+                    //     fontSize: 20,
+                    //     fontWeight: FontWeight.bold,
+                    //   ),
+                    // ),
+                    // SizedBox(height: 16),
+                    // Form(
+                    //   key: _formKey,
+                    //   child: Column(
+                    //     crossAxisAlignment: CrossAxisAlignment.stretch,
+                    //     children: [
+                    //       TextFormField(
+                    //         controller: _nameController,
+                    //         decoration: InputDecoration(
+                    //           labelText: 'Name',
+                    //           prefixIcon: Icon(Icons.person_outline),
+                    //           border: OutlineInputBorder(
+                    //             borderRadius: BorderRadius.circular(12),
+                    //             borderSide: BorderSide.none,
+                    //           ),
+                    //           filled: true,
+                    //           fillColor: Colors.grey.shade100,
+                    //           contentPadding: EdgeInsets.symmetric(vertical: 16),
+                    //         ),
+                    //         validator: (value) {
+                    //           if (value == null || value.isEmpty) {
+                    //             return 'Please enter your name';
+                    //           }
+                    //           return null;
+                    //         },
+                    //       ),
+                    //       SizedBox(height: 16),
+                    //       TextFormField(
+                    //         controller: _emailController,
+                    //         decoration: InputDecoration(
+                    //           labelText: 'Email',
+                    //           prefixIcon: Icon(Icons.email_outlined),
+                    //           border: OutlineInputBorder(
+                    //             borderRadius: BorderRadius.circular(12),
+                    //             borderSide: BorderSide.none,
+                    //           ),
+                    //           filled: true,
+                    //           fillColor: Colors.grey.shade100,
+                    //           contentPadding: EdgeInsets.symmetric(vertical: 16),
+                    //         ),
+                    //         keyboardType: TextInputType.emailAddress,
+                    //         validator: (value) {
+                    //           if (value == null || value.isEmpty) {
+                    //             return 'Please enter your email';
+                    //           }
+                    //           if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                    //               .hasMatch(value)) {
+                    //             return 'Please enter a valid email';
+                    //           }
+                    //           return null;
+                    //         },
+                    //       ),
+                    //       SizedBox(height: 16),
+                    //       TextFormField(
+                    //         controller: _messageController,
+                    //         decoration: InputDecoration(
+                    //           labelText: 'Message',
+                    //           prefixIcon: Icon(Icons.message_outlined),
+                    //           border: OutlineInputBorder(
+                    //             borderRadius: BorderRadius.circular(12),
+                    //             borderSide: BorderSide.none,
+                    //           ),
+                    //           filled: true,
+                    //           fillColor: Colors.grey.shade100,
+                    //           contentPadding: EdgeInsets.symmetric(vertical: 16),
+                    //           alignLabelWithHint: true,
+                    //         ),
+                    //         maxLines: 5,
+                    //         validator: (value) {
+                    //           if (value == null || value.isEmpty) {
+                    //             return 'Please enter your message';
+                    //           }
+                    //           return null;
+                    //         },
+                    //       ),
+                    //       SizedBox(height: 24),
+                    //       ElevatedButton(
+                    //         onPressed: _isSubmitting ? null : _submitForm,
+                    //         style: ElevatedButton.styleFrom(
+                    //           backgroundColor: Color(0xFF6A11CB),
+                    //           foregroundColor: Colors.white,
+                    //           padding: EdgeInsets.symmetric(vertical: 16),
+                    //           shape: RoundedRectangleBorder(
+                    //             borderRadius: BorderRadius.circular(12),
+                    //           ),
+                    //           elevation: 0,
+                    //         ),
+                    //         child: _isSubmitting
+                    //             ? SizedBox(
+                    //                 width: 20,
+                    //                 height: 20,
+                    //                 child: CircularProgressIndicator(
+                    //                   color: Colors.white,
+                    //                   strokeWidth: 2,
+                    //                 ),
+                    //               )
+                    //             : Text(
+                    //                 'SEND MESSAGE',
+                    //                 style: TextStyle(
+                    //                   fontWeight: FontWeight.bold,
+                    //                   fontSize: 16,
+                    //                 ),
+                    //               ),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    // SizedBox(height: 30),
+                    // Social Media Links
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   children: [
+                    //     _socialButton(Icons.facebook, Colors.blue),
+                    //     SizedBox(width: 16),
+                    //     _socialButton(Icons.email, Colors.red),
+                    //     SizedBox(width: 16),
+                    //     _socialButton(Icons.messenger_outline, Colors.purple),
+                    //     SizedBox(width: 16),
+                    //     _socialButton(Icons.alternate_email, Colors.teal),
+                    //   ],
+                    // ),
+
+                    /*
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Card(
+                          elevation: 0,
+                          color: Colors.grey.shade50,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: Colors.grey.shade200),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor:
+                                        Color(0xFF6A11CB).withOpacity(0.1),
+                                    child: Icon(Icons.email_outlined,
+                                        color: Color(0xFF6A11CB)),
+                                  ),
+                                  title: Text('Email'),
+                                  subtitle: Text('support@yourapp.com'),
+                                ),
+                                Divider(),
+                                ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor:
+                                        Color(0xFF6A11CB).withOpacity(0.1),
+                                    child: Icon(Icons.phone_outlined,
+                                        color: Color(0xFF6A11CB)),
+                                  ),
+                                  title: Text('Phone'),
+                                  subtitle: Text('(123) 456-7890'),
+                                ),
+                                Divider(),
+                                ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor:
+                                        Color(0xFF6A11CB).withOpacity(0.1),
+                                    child: Icon(Icons.location_on_outlined,
+                                        color: Color(0xFF6A11CB)),
+                                  ),
+                                  title: Text('Address'),
+                                  subtitle: Text(
+                                      '123 App Street, Silicon Valley, CA 94000'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+        
+        
+                    */
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

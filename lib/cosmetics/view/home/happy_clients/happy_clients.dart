@@ -193,18 +193,18 @@ class _AnimatedCountersScreenState extends State<AnimatedCountersScreen>
               );
             }),
           ),
-          SizedBox(height: 30),
-          Card(
-            color: Acolors.gradientss,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset('assets/images/A5_aboutus.webp')),
-            ),
-          ),
-          SizedBox(height: 30),
-          CustomerReviewSection(productId: productId.toString()),
+          // SizedBox(height: 30),
+          // Card(
+          //   color: Acolors.gradientss,
+          //   child: Padding(
+          //     padding: const EdgeInsets.all(12.0),
+          //     child: ClipRRect(
+          //         borderRadius: BorderRadius.circular(20),
+          //         child: Image.asset('assets/images/A5_aboutus.webp')),
+          //   ),
+          // ),
+          // SizedBox(height: 30),
+          // CustomerReviewSection(productId: productId.toString()),
         ],
       ),
     );

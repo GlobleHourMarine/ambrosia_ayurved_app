@@ -18,26 +18,28 @@ class AboutUsScreen extends StatelessWidget {
       appBar: CustomAppBar(title: '${AppLocalizations.of(context)!.aboutUs}'
           // 'About Us',
           ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Column(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    AboutUsShortSection(),
-                    OurJourneySection(),
-                    OurMissionSection(),
-                    OurVisionSection(),
-                    SizedBox(height: 30),
-                    FeaturesSection(),
-                    SizedBox(height: 30),
-                  ],
-                ),
-              ],
-            ),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Column(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      AboutUsShortSection(),
+                      OurJourneySection(),
+                      OurMissionSection(),
+                      OurVisionSection(),
+                      SizedBox(height: 30),
+                      FeaturesSection(),
+                      SizedBox(height: 30),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

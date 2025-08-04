@@ -34,126 +34,129 @@ class _PaymentDetailsViewState extends State<PaymentDetailsView> {
         title: "${AppLocalizations.of(context)!.paymentDetails}",
         // 'Payment Details',
       ),
-      body: Column(
-        children: [
-          // Container(
-          //   height: 70,
-          //   color: Acolors.primary,
-          //   child: Padding(
-          //     padding: const EdgeInsets.all(12),
-          //     child: Row(
-          //       children: [
-          //         Material(
-          //           color: Colors.white.withOpacity(0.21),
-          //           borderRadius: BorderRadius.circular(12),
-          //           child: const BackButton(color: Acolors.white),
-          //         ),
-          //         const SizedBox(width: 30),
-          //         const Text(
-          //           'Payment Details',
-          //           style: TextStyle(fontSize: 24, color: Acolors.white),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
-          SizedBox(height: 10),
-          Expanded(
-            child: paymentProvider.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : payments.isNotEmpty
-                    ? ListView.builder(
-                        itemCount: payments.length,
-                        itemBuilder: (context, index) {
-                          final payment = payments[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 4,
-                            shadowColor: Colors.black26,
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(LucideIcons.creditCard,
-                                          color: Acolors.primary),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        "${AppLocalizations.of(context)!.paymentMethod}",
-                                        //  'Payment Method',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        payment.paymentMethod,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black54,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const Divider(thickness: 1, height: 12),
-                                  _buildInfoRow(
-                                    LucideIcons.checkCircle,
-                                    "${AppLocalizations.of(context)!.status}",
-                                    //   "Status",
-                                    getOrderStatusText(payment.status, context),
-                                  ),
-                                  _buildInfoRow(
-                                      LucideIcons.user,
-                                      "${AppLocalizations.of(context)!.userId}",
-                                      //"User ID",
-                                      payment.userId.toString()),
-                                  _buildInfoRow(
-                                      LucideIcons.dollarSign,
-                                      "${AppLocalizations.of(context)!.amount}",
-                                      '\Rs ${payment.amount}'
-                                      //   "Amount", '\Rs ${payment.amount}'
-
-                                      ),
-                                  _buildInfoRow(
-                                      LucideIcons.hash,
-                                      "${AppLocalizations.of(context)!.transactionId}",
-                                      //   "Transaction ID",
-                                      payment.transactionId.toString()),
-                                  _buildInfoRow(
-                                      LucideIcons.receipt,
-                                      "${AppLocalizations.of(context)!.paymentId}",
-                                      //"Payment ID",
-
-                                      payment.paymentId),
-                                  _buildInfoRow(
-                                      LucideIcons.calendar,
-                                      "${AppLocalizations.of(context)!.date}",
-                                      //  "Date",
-                                      payment.date),
-                                ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Container(
+            //   height: 70,
+            //   color: Acolors.primary,
+            //   child: Padding(
+            //     padding: const EdgeInsets.all(12),
+            //     child: Row(
+            //       children: [
+            //         Material(
+            //           color: Colors.white.withOpacity(0.21),
+            //           borderRadius: BorderRadius.circular(12),
+            //           child: const BackButton(color: Acolors.white),
+            //         ),
+            //         const SizedBox(width: 30),
+            //         const Text(
+            //           'Payment Details',
+            //           style: TextStyle(fontSize: 24, color: Acolors.white),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
+            SizedBox(height: 10),
+            Expanded(
+              child: paymentProvider.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : payments.isNotEmpty
+                      ? ListView.builder(
+                          itemCount: payments.length,
+                          itemBuilder: (context, index) {
+                            final payment = payments[index];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            ),
-                          );
-                        },
-                      )
-                    : Center(
-                        child: Text(
-                          "${AppLocalizations.of(context)!.youhavenotdoneanypayment}",
-                          // 'You have not done any payment.',
-                          style: TextStyle(fontSize: 18, color: Colors.black),
+                              elevation: 4,
+                              shadowColor: Colors.black26,
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(LucideIcons.creditCard,
+                                            color: Acolors.primary),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          "${AppLocalizations.of(context)!.paymentMethod}",
+                                          //  'Payment Method',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        Text(
+                                          payment.paymentMethod,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const Divider(thickness: 1, height: 12),
+                                    _buildInfoRow(
+                                      LucideIcons.checkCircle,
+                                      "${AppLocalizations.of(context)!.status}",
+                                      //   "Status",
+                                      getOrderStatusText(
+                                          payment.status, context),
+                                    ),
+                                    _buildInfoRow(
+                                        LucideIcons.user,
+                                        "${AppLocalizations.of(context)!.userId}",
+                                        //"User ID",
+                                        payment.userId.toString()),
+                                    _buildInfoRow(
+                                        LucideIcons.dollarSign,
+                                        "${AppLocalizations.of(context)!.amount}",
+                                        '\Rs ${payment.amount}'
+                                        //   "Amount", '\Rs ${payment.amount}'
+
+                                        ),
+                                    _buildInfoRow(
+                                        LucideIcons.hash,
+                                        "${AppLocalizations.of(context)!.transactionId}",
+                                        //   "Transaction ID",
+                                        payment.transactionId.toString()),
+                                    _buildInfoRow(
+                                        LucideIcons.receipt,
+                                        "${AppLocalizations.of(context)!.paymentId}",
+                                        //"Payment ID",
+
+                                        payment.paymentId),
+                                    _buildInfoRow(
+                                        LucideIcons.calendar,
+                                        "${AppLocalizations.of(context)!.date}",
+                                        //  "Date",
+                                        payment.date),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : Center(
+                          child: Text(
+                            "${AppLocalizations.of(context)!.youhavenotdoneanypayment}",
+                            // 'You have not done any payment.',
+                            style: TextStyle(fontSize: 18, color: Colors.black),
+                          ),
                         ),
-                      ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

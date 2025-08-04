@@ -1,9 +1,13 @@
+import 'package:ambrosia_ayurved/cosmetics/view/home/products/products_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
 
 class ThreeMonthPlan extends StatelessWidget {
-  const ThreeMonthPlan({Key? key}) : super(key: key);
+  // final String productId;
+  const ThreeMonthPlan({
+    Key? key,
+  }) : super(key: key);
 
   TextSpan buildStyledMonth(String monthText) {
     return TextSpan(
@@ -21,11 +25,11 @@ class ThreeMonthPlan extends StatelessWidget {
     final t = AppLocalizations.of(context)!;
 
     return Padding(
-      padding: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.all(12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 15),
+          // SizedBox(height: 5),
           Text(
             t.threeMonthTitle,
             style: TextStyle(

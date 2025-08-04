@@ -153,8 +153,7 @@ class CancellationRefundPolicyScreen1 extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        Text(
-          t.orderCancellationTitle,
+        Text(t.orderCancellationTitle,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
@@ -183,6 +182,7 @@ class CancellationRefundPolicyScreen1 extends StatelessWidget {
         BulletPoint(boldText: t.returnCondition1),
         BulletPoint(boldText: t.returnCondition2),
         BulletPoint(boldText: t.returnCondition3),
+        BulletPoint(boldText: t.replacementDeliveryInfo),
         const SizedBox(height: 8),
         Text(t.replacementIntro),
         BulletPoint(boldText: t.replacement1),

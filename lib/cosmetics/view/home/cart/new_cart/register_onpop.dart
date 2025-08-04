@@ -3,6 +3,7 @@ import 'package:ambrosia_ayurved/cosmetics/common_widgets/custom_message.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/ourpolicies/privacy_policy.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/ourpolicies/terms&conditions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
@@ -89,27 +90,40 @@ class RegisterService {
                       Row(
                         children: [
                           Expanded(
-                            child: buildTextFormField(fnameController,
-                                "${AppLocalizations.of(context)!.firstName} ",
-                                //'First Name',
-                                (value) {
-                              if (value!.isEmpty)
-                                return "${AppLocalizations.of(context)!.pleaseEnterFirstName} ";
-                              //  'First name cannot be empty';
-                              return null;
-                            }),
+                            child: buildTextFormField(
+                              fnameController,
+                              "${AppLocalizations.of(context)!.firstName} ",
+                              //'First Name',
+                              (value) {
+                                if (value!.isEmpty)
+                                  return "${AppLocalizations.of(context)!.pleaseEnterFirstName} ";
+                                //  'First name cannot be empty';
+                                return null;
+                              },
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'[a-zA-Z]')),
+                              ],
+                            ),
                           ),
                           SizedBox(width: 7),
                           Expanded(
-                            child: buildTextFormField(lnameController,
-                                "${AppLocalizations.of(context)!.lastName} ",
-                                //  'Last Name',
-                                (value) {
-                              if (value!.isEmpty)
-                                return "${AppLocalizations.of(context)!.pleaseEnterLastName} ";
-                              //'Last name cannot be empty';
-                              return null;
-                            }),
+                            child: buildTextFormField(
+                              lnameController,
+                              "${AppLocalizations.of(context)!.lastName} ",
+                              //  'Last Name',
+                              (value) {
+                                if (value!.isEmpty)
+                                  return "${AppLocalizations.of(context)!.pleaseEnterLastName} ";
+                                //'Last name cannot be empty';
+                                return null;
+                              },
+
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'[a-zA-Z]')),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -117,17 +131,20 @@ class RegisterService {
                         phoneController,
                         "${AppLocalizations.of(context)!.phone} ",
                         //'Mobile Number',
-
                         (value) {
                           if (value == null || value.isEmpty) {
                             return "${AppLocalizations.of(context)!.pleaseEnterPhone}";
                             //'Please enter Phone no.';
-                          } else if (!RegExp(r'^\d{1,13}$').hasMatch(value)) {
+                          } else if (!RegExp(r'^\d{10,13}$').hasMatch(value)) {
                             return "${AppLocalizations.of(context)!.pleaseEnterValidPhone}";
                             //'Please enter a valid Phone no.';
                           }
                           return null;
                         },
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(13),
+                        ],
                       ),
                       //     (value) {
                       //   if (value!.isEmpty)
@@ -280,9 +297,13 @@ class RegisterService {
     );
   }
 
-  Widget buildTextFormField(TextEditingController controller, String labelText,
-      String? Function(String?) validator,
-      {bool isObscure = false}) {
+  Widget buildTextFormField(
+    TextEditingController controller,
+    String labelText,
+    String? Function(String?) validator, {
+    bool isObscure = false,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: SizedBox(
@@ -295,6 +316,7 @@ class RegisterService {
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
           validator: validator,
+          inputFormatters: inputFormatters,
         ),
       ),
     );

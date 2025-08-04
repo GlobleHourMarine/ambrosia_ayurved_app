@@ -8,7 +8,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/contact/custom_field.dart';
-
 import 'package:flutter/material.dart';
 import 'package:typicons_flutter/typicons_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -586,38 +585,40 @@ class ContactUsPage extends StatelessWidget {
         title: "${AppLocalizations.of(context)!.contactUs}",
         //  'Contact Us',
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Container(
-            //   height: 70,
-            //   color: Acolors.primary,
-            //   child: Padding(
-            //     padding: const EdgeInsets.all(12),
-            //     child: Row(
-            //       children: [
-            //         Material(
-            //           color: Colors.white.withOpacity(0.21),
-            //           borderRadius: BorderRadius.circular(12),
-            //           child: const BackButton(
-            //             color: Acolors.white,
-            //           ),
-            //         ),
-            //         const SizedBox(width: 30),
-            //         const Text(
-            //           'Contact Us',
-            //           style: TextStyle(fontSize: 24, color: Acolors.white),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
-            const SizedBox(height: 10),
-            _buildContactInfo(context),
-            SizedBox(height: 20),
-            //  _buildContactForm(context),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Container(
+              //   height: 70,
+              //   color: Acolors.primary,
+              //   child: Padding(
+              //     padding: const EdgeInsets.all(12),
+              //     child: Row(
+              //       children: [
+              //         Material(
+              //           color: Colors.white.withOpacity(0.21),
+              //           borderRadius: BorderRadius.circular(12),
+              //           child: const BackButton(
+              //             color: Acolors.white,
+              //           ),
+              //         ),
+              //         const SizedBox(width: 30),
+              //         const Text(
+              //           'Contact Us',
+              //           style: TextStyle(fontSize: 24, color: Acolors.white),
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // ),
+              const SizedBox(height: 10),
+              _buildContactInfo(context),
+              SizedBox(height: 20),
+              //  _buildContactForm(context),
+            ],
+          ),
         ),
       ),
     );

@@ -19,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: Duration(seconds: 3),
+      duration: Duration(seconds: 2),
       vsync: this,
     );
     _fadeAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(_controller);
@@ -72,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _navigateToAppropriateScreen(UserProvider userProvider) async {
     print('Splash Screen - Is Logged In: ${userProvider.isLoggedIn}');
-    await Future.delayed(Duration(seconds: 3));
+    await Future.delayed(Duration(seconds: 1));
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => HomeScreen()),

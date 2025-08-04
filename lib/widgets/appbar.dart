@@ -1,4 +1,10 @@
 import 'dart:convert';
+import 'package:ambrosia_ayurved/cosmetics/shiprocket/shipping_screen.dart';
+import 'package:ambrosia_ayurved/cosmetics/shiprocket/shiprocket_service.dart';
+import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/address/address_fetch_service.dart';
+import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/address/fetch_address_screen.dart';
+import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/address/new_address_screen.dart';
+import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/order_now_page.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/contact/contact_us_new.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/order_history/submit_review.dart';
 import 'package:ambrosia_ayurved/home/sign_in_new.dart';
@@ -6,9 +12,14 @@ import 'package:ambrosia_ayurved/home/sign_up_new.dart';
 import 'package:ambrosia_ayurved/profile/new_forget_password.dart';
 import 'package:ambrosia_ayurved/widgets/address/address_form.dart';
 import 'package:ambrosia_ayurved/widgets/address/gemini_address/addressform_screen.dart';
+import 'package:ambrosia_ayurved/widgets/new_phonepe/phonepe_view.dart';
 import 'package:ambrosia_ayurved/widgets/newaddresssection.dart';
+import 'package:ambrosia_ayurved/widgets/phonepe_widget.dart';
+import 'package:ambrosia_ayurved/widgets/phonepe_widget2.dart';
+import 'package:ambrosia_ayurved/widgets/shiprocket/claude_tracking.dart';
+import 'package:ambrosia_ayurved/widgets/shiprocket/gemini/screen.dart';
+import 'package:ambrosia_ayurved/widgets/shiprocket/tracking.dart';
 import 'package:get/get.dart';
-
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_page.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/new_cart/provider.dart';
 //import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_provider.dart';
@@ -43,6 +54,8 @@ import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ambrosia_ayurved/profile/profile_model/profile_model.dart';
 
+import 'phonepe.dart';
+
 class BaseScaffold extends StatefulWidget {
   final String title;
   final Widget child;
@@ -60,6 +73,7 @@ class BaseScaffold extends StatefulWidget {
 class _BaseScaffoldState extends State<BaseScaffold> {
   String? _imageUrl;
   String? _userName;
+  AddressModel? selectedAddress;
 
   @override
   void initState() {
@@ -574,6 +588,146 @@ class _BaseScaffoldState extends State<BaseScaffold> {
 
                 ListTile(
                   leading: Icon(
+                    Icons.add_location_alt_outlined,
+                    color: Acolors.primary,
+                  ),
+                  title: Text(
+                    'Manage address',
+                    //  '${AppLocalizations.of(context)!.faq}',
+                    //   'FAQ',
+                    //  AppLocalizations.of(context)!.contactUs,
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              // AddressSelectionWidget(
+                              //   title: "Select Delivery Address",
+                              //   onAddressSelected: (AddressModel address) {
+                              //     setState(() {
+                              //       selectedAddress = address;
+                              //     });
+                              //     print(
+                              //         'Selected: ${address.fname} ${address.lname}');
+                              //   },
+                              // ),
+                              AddressNewScreen(),
+                        ));
+                  },
+                ),
+
+                ListTile(
+                  leading: Icon(
+                    Icons.person_pin_circle_outlined,
+                    color: Acolors.primary,
+                  ),
+                  title: Text(
+                    AppLocalizations.of(context)!.contactUs,
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              TrackingScreen1(awbCode: '19041768388890'),
+                          // ContactUsPage(),
+                        ));
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.person_pin_circle_outlined,
+                    color: Acolors.primary,
+                  ),
+                  title: Text(
+                    AppLocalizations.of(context)!.contactUs,
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TrackingScreen2(),
+                          // ContactUsPage(),
+                        ));
+                  },
+                ),
+
+                ListTile(
+                  leading: Icon(
+                    Icons.person_pin_circle_outlined,
+                    color: Acolors.primary,
+                  ),
+                  title: Text(
+                    'Tracking details',
+                    //  AppLocalizations.of(context)!.contactUs,
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    // In any other file
+                    // final awbCode =
+                    //     Provider.of<AwbData>(context, listen: false).awbCode;
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TrackingScreen(
+                            awbCode: '1091340531865' ?? '',
+                            token:
+                                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjY4NTkzMDcsInNvdXJjZSI6InNyLWF1dGgtaW50IiwiZXhwIjoxNzUxNzk5Njk5LCJqdGkiOiJQcGNxYmJjbllzTU5LT1FQIiwiaWF0IjoxNzUwOTM1Njk5LCJpc3MiOiJodHRwczovL3NyLWF1dGguc2hpcHJvY2tldC5pbi9hdXRob3JpemUvdXNlciIsIm5iZiI6MTc1MDkzNTY5OSwiY2lkIjo2NTE3MTM5LCJ0YyI6MzYwLCJ2ZXJib3NlIjpmYWxzZSwidmVuZG9yX2lkIjowLCJ2ZW5kb3JfY29kZSI6IiJ9.2HUjE-3fSCP9jf-5uer7Khas3rwC0bSt3mJAIgu5KqE',
+                          ),
+                          // ContactUsPage(),
+                        ));
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.person_pin_circle_outlined,
+                    color: Acolors.primary,
+                  ),
+                  title: Text(
+                    AppLocalizations.of(context)!.contactUs,
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PhonePePaymentScreen(),
+                          // ContactUsPage(),
+                        ));
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.person_pin_circle_outlined,
+                    color: Acolors.primary,
+                  ),
+                  title: Text(
+                    'Phonpe widget',
+                    //   AppLocalizations.of(context)!.contactUs,
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PhonePePaymentScreen(),
+                          // ContactUsPage(),
+                        ));
+                  },
+                ),
+
+                ListTile(
+                  leading: Icon(
                     Icons.add_business_outlined,
                     color: Acolors.primary,
                   ),
@@ -637,35 +791,13 @@ class _BaseScaffoldState extends State<BaseScaffold> {
 //
 //
 
-                ListTile(
-                  leading: Icon(
-                    Icons.format_quote_outlined,
-                    color: Acolors.primary,
-                  ),
-                  title: Text(
-                    'add address',
-                    //  '${AppLocalizations.of(context)!.faq}',
-                    //   'FAQ',
-                    //  AppLocalizations.of(context)!.contactUs,
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AddressSection(),
-                        ));
-                  },
-                ),
-
                 // ListTile(
                 //   leading: Icon(
                 //     Icons.format_quote_outlined,
-                //     //   color: Acolors.primary,
+                //     color: Acolors.primary,
                 //   ),
                 //   title: Text(
-                //     'contact us 2',
+                //     'add address',
                 //     //  '${AppLocalizations.of(context)!.faq}',
                 //     //   'FAQ',
                 //     //  AppLocalizations.of(context)!.contactUs,
@@ -676,10 +808,11 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                 //     Navigator.push(
                 //         context,
                 //         MaterialPageRoute(
-                //           builder: (context) => ContactUsScreen1(),
+                //           builder: (context) => ShippingScreen1(),
                 //         ));
                 //   },
                 // ),
+
                 //
                 //
                 //

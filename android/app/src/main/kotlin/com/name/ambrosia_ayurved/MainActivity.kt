@@ -1,4 +1,4 @@
-package com.name.ambrosia_ayurved
+package com.app.ambrosiaayurved
 
 import io.flutter.embedding.android.FlutterActivity
 
