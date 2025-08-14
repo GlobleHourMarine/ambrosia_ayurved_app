@@ -86,8 +86,9 @@ class _SignInScreenState extends State<SignInScreen> {
             subtitle:
                 "${AppLocalizations.of(context)!.youHaveBeenredirectedtohomescreen}",
             icon: Icons.verified_user,
+            iconColor: Acolors.primary,
             navigateToScreen: HomeScreen(),
-            autoCloseDuration: 3,
+            autoCloseDuration: 2,
           );
           ///////  showLoginSuccessPopup1(context);
           // Get.snackbar(

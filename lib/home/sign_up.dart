@@ -128,7 +128,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             subtitle:
                 "${AppLocalizations.of(context)!.youHaveBeenredirectedtohomescreen}",
             icon: Icons.verified_user,
-            //   iconColor: Colors.blue,
+            iconColor: Acolors.primary,
             navigateToScreen: HomeScreen(),
             autoCloseDuration: 3,
           );

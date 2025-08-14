@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
 import 'package:ambrosia_ayurved/cosmetics/common_widgets/custom_message.dart';
 import 'package:ambrosia_ayurved/cosmetics/common_widgets/snackbar.dart';
 import 'package:ambrosia_ayurved/home/home_screen.dart';
@@ -110,6 +111,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             subtitle:
                 "${AppLocalizations.of(context)!.youHaveBeenredirectedtohomescreen}",
             icon: Icons.verified_user,
+            iconColor: Acolors.primary,
             //   iconColor: Colors.blue,
             navigateToScreen: HomeScreen(),
             autoCloseDuration: 3,

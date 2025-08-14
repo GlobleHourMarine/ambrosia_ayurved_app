@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ambrosia_ayurved/widgets/phonepe/phonepe_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ambrosia_ayurved/cosmetics/common_widgets/snackbar.dart';
@@ -30,9 +31,11 @@ class PlaceOrderProvider with ChangeNotifier {
   Future<void> placeOrder(BuildContext context) async {
     if (_addressId == null) {
       _message = "Address ID is required";
+      print('address id : $_addressId $_message');
       notifyListeners();
       return;
     }
+
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     final grandTotalProvider =
@@ -55,16 +58,19 @@ class PlaceOrderProvider with ChangeNotifier {
         item.price.toString(),
         item.quantity.toString(),
       );
+      final merchantOrderId = GlobalPaymentData.merchantOrderId;
 
       final Map<String, String> orderData = {
         "user_id": userId,
         "address_id": addressId!,
         "product_id": item.productId.toString(),
         "quantity": item.quantity.toString(),
+        "order_id": merchantOrderId.toString(),
         "product_price": item.price.toString(),
         "total_price": totalPrice.toString(),
       };
-      print(orderData);
+
+      print('order data api : $orderData');
 
       try {
         final response = await http.post(
@@ -75,22 +81,17 @@ class PlaceOrderProvider with ChangeNotifier {
 
         final responseData = jsonDecode(response.body);
         print(responseData);
-        if (responseData["status"] == "success" &&
-            responseData['order_id'] != null) {
+        if (responseData["status"] == true) {
           _message = responseData["message"];
-          _orderId = responseData["order_id"]
-              .toString(); // Extract order_id from API response
-          print("Order ID: $_orderId");
-          print(responseData);
 
-          // SnackbarMessage.showSnackbar(context, 'Order placed successfully');
+          print('order data : $responseData');
         } else {
-          //  SnackbarMessage.showSnackbar(context, 'Failed to place order');
+          print('order data else  : $responseData');
           _message = "Order placement failed!";
         }
       } catch (error) {
-        print(error);
-        //  SnackbarMessage.showSnackbar(context, '$error');
+        print('orderdata error : $error');
+
         _message = "An error occurred!";
       }
     }

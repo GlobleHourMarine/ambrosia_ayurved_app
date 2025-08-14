@@ -1,5 +1,6 @@
 import 'package:ambrosia_ayurved/cosmetics/common/contact_info.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/order_now_page.dart';
+import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/order_history/new_order_history_ge.dart';
 import 'package:ambrosia_ayurved/firebase_options.dart';
 import 'package:ambrosia_ayurved/widgets/address/address_model.dart';
 import 'package:ambrosia_ayurved/widgets/notification_service.dart';
@@ -53,6 +54,7 @@ void main() async {
         //  ChangeNotifierProvider(create: (context) => Address()),
         // ChangeNotifierProvider(create: (context) => AwbData()),
         ChangeNotifierProvider(create: (context) => ProductNotifier()),
+        ChangeNotifierProvider(create: (context) => OrderProviderG()),
         ChangeNotifierProvider(create: (context) => CartProvider()),
         ChangeNotifierProvider(create: (context) => PaymentProvider()),
         ChangeNotifierProvider(create: (context) => PaymentDetailsProvider()),

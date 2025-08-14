@@ -77,8 +77,7 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
 
   // Add this method to launch WhatsApp
   Future<void> _launchWhatsApp() async {
-    const phoneNumber =
-        '+918000057233'; // Replace with your actual phone number
+    const phoneNumber = '+918000057233';
     const message = 'Hello, I have a question about Ambrosia Ayurved products';
     final url =
         'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}';

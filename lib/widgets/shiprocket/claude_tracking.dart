@@ -1,7 +1,11 @@
+import 'package:ambrosia_ayurved/cosmetics/common/contact_info.dart';
+import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
+import 'package:ambrosia_ayurved/widgets/shiprocket/shiprocket_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TrackingScreen1 extends StatefulWidget {
   final String awbCode;
@@ -22,9 +26,8 @@ class _TrackingScreen1State extends State<TrackingScreen1>
   late Animation<double> _progressAnimation;
   late Animation<double> _fadeAnimation;
 
-  // Replace with your actual bearer token
-  final String _bearerToken =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjY4NTkzMDcsInNvdXJjZSI6InNyLWF1dGgtaW50IiwiZXhwIjoxNzUxNzk5Njk5LCJqdGkiOiJQcGNxYmJjbllzTU5LT1FQIiwiaWF0IjoxNzUwOTM1Njk5LCJpc3MiOiJodHRwczovL3NyLWF1dGguc2hpcHJvY2tldC5pbi9hdXRob3JpemUvdXNlciIsIm5iZiI6MTc1MDkzNTY5OSwiY2lkIjo2NTE3MTM5LCJ0YyI6MzYwLCJ2ZXJib3NlIjpmYWxzZSwidmVuZG9yX2lkIjowLCJ2ZW5kb3JfY29kZSI6IiJ9.2HUjE-3fSCP9jf-5uer7Khas3rwC0bSt3mJAIgu5KqE";
+  // final String bearerToken =
+  //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjY3NTMwMzksInNvdXJjZSI6InNyLWF1dGgtaW50IiwiZXhwIjoxNzU1NzcxNzkxLCJqdGkiOiJpWmFwVHdubURDMjRWS1ltIiwiaWF0IjoxNzU0OTA3NzkxLCJpc3MiOiJodHRwczovL3NyLWF1dGguc2hpcHJvY2tldC5pbi9hdXRob3JpemUvdXNlciIsIm5iZiI6MTc1NDkwNzc5MSwiY2lkIjo2NTE3MTM5LCJ0YyI6MzYwLCJ2ZXJib3NlIjpmYWxzZSwidmVuZG9yX2lkIjowLCJ2ZW5kb3JfY29kZSI6IiJ9.tfzREh0gVEGxz3WQ4D-JwM7QPIiQExv0BLcDJujo6D4";
 
   @override
   void initState() {
@@ -58,10 +61,17 @@ class _TrackingScreen1State extends State<TrackingScreen1>
   }
 
   Future<void> _trackShipment() async {
+    // ✅ Get Shiprocket token
+    String? bearerToken = await ShiprocketAuth.getToken();
+    // if (bearerToken == null) {
+    //   showError("Failed", "Failed to authenticate with Shiprocket");
+    //   return;
+    // }
+
     try {
       var headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $_bearerToken'
+        'Authorization': 'Bearer $bearerToken'
       };
 
       var request = http.Request(
@@ -180,23 +190,15 @@ class _TrackingScreen1State extends State<TrackingScreen1>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: Text(
-          'Track Order',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: Colors.blue[600],
-        elevation: 0,
+      appBar: CustomAppBar(
+        title: "Track Order",
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh, color: Colors.white),
+            icon: Icon(Icons.refresh, color: Colors.black),
             onPressed: () {
               setState(() {
                 _isLoading = true;
@@ -387,64 +389,130 @@ class _TrackingScreen1State extends State<TrackingScreen1>
     final statusCode = trackingData['track_status'] ?? 0;
     final mainStatus = _getMainStatus(statusCode);
     final statusColor = _getStatusColor(statusCode);
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [statusColor, statusColor.withOpacity(0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: statusColor.withOpacity(0.3),
-            spreadRadius: 2,
-            blurRadius: 10,
-            offset: Offset(0, 5),
-          ),
-        ],
-      ),
-      padding: EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Icon(
-            statusCode == 7 ? Icons.check_circle : Icons.local_shipping,
-            size: 50,
-            color: Colors.white,
-          ),
-          SizedBox(height: 15),
-          Text(
-            mainStatus,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+    return Card(
+      elevation: 4,
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      statusCode == 7
+                          ? Icons.check_circle
+                          : Icons.local_shipping,
+                      // size: 50,
+                      //  color: Colors.white,
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      'Current Status',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                Text(
+                  mainStatus,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: statusColor,
+                  ),
+                ),
+              ],
             ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Order #${widget.awbCode}',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.white.withOpacity(0.9),
+            // SizedBox(height: 10),
+            // Text(
+            //   mainStatus,
+            //   style: TextStyle(
+            //     fontSize: 20,
+            //     fontWeight: FontWeight.bold,
+            //     color: statusColor,
+            //   ),
+            // ),
+            SizedBox(height: 10),
+            Text(
+              // 'Order #${widget.awbCode}',
+              'AWB: ${widget.awbCode}',
+              style: TextStyle(color: Colors.grey),
             ),
-          ),
-          if (shipmentData != null && shipmentData['edd'] != null)
-            Padding(
-              padding: EdgeInsets.only(top: 10),
-              child: Text(
-                'Expected delivery: ${_formatDate(shipmentData['edd'])}',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white.withOpacity(0.8),
+            if (shipmentData != null && shipmentData['edd'] != null)
+              Padding(
+                padding: EdgeInsets.only(top: 10),
+                child: Text(
+                  'Expected delivery: ${_formatDate(shipmentData['edd'])}',
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 14,
+                    //  color: Colors.white.withOpacity(0.8),
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
+    // return Container(
+    //   width: double.infinity,
+    //   decoration: BoxDecoration(
+    //     gradient: LinearGradient(
+    //       colors: [statusColor, statusColor.withOpacity(0.8)],
+    //       begin: Alignment.topLeft,
+    //       end: Alignment.bottomRight,
+    //     ),
+    //     borderRadius: BorderRadius.circular(15),
+    //     boxShadow: [
+    //       BoxShadow(
+    //         color: statusColor.withOpacity(0.3),
+    //         spreadRadius: 2,
+    //         blurRadius: 10,
+    //         offset: Offset(0, 5),
+    //       ),
+    //     ],
+    //   ),
+    //   padding: EdgeInsets.all(20),
+    //   child: Column(
+    //     children: [
+    //       Icon(
+    //         statusCode == 7 ? Icons.check_circle : Icons.local_shipping,
+    //         size: 50,
+    //         color: Colors.white,
+    //       ),
+    //       SizedBox(height: 15),
+    //       Text(
+    //         mainStatus,
+    //         style: TextStyle(
+    //           fontSize: 24,
+    //           fontWeight: FontWeight.bold,
+    //           color: Colors.white,
+    //         ),
+    //       ),
+    //       SizedBox(height: 8),
+    //       Text(
+    //         'Order #${widget.awbCode}',
+    //         style: TextStyle(
+    //           fontSize: 16,
+    //           color: Colors.white.withOpacity(0.9),
+    //         ),
+    //       ),
+    //       if (shipmentData != null && shipmentData['edd'] != null)
+    //         Padding(
+    //           padding: EdgeInsets.only(top: 10),
+    //           child: Text(
+    //             'Expected delivery: ${_formatDate(shipmentData['edd'])}',
+    //             style: TextStyle(
+    //               fontSize: 14,
+    //               color: Colors.white.withOpacity(0.8),
+    //             ),
+    //           ),
+    //         ),
+    //     ],
+    //   ),
+    // );
   }
 
   Widget _buildTrackingProgress(int currentStatus) {
@@ -667,7 +735,7 @@ class _TrackingScreen1State extends State<TrackingScreen1>
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () => _launchURL(ContactInfo.whatsappUrl),
                   icon: Icon(Icons.chat, size: 18),
                   label: Text('Chat Support'),
                   style: ElevatedButton.styleFrom(
@@ -683,7 +751,7 @@ class _TrackingScreen1State extends State<TrackingScreen1>
               SizedBox(width: 10),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () => _launchURL(ContactInfo.phoneUrl),
                   icon: Icon(Icons.phone, size: 18),
                   label: Text('Call Us'),
                   style: ElevatedButton.styleFrom(
@@ -701,6 +769,16 @@ class _TrackingScreen1State extends State<TrackingScreen1>
         ],
       ),
     );
+  }
+
+  void _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      debugPrint('Could not launch $url');
+    }
   }
 
   String _formatDate(String dateString) {

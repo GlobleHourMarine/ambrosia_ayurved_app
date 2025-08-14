@@ -3,6 +3,7 @@ class PlaceOrderModel {
   final String addressId;
   final String productId;
   final String quantity;
+  final String orderId;
   final String productPrice;
   final String totalPrice;
 
@@ -11,6 +12,7 @@ class PlaceOrderModel {
     required this.addressId,
     required this.productId,
     required this.quantity,
+    required this.orderId,
     required this.productPrice,
     required this.totalPrice,
   });
@@ -22,6 +24,7 @@ class PlaceOrderModel {
       addressId: json['address_id'] ?? '',
       productId: json['product_id'] ?? '',
       quantity: json['quantity'] ?? '',
+      orderId: json['order_id'] ?? '',
       productPrice: json['product_price'] ?? '',
       totalPrice: json['total_price'] ?? '',
     );
@@ -34,6 +37,7 @@ class PlaceOrderModel {
       "address_id": addressId,
       "product_id": productId,
       "quantity": quantity,
+      "order_id": orderId,
       "product_price": productPrice,
       "total_price": totalPrice,
     };

@@ -6,18 +6,19 @@ import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/address/fetc
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/address/new_address_screen.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/order_now_page.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/contact/contact_us_new.dart';
+import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/order_history/new_order_history.dart';
+import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/order_history/new_order_history_ge.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/more/more_view/order_history/submit_review.dart';
 import 'package:ambrosia_ayurved/home/sign_in_new.dart';
 import 'package:ambrosia_ayurved/home/sign_up_new.dart';
 import 'package:ambrosia_ayurved/profile/new_forget_password.dart';
 import 'package:ambrosia_ayurved/widgets/address/address_form.dart';
-import 'package:ambrosia_ayurved/widgets/address/gemini_address/addressform_screen.dart';
-import 'package:ambrosia_ayurved/widgets/new_phonepe/phonepe_view.dart';
+
+import 'package:ambrosia_ayurved/widgets/phonepe/phonepe_service.dart';
 import 'package:ambrosia_ayurved/widgets/newaddresssection.dart';
-import 'package:ambrosia_ayurved/widgets/phonepe_widget.dart';
-import 'package:ambrosia_ayurved/widgets/phonepe_widget2.dart';
 import 'package:ambrosia_ayurved/widgets/shiprocket/claude_tracking.dart';
 import 'package:ambrosia_ayurved/widgets/shiprocket/gemini/screen.dart';
+import 'package:ambrosia_ayurved/widgets/shiprocket/shiprocket_service.dart';
 import 'package:ambrosia_ayurved/widgets/shiprocket/tracking.dart';
 import 'package:get/get.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_page.dart';
@@ -53,8 +54,6 @@ import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_model.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ambrosia_ayurved/profile/profile_model/profile_model.dart';
-
-import 'phonepe.dart';
 
 class BaseScaffold extends StatefulWidget {
   final String title;
@@ -374,10 +373,6 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                     Icons.history,
                     color: Acolors.primary,
                   ),
-                  // trailing: Icon(
-                  //   Icons.keyboard_arrow_down_outlined,
-                  //   size: 35,
-                  // ),
                   title: Text(
                     AppLocalizations.of(context)!.orderHistory,
                     style: TextStyle(fontSize: 18),
@@ -400,6 +395,46 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                         ),
                         title: Text(
                           AppLocalizations.of(context)!.myOrders,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 35),
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OrderHistoryScreenN(),
+                              ));
+                        },
+                        leading: Icon(
+                          Icons.shopping_cart_outlined,
+                          color: Acolors.primary,
+                        ),
+                        title: Text(
+                          'My orders',
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 35),
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OrderHistoryScreenG(),
+                              ));
+                        },
+                        leading: Icon(
+                          Icons.shopping_cart_outlined,
+                          color: Acolors.primary,
+                        ),
+                        title: Text(
+                          'My orders G',
                         ),
                       ),
                     ),
@@ -634,7 +669,7 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              TrackingScreen1(awbCode: '19041768388890'),
+                              TrackingScreen1(awbCode: '19041787021862'),
                           // ContactUsPage(),
                         ));
                   },
@@ -678,54 +713,46 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => TrackingScreen(
-                            awbCode: '1091340531865' ?? '',
+                            awbCode: '19041787021862',
                             token:
-                                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjY4NTkzMDcsInNvdXJjZSI6InNyLWF1dGgtaW50IiwiZXhwIjoxNzUxNzk5Njk5LCJqdGkiOiJQcGNxYmJjbllzTU5LT1FQIiwiaWF0IjoxNzUwOTM1Njk5LCJpc3MiOiJodHRwczovL3NyLWF1dGguc2hpcHJvY2tldC5pbi9hdXRob3JpemUvdXNlciIsIm5iZiI6MTc1MDkzNTY5OSwiY2lkIjo2NTE3MTM5LCJ0YyI6MzYwLCJ2ZXJib3NlIjpmYWxzZSwidmVuZG9yX2lkIjowLCJ2ZW5kb3JfY29kZSI6IiJ9.2HUjE-3fSCP9jf-5uer7Khas3rwC0bSt3mJAIgu5KqE',
+                                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjY3NTMwMzksInNvdXJjZSI6InNyLWF1dGgtaW50IiwiZXhwIjoxNzU1NzcxNzkxLCJqdGkiOiJpWmFwVHdubURDMjRWS1ltIiwiaWF0IjoxNzU0OTA3NzkxLCJpc3MiOiJodHRwczovL3NyLWF1dGguc2hpcHJvY2tldC5pbi9hdXRob3JpemUvdXNlciIsIm5iZiI6MTc1NDkwNzc5MSwiY2lkIjo2NTE3MTM5LCJ0YyI6MzYwLCJ2ZXJib3NlIjpmYWxzZSwidmVuZG9yX2lkIjowLCJ2ZW5kb3JfY29kZSI6IiJ9.tfzREh0gVEGxz3WQ4D-JwM7QPIiQExv0BLcDJujo6D4',
                           ),
                           // ContactUsPage(),
                         ));
                   },
                 ),
-                ListTile(
-                  leading: Icon(
-                    Icons.person_pin_circle_outlined,
-                    color: Acolors.primary,
-                  ),
-                  title: Text(
-                    AppLocalizations.of(context)!.contactUs,
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PhonePePaymentScreen(),
-                          // ContactUsPage(),
-                        ));
-                  },
-                ),
-                ListTile(
-                  leading: Icon(
-                    Icons.person_pin_circle_outlined,
-                    color: Acolors.primary,
-                  ),
-                  title: Text(
-                    'Phonpe widget',
-                    //   AppLocalizations.of(context)!.contactUs,
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PhonePePaymentScreen(),
-                          // ContactUsPage(),
-                        ));
-                  },
-                ),
-
+                // ListTile(
+                //   leading: Icon(
+                //     Icons.person_pin_circle_outlined,
+                //     color: Acolors.primary,
+                //   ),
+                //   title: Text(
+                //     'Phonpe widget',
+                //     //   AppLocalizations.of(context)!.contactUs,
+                //     style: TextStyle(fontSize: 18),
+                //   ),
+                //   onTap: () {
+                //     Navigator.pop(context);
+                //     Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //           builder: (context) =>
+                //           PhonePePaymentPage(),
+                //           // ContactUsPage(),
+                //         ));
+                //   },
+                // ),
+                // ListTile(
+                //   leading: Icon(
+                //     Icons.add_business_outlined,
+                //     color: Acolors.primary,
+                //   ),
+                //   title: Text(
+                //     'trackingask',
+                //     style: TextStyle(fontSize: 18),
+                //   ),
+                //   onTap: () => fetchTrackingInfo,
+                // ),
                 ListTile(
                   leading: Icon(
                     Icons.add_business_outlined,

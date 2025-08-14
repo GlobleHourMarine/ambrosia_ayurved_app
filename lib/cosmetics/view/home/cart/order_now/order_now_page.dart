@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:ambrosia_ayurved/cosmetics/common_widgets/custom_message.dart';
 import 'package:ambrosia_ayurved/cosmetics/thankyou/thankyou.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/address/address_fetch_service.dart';
 import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/bill_summary_section.dart';
 import 'package:ambrosia_ayurved/home/home_screen.dart';
+import 'package:ambrosia_ayurved/widgets/phonepe/phonepe_service.dart';
+import 'package:ambrosia_ayurved/widgets/shiprocket/shiprocket_service.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
@@ -37,22 +40,7 @@ class OrderNowPage extends StatefulWidget {
 
 class _OrderNowPageState extends State<OrderNowPage> {
   AddressModel? selectedAddress;
-  // PhonePe Configuration
-  static const String merchantId = "M22NOXGSL1P2A";
-  static const String saltKey =
-      "MWRiMWMwMjAtNmRmMy00Mjk1LWI2N2EtZGNkMmU0MmVjOTQ1";
-  static const int saltIndex = 1;
-  static const String environment =
-      "SANDBOX"; // Change to "PRODUCTION" for live
-  static const String appId = "TEST-M22NOXGSL1P2A_25052";
-  // Base URLs for PhonePe API
-  static const String sandboxBaseUrl =
-      "https://api-preprod.phonepe.com/apis/hermes";
-  static const String productionBaseUrl = "https://api.phonepe.com/apis/hermes";
-
   final _formKey = GlobalKey<FormState>();
-  //final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  // Form controllers
 
   final TextEditingController _fnameController = TextEditingController();
   final TextEditingController _lnameController = TextEditingController();
@@ -70,7 +58,6 @@ class _OrderNowPageState extends State<OrderNowPage> {
 
   void initState() {
     super.initState();
-    _initializePhonePe();
 
     _pincodeController.addListener(_onPincodeChanged);
 
@@ -84,233 +71,6 @@ class _OrderNowPageState extends State<OrderNowPage> {
       grandTotalProvider.calculateGrandTotal(cartProvider.cartItems);
     });
   }
-//s
-// phone pe
-//
-
-  // Initialize PhonePe SDK
-  Future<void> _initializePhonePe() async {
-    try {
-      String flowId = "FLOW_${DateTime.now().millisecondsSinceEpoch}";
-      bool isInitialized = await PhonePePaymentSdk.init(
-        environment,
-        merchantId, // Use merchantId instead of appId
-        flowId,
-        true, // Enable logging for debug
-      );
-
-      setState(() {
-        _isPhonePeInitialized = isInitialized;
-      });
-
-      if (isInitialized) {
-        print("PhonePe SDK initialized successfully");
-      } else {
-        print("PhonePe SDK initialization failed");
-      }
-    } catch (e) {
-      print("Error initializing PhonePe: $e");
-    }
-  }
-
-// Generate unique order ID
-  String _generateOrderId() {
-    return "ORDER_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(10000)}";
-  }
-
-  // Generate unique transaction ID
-  String _generateTransactionId() {
-    return "TXN_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(10000)}";
-  }
-
-  // Generate checksum for API calls
-  String _generateChecksum(String payload, String endpoint) {
-    String data = payload + endpoint + saltKey;
-    var bytes = utf8.encode(data);
-    var digest = sha256.convert(bytes);
-    return "${digest.toString()}###$saltIndex";
-  }
-
-  // Create payment request directly (no separate auth token needed for SDK)
-  Future<void> _startPhonePePayment(double amount) async {
-    if (!_isPhonePeInitialized) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('PhonePe SDK not initialized')),
-      );
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      String transactionId = _generateTransactionId();
-      String orderId = _generateOrderId();
-      String merchantUserId =
-          "USER_${DateTime.now().millisecondsSinceEpoch}"; // 1. Create the payload (ensure all required fields are included)
-// 1. Generate the payload (JSON)
-      Map<String, dynamic> payload = {
-        "merchantId": merchantId,
-        "merchantTransactionId":
-            "TXN_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(10000)}",
-        "amount": (amount * 100).toInt(), // Amount in paise
-        "merchantUserId": "USER_${DateTime.now().millisecondsSinceEpoch}",
-        "redirectUrl": "https://webhook.site/redirect-url",
-        "redirectMode": "POST", // Changed from REDIRECT to POST
-        "callbackUrl": "https://webhook.site/callback-url",
-        "mobileNumber": "9999999999",
-        "paymentInstrument": {"type": "PAY_PAGE"}
-      };
-
-// 2. Encode payload to base64
-      String payloadString = jsonEncode(payload);
-// Ensure no trailing newlines or spaces
-      String base64Payload = base64.encode(utf8.encode(payloadString)).trim();
-      print("Base64 Payload: $base64Payload");
-// 3. Generate checksum (SHA256 of base64Payload + endpoint + saltKey)
-      String checksumInput = base64Payload + "/pg/v1/pay" + saltKey;
-
-      String checksum = sha256.convert(utf8.encode(checksumInput)).toString() +
-          "###$saltIndex";
-
-      // Create the request for PhonePe SDK
-      Map<String, dynamic> phonePeRequest = {
-        "merchantId": merchantId,
-        "merchantTransactionId": transactionId,
-        "merchantUserId": merchantUserId,
-        "merchantOrderId": orderId,
-        "amount": (amount * 100).toInt(),
-        "callbackUrl": "https://webhook.site/callback-url",
-        "paymentInstrument": {"type": "PAY_PAGE"}
-      };
-
-      String requestString = jsonEncode(phonePeRequest);
-      String appSchema = "phonepe://"; // PhonePe's URL scheme
-      String decoded = utf8.decode(base64.decode(base64Payload));
-      print("Decoded payload: $decoded");
-      print("PhonePe Request: $requestString");
-
-      // Start transaction using PhonePe SDK
-      Map<dynamic, dynamic>? result = await PhonePePaymentSdk.startTransaction(
-        base64Payload, // ✅ Base64-encoded payload
-        "phonepe://",
-      );
-
-      print("PhonePe Result: $result");
-
-      if (result != null) {
-        String status = result['status'].toString();
-
-        if (status == 'SUCCESS') {
-          // Check payment status to confirm
-          await _checkPaymentStatus(transactionId);
-        } else {
-          String error = result['error']?.toString() ?? 'Unknown error';
-          _showPaymentFailed("Payment failed: $error");
-        }
-      } else {
-        _showPaymentFailed("Payment was interrupted");
-      }
-    } catch (e) {
-      print("Payment error: $e");
-      _showPaymentFailed("Payment failed: ${e.toString()}");
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  // Check payment status using PhonePe API
-  Future<void> _checkPaymentStatus(String transactionId) async {
-    try {
-      String endpoint = "/pg/v1/status/$merchantId/$transactionId";
-      String baseUrl =
-          environment == "SANDBOX" ? sandboxBaseUrl : productionBaseUrl;
-
-      // Create checksum for status check
-      String checksum = _generateChecksum("", endpoint);
-
-      final response = await http.get(
-        Uri.parse("$baseUrl$endpoint"),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-VERIFY': checksum,
-          'X-MERCHANT-ID': merchantId,
-        },
-      );
-
-      print("Status Response: ${response.body}");
-
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        if (responseData['success'] == true) {
-          String paymentState = responseData['data']['state'];
-          if (paymentState == 'COMPLETED') {
-            _showPaymentSuccess();
-          } else if (paymentState == 'FAILED') {
-            _showPaymentFailed("Payment failed");
-          } else {
-            _showPaymentFailed("Payment status: $paymentState");
-          }
-        } else {
-          _showPaymentFailed("Payment verification failed");
-        }
-      } else {
-        _showPaymentFailed("Failed to verify payment status");
-      }
-    } catch (e) {
-      print("Error checking payment status: $e");
-      _showPaymentFailed("Payment verification failed");
-    }
-  }
-
-  void _showPaymentSuccess() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Payment Successful'),
-          content: Text('Your payment has been processed successfully!'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Navigate to success page or order confirmation
-                Navigator.pushReplacementNamed(context, '/order-success');
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showPaymentFailed(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Payment Failed'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-//
-//phone pe
-//
 
   void _onPincodeChanged() {
     if (_pincodeController.text.length == 6) {
@@ -426,86 +186,8 @@ class _OrderNowPageState extends State<OrderNowPage> {
     );
   }
 
-// // create shiprocket order
-//   Future<void> _createOrder() async {
-//     if (_isLoading) return; // Prevent multiple clicks
-
-//     setState(() => _isLoading = true);
-
-//     final userProvider = Provider.of<UserProvider>(context);
-//     final cartProvider = Provider.of<CartProvider>(context);
-//     final grandTotalProvider =
-//         Provider.of<GrandTotalProvider>(context, listen: false);
-
-//     // final cartList = cartProvider.cartItems;
-
-//     try {
-//       // List<Map<String, dynamic>> orderItems =
-//       //     cartProvider.cartItems.map((cartItem) {
-//       //   return {
-//       //     "name":
-//       //         cartItem.productName, // Adjust according to your product model
-//       //     "sku": "AYUR${cartItem.productId}", // Use SKU or generate one
-//       //     "units": cartItem.quantity,
-//       //     "selling_price": cartItem.price, // Adjust for your price field
-//       //     "discount": "", // You can calculate discount if available
-//       //     "tax": "", // Add tax if applicable
-//       //     "hsn": 123566 // Use HSN from product or default
-//       //   };
-//       // }).toList();
-
-//       await createShiprocketOrder(
-//         billingCustomerName: selectedAddress!.fname,
-//         billingLastName: selectedAddress!.lname,
-//         billingAddress: selectedAddress!.address,
-//         billingAddress2: "123",
-//         billingCity: selectedAddress!.city,
-//         billingPincode: selectedAddress!.pincode,
-//         billingState: selectedAddress!.state,
-//         billingCountry: selectedAddress!.country,
-//         billingEmail: userProvider.email,
-//         billingPhone: selectedAddress!.mobile,
-//         //   orderItems: orderItems,
-//         orderItems: [
-//           {
-//             "name": "Ambrosia ayurved",
-//             "sku": "AYUR123",
-//             "units": 2,
-//             "selling_price": 500,
-//             "discount": "",
-//             "tax": "",
-//             "hsn": 123456
-//           }
-//         ],
-//         paymentMethod: "Prepaid",
-//         shippingCharges: 50,
-//         giftwrapCharges: 0,
-//         transactionCharges: 10,
-//         totalDiscount: 100,
-//         subTotal: grandTotalProvider.grandTotal,
-//         length: 3,
-//         breadth: 2,
-//         height: 5,
-//         weight: 0.1,
-//       );
-
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         SnackBar(content: Text('Order created successfully!')),
-//       );
-//     } catch (e) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         SnackBar(content: Text('Error creating order: $e')),
-//       );
-//     } finally {
-//       setState(() => _isLoading = false);
-//     }
-//   }
-
   @override
   Widget build(BuildContext context) {
-    // final TextEditingController _addressController = TextEditingController();
-    // final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
     final addressProvider = Provider.of<AddressProvider>(context);
 
     final cartProvider = Provider.of<CartProvider>(context);
@@ -513,10 +195,6 @@ class _OrderNowPageState extends State<OrderNowPage> {
     // Provider.of<GrandTotalProvider>(context, listen: false);
 
     final cartList = cartProvider.cartItems;
-    // // Calculate grand total and update provider
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   grandTotalProvider.calculateGrandTotal(cartList);
-    // });
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -609,6 +287,7 @@ class _OrderNowPageState extends State<OrderNowPage> {
                                     ),
                                   ),
                                 ),
+
                                 const SizedBox(width: 20),
                                 //
                                 Expanded(
@@ -1611,8 +1290,8 @@ class _OrderNowPageState extends State<OrderNowPage> {
                 //         color: Colors.black,
                 //         fontSize: 18,
                 //         fontWeight: FontWeight.w600),
-                //   ),
-                // ),
+                //        ),
+                //    ),
                 // /// Address Input Field
                 // Padding(
                 //   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -1637,7 +1316,6 @@ class _OrderNowPageState extends State<OrderNowPage> {
                 //     ),
                 //   ),
                 // ),
-
                 // if (cartList.isNotEmpty)
                 //   Consumer<GrandTotalProvider>(
                 //     builder: (context, grandTotalProvider, child) {
@@ -1671,98 +1349,159 @@ class _OrderNowPageState extends State<OrderNowPage> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                   child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            backgroundColor: Acolors.primary,
-                            foregroundColor: Acolors.white),
-                        onPressed: _isLoading
-                            ? null
-                            : () async {
-                                setState(() => _isLoading = true);
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          backgroundColor: Acolors.primary,
+                          foregroundColor: Acolors.white),
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                              setState(() => _isLoading = true);
 
-                                try {
-                                  if (selectedAddress == null) {
-                                    SnackbarMessage.showSnackbar(context,
-                                        'Please select a delivery address');
-                                    return;
-                                  }
-                                  final userProvider =
-                                      Provider.of<UserProvider>(context,
-                                          listen: false);
-                                  final cartProvider =
-                                      Provider.of<CartProvider>(context,
-                                          listen: false);
-                                  final grandTotalProvider =
-                                      Provider.of<GrandTotalProvider>(context,
-                                          listen: false);
-
-                                  List<Map<String, dynamic>> orderItems =
-                                      cartProvider.cartItems.map((cartItem) {
-                                    return {
-                                      "name": cartItem.productName,
-                                      "sku": "AYUR${cartItem.productId}",
-                                      "units": cartItem.quantity,
-                                      "selling_price": cartItem.price,
-                                      "discount":
-                                          "", // You can calculate discount if available
-                                      "tax": "", // Add tax if applicable
-                                      "hsn":
-                                          123566 // Use HSN from product or default
-                                    };
-                                  }).toList();
-
-                                  await createShiprocketOrder(
-                                      billingCustomerName:
-                                          selectedAddress!.fname,
-                                      billingLastName: selectedAddress!.lname,
-                                      billingAddress: selectedAddress!.address,
-                                      billingAddress2: "",
-                                      billingCity: selectedAddress!.city,
-                                      billingPincode: selectedAddress!.pincode,
-                                      billingState: selectedAddress!.state,
-                                      billingCountry: selectedAddress!.country,
-                                      billingEmail: userProvider.email,
-                                      billingPhone: selectedAddress!.mobile,
-                                      orderItems: orderItems,
-                                      paymentMethod: "Prepaid",
-                                      shippingCharges: 0,
-                                      giftwrapCharges: 0,
-                                      transactionCharges: 0,
-                                      totalDiscount: 0,
-                                      subTotal: grandTotalProvider.grandTotal,
-                                      length: 9,
-                                      breadth: 7,
-                                      height: 2,
-                                      weight: 0.1,
-                                      context: context);
-                                } catch (e) {
-                                  print(e);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content: Text('Error creating order')),
-                                  );
-                                } finally {
-                                  if (mounted) {
-                                    setState(() => _isLoading = false);
-                                  }
+                              try {
+                                if (selectedAddress == null) {
+                                  SnackbarMessage.showSnackbar(context,
+                                      'Please select a delivery address');
+                                  return;
                                 }
-                              },
-                        child: _isLoading
-                            ? SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
-                                ),
-                              )
-                            : Text("Create Shiprocket Order"),
-                      )
-                      /* 
+
+                                final placeOrderProvider =
+                                    Provider.of<PlaceOrderProvider>(context,
+                                        listen: false);
+                                // ✅ Pass the selected address ID to the provider
+                                placeOrderProvider.setAddressId(
+                                    selectedAddress!.id.toString());
+
+                                final userProvider = Provider.of<UserProvider>(
+                                    context,
+                                    listen: false);
+                                final cartProvider = Provider.of<CartProvider>(
+                                    context,
+                                    listen: false);
+                                final grandTotalProvider =
+                                    Provider.of<GrandTotalProvider>(context,
+                                        listen: false);
+
+                                // 1️⃣ Show loader popup immediately
+                                SuccessPopup.show(
+                                  context: context,
+                                  title: "Processing...",
+                                  subtitle:
+                                      "Please wait while we complete your payment and order.",
+                                  icon: Icons.hourglass_empty,
+                                  iconColor: Colors.orange,
+                                  autoCloseDuration: 0,
+                                  showButtonLoader: true,
+                                );
+
+                                String paymentResult =
+                                    await PhonePePaymentService.initiatePayment(
+                                  amount: 100, context: context,
+
+                                  // (grandTotalProvider.grandTotal * 100)
+                                  //     .toInt(), // amount in paisa
+                                );
+                                Navigator.of(context)
+                                    .pop(); // close loader popup after payment
+
+                                if (paymentResult.contains("FAILURE")) {
+                                  SuccessPopup.show(
+                                    context: context,
+                                    title: "Payment Failed",
+                                    subtitle: paymentResult,
+                                    iconColor: Colors.red,
+                                    icon: Icons.cancel,
+                                    autoCloseDuration: 0,
+                                    buttonText: "OK",
+                                  );
+                                  return;
+                                }
+
+                                // 3️⃣ If payment success, show "Creating Order..." loader
+                                SuccessPopup.show(
+                                  context: context,
+                                  title: "Creating Order...",
+                                  subtitle:
+                                      "We are placing your order in Shiprocket.",
+                                  icon: Icons.hourglass_empty,
+                                  iconColor: Colors.orange,
+                                  autoCloseDuration: 0,
+                                  showButtonLoader: true,
+                                );
+
+                                List<Map<String, dynamic>> orderItems =
+                                    cartProvider.cartItems.map((cartItem) {
+                                  return {
+                                    "name": cartItem.productName,
+                                    "sku": "AYUR${cartItem.productId}",
+                                    "units": cartItem.quantity,
+                                    "selling_price": cartItem.price,
+                                    "discount":
+                                        "", // You can calculate discount if available
+                                    "tax": "", // Add tax if applicable
+                                    "hsn":
+                                        123566 // Use HSN from product or default
+                                  };
+                                }).toList();
+
+                                await createShiprocketOrder(
+                                    billingCustomerName: selectedAddress!.fname,
+                                    billingLastName: selectedAddress!.lname,
+                                    billingAddress: selectedAddress!.address,
+                                    billingAddress2: "",
+                                    billingCity: selectedAddress!.city,
+                                    billingPincode: selectedAddress!.pincode,
+                                    billingState: selectedAddress!.state,
+                                    billingCountry: selectedAddress!.country,
+                                    billingEmail: userProvider.email,
+                                    billingPhone: selectedAddress!.mobile,
+                                    orderItems: orderItems,
+                                    paymentMethod: "Prepaid",
+                                    shippingCharges: 0,
+                                    giftwrapCharges: 0,
+                                    transactionCharges: 0,
+                                    totalDiscount: 0,
+                                    subTotal: grandTotalProvider.grandTotal,
+                                    length: 2,
+                                    breadth: 3,
+                                    height: 4,
+                                    weight: 0.1,
+                                    context: context);
+                              } catch (e) {
+                                print(e);
+
+                                SuccessPopup.show(
+                                  context: context,
+                                  title: "Error",
+                                  subtitle: e.toString(),
+                                  iconColor: Colors.red,
+                                  icon: Icons.error,
+                                  autoCloseDuration: 0,
+                                  buttonText: "OK",
+                                );
+                              } finally {
+                                if (mounted) {
+                                  setState(() => _isLoading = false);
+                                }
+                              }
+                            },
+                      child: _isLoading
+                          ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : Text("Create Shiprocket Order"),
+                    ),
+
+                    /* 
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
@@ -1906,8 +1645,19 @@ class _OrderNowPageState extends State<OrderNowPage> {
                             ),
                     ),
                     */
-                      ),
+                  ),
                 ),
+                // ElevatedButton(
+                //     onPressed: () async {
+                //       try {
+                //         final data = await fetchTrackingInfo('19041786623385',
+                //             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjY3NTMwMzksInNvdXJjZSI6InNyLWF1dGgtaW50IiwiZXhwIjoxNzU1NzcxNzkxLCJqdGkiOiJpWmFwVHdubURDMjRWS1ltIiwiaWF0IjoxNzU0OTA3NzkxLCJpc3MiOiJodHRwczovL3NyLWF1dGguc2hpcHJvY2tldC5pbi9hdXRob3JpemUvdXNlciIsIm5iZiI6MTc1NDkwNzc5MSwiY2lkIjo2NTE3MTM5LCJ0YyI6MzYwLCJ2ZXJib3NlIjpmYWxzZSwidmVuZG9yX2lkIjowLCJ2ZW5kb3JfY29kZSI6IiJ9.tfzREh0gVEGxz3WQ4D-JwM7QPIiQExv0BLcDJujo6D4');
+                //         print('Tracking data : $data');
+                //       } catch (e) {
+                //         print('Error: $e');
+                //       }
+                //     },
+                //     child: Text('click')),
                 SizedBox(height: 5),
               ],
             ),
@@ -2319,6 +2069,9 @@ class OrderNowPage extends StatelessWidget {
 }
 */
 
+
+
+/*
 // shiprocket code
 
 Future<void> createShiprocketOrder({
@@ -2354,16 +2107,19 @@ Future<void> createShiprocketOrder({
   final now = DateTime.now();
   final orderDate = DateFormat('yyyy-MM-dd HH:mm').format(now);
 
+  final merchantOrderId = GlobalPaymentData.merchantOrderId;
+  print('global merchant id : $merchantOrderId');
+
   const bearerToken =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjY4NTkzMDcsInNvdXJjZSI6InNyLWF1dGgtaW50IiwiZXhwIjoxNzUxNzk5Njk5LCJqdGkiOiJQcGNxYmJjbllzTU5LT1FQIiwiaWF0IjoxNzUwOTM1Njk5LCJpc3MiOiJodHRwczovL3NyLWF1dGguc2hpcHJvY2tldC5pbi9hdXRob3JpemUvdXNlciIsIm5iZiI6MTc1MDkzNTY5OSwiY2lkIjo2NTE3MTM5LCJ0YyI6MzYwLCJ2ZXJib3NlIjpmYWxzZSwidmVuZG9yX2lkIjowLCJ2ZW5kb3JfY29kZSI6IiJ9.2HUjE-3fSCP9jf-5uer7Khas3rwC0bSt3mJAIgu5KqE';
-
+  
   var headers = {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $bearerToken'
   };
 
   var requestBody = {
-    "order_id": orderId,
+    "order_id": merchantOrderId,
     "order_date": orderDate,
     "pickup_location": "warehouse",
     "comment": "Ambrosia",
@@ -2418,7 +2174,7 @@ Future<void> createShiprocketOrder({
     if (response.statusCode == 200) {
       print('Order created successfully!');
       print('Order ID: $orderId');
-      print(responseData);
+      print( 'Create order api of shipment :   $responseData');
 
       final shipmentId = responseData['shipment_id'];
       if (shipmentId != null) {
@@ -2462,6 +2218,7 @@ Future<void> createShiprocketOrder({
               'Order created but AWB assignment failed: ${awbResult['error']}');
         }
       }
+
       // Example usage
       // if (shipmentId != null) {
       //   List<int> shipmentIds = [shipmentId as int];
@@ -2494,28 +2251,28 @@ Future<Map<String, dynamic>> assignAwbToShipment({
   required String token,
   required List<int> shipmentIds,
 }) async {
-  // Set up headers
+ 
   final headers = {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token',
   };
 
-  // Create request
+
   final request = http.Request(
     'POST',
     Uri.parse('https://apiv2.shiprocket.in/v1/external/courier/assign/awb'),
   );
 
-  // Set request body
+  
   request.body = json.encode({
     "shipment_id": shipmentIds,
   });
 
-  // Add headers
+  
   request.headers.addAll(headers);
 
   try {
-    // Send request
+   
     final response = await request.send();
     final responseBody = await response.stream.bytesToString();
     final responseData = json.decode(responseBody);
@@ -2525,7 +2282,7 @@ Future<Map<String, dynamic>> assignAwbToShipment({
         'success': true,
         'data': responseData,
         'awb_number': responseData['awb_number']
-            ?.toString(), // Extract AWB number if available
+            ?.toString(), 
       };
     } else {
       return {
@@ -2549,29 +2306,29 @@ Future<Map<String, dynamic>> generatePickupRequest({
   required String token,
   required List<int> shipmentIds,
 }) async {
-  // Setup headers
+
   final headers = {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token',
   };
 
-  // Create request
+  
   final request = http.Request(
     'POST',
     Uri.parse(
         'https://apiv2.shiprocket.in/v1/external/courier/generate/pickup'),
   );
 
-  // Set request body
+  
   request.body = json.encode({
     "shipment_id": shipmentIds,
   });
 
-  // Add headers
+ 
   request.headers.addAll(headers);
 
   try {
-    // Send request
+    
     final response = await request.send();
     final responseBody = await response.stream.bytesToString();
     final responseData = json.decode(responseBody);
@@ -2631,4 +2388,5 @@ createShiprocketOrder(
   height: 20,
   weight: 2.5,
 );
+*/
 */

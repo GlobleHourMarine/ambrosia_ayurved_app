@@ -4,6 +4,11 @@ class ContactInfo {
   // Phone
   static const String phoneNumber = '+918000057233';
   static const String phoneUrl = 'tel:$phoneNumber';
+// whatsapp
+  static const String whatsappNumber = '+918000057233';
+  static const String whatsappUrl = 'https://wa.me/$whatsappNumber';
+  static const whatsappMessage =
+      'Hello, I have a question about Ambrosia Ayurved products';
 
   // Email
   static const String emailAddress = 'care@ambrosiaayurved.in';
