@@ -63,10 +63,6 @@ class _TrackingScreen1State extends State<TrackingScreen1>
   Future<void> _trackShipment() async {
     // ✅ Get Shiprocket token
     String? bearerToken = await ShiprocketAuth.getToken();
-    // if (bearerToken == null) {
-    //   showError("Failed", "Failed to authenticate with Shiprocket");
-    //   return;
-    // }
 
     try {
       var headers = {

@@ -35,7 +35,6 @@ class PlaceOrderProvider with ChangeNotifier {
       notifyListeners();
       return;
     }
-
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     final grandTotalProvider =
@@ -91,11 +90,9 @@ class PlaceOrderProvider with ChangeNotifier {
         }
       } catch (error) {
         print('orderdata error : $error');
-
         _message = "An error occurred!";
       }
     }
-
     _isLoading = false;
     notifyListeners();
   }

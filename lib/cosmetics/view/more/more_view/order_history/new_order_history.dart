@@ -1,7 +1,8 @@
 import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
 import 'package:ambrosia_ayurved/provider/user_provider.dart';
 import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
-import 'package:ambrosia_ayurved/widgets/shiprocket/claude_tracking.dart';
+import 'package:ambrosia_ayurved/widgets/shiprocket/track_order.dart';
+import 'package:ambrosia_ayurved/widgets/shiprocket/shiprocket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -99,7 +100,6 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final userId = userProvider.id;
-
       final response = await http.post(
         Uri.parse('https://ambrosiaayurved.in/api/fetch_orders_data'),
         headers: {
@@ -270,58 +270,58 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
       );
     }
 
-    if (error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red[300],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Oops! Something went wrong',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[700],
-              ),
-            ),
-            // const SizedBox(height: 8),
-            // Text(
-            //   error!,
-            //   textAlign: TextAlign.center,
-            //   style: TextStyle(
-            //     fontSize: 14,
-            //     color: Colors.grey[600],
-            //   ),
-            // ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                setState(() {
-                  isLoading = true;
-                  error = null;
-                });
-                fetchOrders();
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Try Again'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Acolors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    // if (error != null) {
+    //   return Center(
+    //     child: Column(
+    //       mainAxisAlignment: MainAxisAlignment.center,
+    //       children: [
+    //         Icon(
+    //           Icons.error_outline,
+    //           size: 64,
+    //           color: Colors.red[300],
+    //         ),
+    //         const SizedBox(height: 16),
+    //         Text(
+    //           'Oops! Something went wrong',
+    //           style: TextStyle(
+    //             fontSize: 20,
+    //             fontWeight: FontWeight.bold,
+    //             color: Colors.grey[700],
+    //           ),
+    //         ),
+    //         // const SizedBox(height: 8),
+    //         // Text(
+    //         //   error!,
+    //         //   textAlign: TextAlign.center,
+    //         //   style: TextStyle(
+    //         //     fontSize: 14,
+    //         //     color: Colors.grey[600],
+    //         //   ),
+    //         // ),
+    //         const SizedBox(height: 24),
+    //         ElevatedButton.icon(
+    //           onPressed: () {
+    //             setState(() {
+    //               isLoading = true;
+    //               error = null;
+    //             });
+    //             fetchOrders();
+    //           },
+    //           icon: const Icon(Icons.refresh),
+    //           label: const Text('Try Again'),
+    //           style: ElevatedButton.styleFrom(
+    //             backgroundColor: Acolors.primary,
+    //             foregroundColor: Colors.white,
+    //             padding: const EdgeInsets.symmetric(
+    //               horizontal: 24,
+    //               vertical: 12,
+    //             ),
+    //           ),
+    //         ),
+    //       ],
+    //     ),
+    //   );
+    // }
 
     if (orders.isEmpty) {
       return Center(
@@ -411,8 +411,8 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          width: 80,
-                          height: 80,
+                          width: 100,
+                          height: 100,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
                             color: Colors.grey[100],
@@ -421,7 +421,7 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                             borderRadius: BorderRadius.circular(12),
                             child: Image.network(
                               'https://ambrosiaayurved.in/${order.image}',
-                              fit: BoxFit.cover,
+                              fit: BoxFit.contain,
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
                                   decoration: BoxDecoration(
@@ -535,7 +535,7 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.deepPurple,
+                                  color: Acolors.primary,
                                 ),
                               ),
                               if (order.productQuantity > 1)
@@ -622,7 +622,7 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    TrackingScreen1(awbCode: "19041787021862"),
+                                    TrackingScreen1(awbCode: order.awbCode),
                               ));
                         },
                         icon: const Icon(
