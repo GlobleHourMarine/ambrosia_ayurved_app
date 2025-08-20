@@ -49,7 +49,7 @@ class OrdersService {
         'Content-Type': 'application/json',
       },
       body: json.encode({
-        'user_id': "10117", // Will be a string in JSON
+        'user_id': userId, // Will be a string in JSON
       }),
     );
 
@@ -59,6 +59,7 @@ class OrdersService {
 
       if (data['status'] == 'success') {
         List<dynamic> orderData = data['data'];
+        print('order data : ${orderData}');
         return orderData.map((json) => Order.fromJson(json)).toList();
       } else {
         throw Exception('Failed to load orders: ${data['message']}');
@@ -171,11 +172,12 @@ class OrderHistoryScreenGAlternative extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<OrderProviderG>(context, listen: false);
-
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userId = userProvider.id;
     // You can call loadOrders here as it's not in initState.
     // It will be called every time the widget is built, but you can add a check
     // to prevent redundant calls if needed.
-    provider.loadOrders('10117');
+    provider.loadOrders(userId);
 
     return Scaffold(
       appBar: AppBar(

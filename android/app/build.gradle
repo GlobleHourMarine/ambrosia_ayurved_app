@@ -21,6 +21,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -48,19 +49,19 @@ android {
 
 buildTypes {
     release {
-          // Enable ProGuard/R8 obfuscation
+         
             minifyEnabled true
             shrinkResources true
-            
-            // Point to your ProGuard rules file
+        
+        
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             
-            // Signing config (if you have one)
+       
             signingConfig signingConfigs.release
     }
 
        debug {
-            // Disable obfuscation for debug builds
+           
             minifyEnabled false
             shrinkResources false
         }
@@ -69,4 +70,9 @@ buildTypes {
 
 flutter {
     source = "../.."
+}
+dependencies {
+    
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+   
 }

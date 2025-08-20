@@ -112,6 +112,7 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        print('Order data : ${data}');
         if (data['status'] == 'success') {
           setState(() {
             orders = (data['data'] as List)
