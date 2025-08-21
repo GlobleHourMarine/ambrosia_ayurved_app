@@ -1,6 +1,7 @@
 import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
 import 'package:ambrosia_ayurved/provider/user_provider.dart';
 import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
+import 'package:ambrosia_ayurved/widgets/shiprocket/shiprocket_auth.dart';
 import 'package:ambrosia_ayurved/widgets/shiprocket/track_order.dart';
 import 'package:ambrosia_ayurved/widgets/shiprocket/shiprocket_service.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class Order {
   final String image;
   final double productPrice;
   final int productQuantity;
+   final String shiprocketOrderId;
   final double totalPrice;
   final String currentStatus;
   final String expectedDeliveryDate;
@@ -28,6 +30,7 @@ class Order {
     required this.id,
     required this.orderId,
     required this.productName,
+      required this.shiprocketOrderId,
     required this.image,
     required this.productPrice,
     required this.productQuantity,
@@ -44,6 +47,7 @@ class Order {
       id: json['id'],
       orderId: json['order_id'],
       productName: json['product_name'],
+       shiprocketOrderId: json['shiprocket_order_id'].toString(),
       image: json['image'],
       productPrice: double.parse(json['product_price']),
       productQuantity: int.parse(json['product_quantity']),
@@ -72,9 +76,15 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
+// Add these variables to your class
+bool _isTrackingLoading = false;
+bool _isCancelLoading = false;
+
+
   @override
   void initState() {
     super.initState();
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -86,8 +96,9 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-
+   
     fetchOrders();
+     updateTrackingStatus(context);
   }
 
   @override
@@ -95,6 +106,100 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
     _animationController.dispose();
     super.dispose();
   }
+  
+  
+// Cancel Order Function
+Future<void> _cancelOrder(String shiprocketOrderId) async {
+  try {
+    setState(() {
+      _isCancelLoading = true;
+    });
+
+    // Get Shiprocket token
+    String? bearerToken = await ShiprocketAuth.getToken();
+    
+    if (bearerToken == null) {
+      throw Exception('Unable to get authentication token');
+    }
+
+    // Use the provided shiprocket order ID
+    final response = await http.post(
+      Uri.parse('https://apiv2.shiprocket.in/v1/external/orders/cancel'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $bearerToken',
+      },
+      body: json.encode({
+        "ids": [int.parse(shiprocketOrderId)]
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      print('Cancel response: $responseData');
+      
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Order cancelled successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      
+      // Refresh orders to get updated status
+      await fetchOrders();
+      
+      // Close the bottom sheet
+      Navigator.pop(context);
+      
+    } else {
+      throw Exception('Failed to cancel order: ${response.statusCode}');
+    }
+    
+  } catch (e) {
+    print('Error cancelling order: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error: ${e.toString()}'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  } finally {
+    setState(() {
+      _isCancelLoading = false;
+    });
+  }
+}
+
+// Show Cancel Confirmation Dialog
+Future<void> _showCancelConfirmation(Order order, String shiprocketOrderId) async {
+  final bool? shouldCancel = await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Cancel Order'),
+        content: Text('Are you sure you want to cancel order ${order.orderId}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Yes, Cancel'),
+          ),
+        ],
+      );
+    },
+  );
+
+  if (shouldCancel == true) {
+    await _cancelOrder(shiprocketOrderId);
+  }
+}
 
   Future<void> fetchOrders() async {
     try {
@@ -112,11 +217,26 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        print('Order data : ${data}');
         if (data['status'] == 'success') {
           setState(() {
             orders = (data['data'] as List)
                 .map((orderJson) => Order.fromJson(orderJson))
                 .toList();
+
+    // Sort by createdAt descending (latest first)
+    orders.sort((a, b) {
+      final dateA = DateTime.tryParse(a.createdAt) ?? DateTime(1970);
+      final dateB = DateTime.tryParse(b.createdAt) ?? DateTime(1970);
+      return dateB.compareTo(dateA); // descending order
+    });
+  // Extract all shiprocket_order_ids
+List<String> shiprocketOrderIds = orders.map((order) => order.shiprocketOrderId).toList();
+print('Shiprocket Order IDs: $shiprocketOrderIds');
+  
+ 
+
+
             isLoading = false;
           });
           _animationController.forward();
@@ -202,7 +322,9 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                 error = null;
               });
               _animationController.reset();
+              
               fetchOrders();
+               
             },
           ),
         ],
@@ -461,6 +583,7 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                                   color: Colors.grey[600],
                                 ),
                               ),
+                            
                               const SizedBox(height: 8),
                               Row(
                                 children: [
@@ -560,13 +683,13 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
       },
     );
   }
-
-  void _showOrderDetails(Order order) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
+void _showOrderDetails(Order order) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (context) => StatefulBuilder(
+      builder: (BuildContext context, StateSetter setModalState) => DraggableScrollableSheet(
         initialChildSize: 0.7,
         maxChildSize: 0.9,
         minChildSize: 0.5,
@@ -614,29 +737,115 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                     _buildDetailRow('Courier', order.courierCompany),
                     _buildDetailRow('AWB Code', order.awbCode),
                     const SizedBox(height: 20),
-                    if (order.currentStatus.toLowerCase() != 'canceled' &&
-                        order.currentStatus.toLowerCase() != 'cancelled')
+
+                    // Check if order is cancelled
+                    if (order.currentStatus.toLowerCase() == 'canceled' ||
+                        order.currentStatus.toLowerCase() == 'cancelled')
+                      // Show "Cancelled" message in red
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.red, width: 1),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.cancel,
+                              color: Colors.red,
+                              size: 24,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'CANCELLED',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else ...[
+                      // Track Order Button
                       ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
+                        onPressed: _isTrackingLoading ? null : () async {
+                          // Use setModalState instead of setState
+                          setModalState(() {
+                            _isTrackingLoading = true;
+                          });
+                          
+                          try {
+                        //    await updateTrackingStatus(context);
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
                                     TrackingScreen1(awbCode: order.awbCode),
                               ));
+                          } finally {
+                            // Use setModalState instead of setState
+                            setModalState(() {
+                              _isTrackingLoading = false;
+                            });
+                          }
                         },
-                        icon: const Icon(
-                          Icons.track_changes,
-                          color: Acolors.white,
-                        ),
-                        label: const Text('Track Order'),
+                        icon: _isTrackingLoading 
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : const Icon(
+                                Icons.track_changes,
+                                color: Colors.white,
+                              ),
+                        label: Text(_isTrackingLoading ? 'Loading...' : 'Track Order'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Acolors.primary,
-                          // Colors.deepPurple,
-                          foregroundColor: Acolors.white,
+                          foregroundColor: Colors.white,
                           minimumSize: const Size(double.infinity, 50),
                         ),
                       ),
+                      
+                      const SizedBox(height: 12),
+                      
+                      // Cancel Order Button
+                      OutlinedButton.icon(
+                        onPressed: _isCancelLoading ? null : () async {
+                      
+                          await _showCancelConfirmation(order, order.shiprocketOrderId);
+                        },
+                        icon: _isCancelLoading 
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                                ),
+                              )
+                            : const Icon(
+                                Icons.cancel_outlined,
+                                color: Acolors.primary,
+                              ),
+                        label: Text(
+                          _isCancelLoading ? 'Cancelling...' : 'Cancel Order',
+                          style: const TextStyle(color: Acolors.primary),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Acolors.primary),
+                          minimumSize: const Size(double.infinity, 50),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -644,9 +853,9 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
           ),
         ),
       ),
-    );
-  }
-
+    ),
+  );
+}
   Widget _buildDetailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -676,6 +885,38 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
     );
   }
 }
+
+Future<void> updateTrackingStatus(BuildContext context) async {
+  try {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.id.toString(); // Convert to string
+
+    final url = Uri.parse('https://ambrosiaayurved.in/tracking/update_tracking_status_for_app');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'user_id': userId}), // Now userId is a string
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      print('update tracking response : ${data}');
+      // if (data['status'] == true) {
+      //   print('✅ Tracking status updated: ${data['message']}');
+      // } else {
+      //   print('❌ Failed to update tracking status: ${data['message']}');
+      // }
+    } else {
+      print('❌ HTTP Error: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('❌ Error updating tracking status: $e');
+  }
+}
+
+
+
 
 // Deep
 /*

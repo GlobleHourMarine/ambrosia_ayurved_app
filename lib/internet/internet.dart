@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:ambrosia_ayurved/internet/network.dart';
@@ -11,55 +12,68 @@ class BasePage extends StatefulWidget {
   @override
   _BasePageState createState() => _BasePageState();
 }
-
 class _BasePageState extends State<BasePage> {
-  bool isConnectedToInternet =
-      true; // Default to true to avoid showing no internet UI at startup
+  bool isConnectedToInternet = true;
+  late final StreamSubscription<InternetConnectionStatus> _connectionSubscription;
 
   @override
   void initState() {
     super.initState();
-    _checkInitialConnection(); // Check initial connection status
-    _listenForConnectionChanges(); // Listen for changes in connection status
+    _checkInitialConnection();
+    _listenForConnectionChanges();
   }
-
-  // Check the initial internet connection status
   Future<void> _checkInitialConnection() async {
-    try {
-      bool initialConnection = await InternetConnectionChecker().hasConnection;
-      print('Initial connection check: $initialConnection'); // Debug print
+  try {
+    bool initialConnection = await InternetConnectionChecker().hasConnection;
+    print('Initial connection check: $initialConnection');
+
+    if (!mounted) return;
+
+    // ✅ run after current build frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       setState(() {
         isConnectedToInternet = initialConnection;
       });
+    });
 
-      // If there's an initial connection, fetch data
-      if (initialConnection) {
-        await NetworkUtils.fetchData(widget.fetchDataFunction);
-      }
-    } catch (e) {
-      print('Error checking initial connection: $e'); // Debug print
+    if (initialConnection) {
+      await NetworkUtils.fetchData(widget.fetchDataFunction);
     }
+  } catch (e) {
+    print('Error checking initial connection: $e');
   }
+}
 
-  // Listen for internet connection status changes
-  void _listenForConnectionChanges() {
-    InternetConnectionChecker().onStatusChange.listen((status) async {
-      print('Connection status changed: $status'); // Debug print
+void _listenForConnectionChanges() {
+  _connectionSubscription = InternetConnectionChecker()
+      .onStatusChange
+      .listen((status) async {
+    print('Connection status changed: $status');
+
+    if (!mounted) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       setState(() {
         isConnectedToInternet = (status == InternetConnectionStatus.connected);
       });
-
-      // Fetch data if connected
-      if (isConnectedToInternet) {
-        await NetworkUtils.fetchData(widget.fetchDataFunction);
-      }
     });
+
+    if (status == InternetConnectionStatus.connected) {
+      await NetworkUtils.fetchData(widget.fetchDataFunction);
+    }
+  });
+}
+  @override
+  void dispose() {
+    _connectionSubscription.cancel(); // ✅ cancel the listener
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    print(
-        'Building UI: isConnectedToInternet = $isConnectedToInternet'); // Debug print
+    print('Building UI: isConnectedToInternet = $isConnectedToInternet');
     return isConnectedToInternet ? widget.child : _noInternetUI();
   }
 

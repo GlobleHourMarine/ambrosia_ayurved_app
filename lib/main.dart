@@ -54,7 +54,7 @@ void main() async {
         //  ChangeNotifierProvider(create: (context) => Address()),
         // ChangeNotifierProvider(create: (context) => AwbData()),
         ChangeNotifierProvider(create: (context) => ProductNotifier()),
-        ChangeNotifierProvider(create: (context) => OrderProviderG()),
+        
         ChangeNotifierProvider(create: (context) => CartProvider()),
         ChangeNotifierProvider(create: (context) => PaymentProvider()),
         ChangeNotifierProvider(create: (context) => PaymentDetailsProvider()),

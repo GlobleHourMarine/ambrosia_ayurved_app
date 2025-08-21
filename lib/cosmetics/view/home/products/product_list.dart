@@ -27,6 +27,7 @@ class ProductList extends StatefulWidget {
   State<ProductList> createState() => _ProductListState();
 }
 
+
 class _ProductListState extends State<ProductList> {
   @override
   void initState() {
@@ -39,9 +40,6 @@ class _ProductListState extends State<ProductList> {
   }
 
   Set<String> _loadingProductIds = {};
-
-  // Filter products based on search query
-  // Filter products based on search query
   List<dynamic> _getFilteredProducts(List<dynamic> products) {
     if (widget.searchQuery.isEmpty) {
       return products;
