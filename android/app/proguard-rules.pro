@@ -123,3 +123,32 @@
 # hide the original source file name.
 -renamesourcefileattribute SourceFile
 
+# -------------------------------
+# Firebase Messaging
+# -------------------------------
+-keep class com.google.firebase.messaging.** { *; }
+-dontwarn com.google.firebase.messaging.**
+
+# Firebase Analytics
+-keep class com.google.firebase.analytics.** { *; }
+-dontwarn com.google.firebase.analytics.**
+
+# Firebase Installations (needed for token refresh)
+-keep class com.google.firebase.installations.** { *; }
+-dontwarn com.google.firebase.installations.**
+
+# Firebase Common
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
+
+# -------------------------------
+# Google Play Services
+# -------------------------------
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.gms.**
+
+# -------------------------------
+# WorkManager (used internally by Firebase)
+# -------------------------------
+-keep class androidx.work.** { *; }
+-dontwarn androidx.work.**

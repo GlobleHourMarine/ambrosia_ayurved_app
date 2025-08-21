@@ -438,25 +438,25 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                     //     ),
                     //   ),
                     // ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 35),
-                      child: ListTile(
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PaymentDetailsView(),
-                              ));
-                        },
-                        leading: Icon(
-                          Icons.money_off_csred_rounded,
-                          color: Acolors.primary,
-                        ),
-                        title:
-                            Text(AppLocalizations.of(context)!.paymentDetails),
-                      ),
-                    ),
+                    // Padding(
+                    //   padding: EdgeInsets.only(left: 35),
+                    //   child: ListTile(
+                    //     onTap: () {
+                    //       Navigator.pop(context);
+                    //       Navigator.push(
+                    //           context,
+                    //           MaterialPageRoute(
+                    //             builder: (context) => PaymentDetailsView(),
+                    //           ));
+                    //     },
+                    //     leading: Icon(
+                    //       Icons.money_off_csred_rounded,
+                    //       color: Acolors.primary,
+                    //     ),
+                    //     title:
+                    //         Text(AppLocalizations.of(context)!.paymentDetails),
+                    //   ),
+                    // ),
                   ],
                 ),
 
