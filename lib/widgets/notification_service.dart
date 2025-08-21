@@ -97,8 +97,8 @@ if (!Platform.isIOS || !(await isSimulator())) {
 
 
 
-
 /*
+
 // from andriod one
 
 
@@ -193,7 +193,6 @@ await _localNotificationsPlugin.initialize(
     );
   }
 }
-
 
 */
 

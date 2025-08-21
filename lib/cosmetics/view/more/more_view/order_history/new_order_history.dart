@@ -18,7 +18,7 @@ class Order {
   final String image;
   final double productPrice;
   final int productQuantity;
-   final String shiprocketOrderId;
+  final String shiprocketOrderId;
   final double totalPrice;
   final String currentStatus;
   final String expectedDeliveryDate;
@@ -30,7 +30,7 @@ class Order {
     required this.id,
     required this.orderId,
     required this.productName,
-      required this.shiprocketOrderId,
+    required this.shiprocketOrderId,
     required this.image,
     required this.productPrice,
     required this.productQuantity,
@@ -47,7 +47,7 @@ class Order {
       id: json['id'],
       orderId: json['order_id'],
       productName: json['product_name'],
-       shiprocketOrderId: json['shiprocket_order_id'].toString(),
+      shiprocketOrderId: json['shiprocket_order_id'].toString(),
       image: json['image'],
       productPrice: double.parse(json['product_price']),
       productQuantity: int.parse(json['product_quantity']),
@@ -77,9 +77,8 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
   late Animation<double> _fadeAnimation;
 
 // Add these variables to your class
-bool _isTrackingLoading = false;
-bool _isCancelLoading = false;
-
+  bool _isTrackingLoading = false;
+  bool _isCancelLoading = false;
 
   @override
   void initState() {
@@ -96,9 +95,9 @@ bool _isCancelLoading = false;
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-   
+
     fetchOrders();
-     updateTrackingStatus(context);
+    updateTrackingStatus(context);
   }
 
   @override
@@ -106,100 +105,99 @@ bool _isCancelLoading = false;
     _animationController.dispose();
     super.dispose();
   }
-  
-  
+
 // Cancel Order Function
-Future<void> _cancelOrder(String shiprocketOrderId) async {
-  try {
-    setState(() {
-      _isCancelLoading = true;
-    });
+  Future<void> _cancelOrder(String shiprocketOrderId) async {
+    try {
+      setState(() {
+        _isCancelLoading = true;
+      });
 
-    // Get Shiprocket token
-    String? bearerToken = await ShiprocketAuth.getToken();
-    
-    if (bearerToken == null) {
-      throw Exception('Unable to get authentication token');
-    }
+      // Get Shiprocket token
+      String? bearerToken = await ShiprocketAuth.getToken();
 
-    // Use the provided shiprocket order ID
-    final response = await http.post(
-      Uri.parse('https://apiv2.shiprocket.in/v1/external/orders/cancel'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $bearerToken',
-      },
-      body: json.encode({
-        "ids": [int.parse(shiprocketOrderId)]
-      }),
-    );
+      if (bearerToken == null) {
+        throw Exception('Unable to get authentication token');
+      }
 
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      print('Cancel response: $responseData');
-      
-      // Show success message
+      // Use the provided shiprocket order ID
+      final response = await http.post(
+        Uri.parse('https://apiv2.shiprocket.in/v1/external/orders/cancel'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $bearerToken',
+        },
+        body: json.encode({
+          "ids": [int.parse(shiprocketOrderId)]
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        print('Cancel response: $responseData');
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Order cancelled successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Refresh orders to get updated status
+        await fetchOrders();
+
+        // Close the bottom sheet
+        Navigator.pop(context);
+      } else {
+        throw Exception('Failed to cancel order: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error cancelling order: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Order cancelled successfully'),
-          backgroundColor: Colors.green,
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
         ),
       );
-      
-      // Refresh orders to get updated status
-      await fetchOrders();
-      
-      // Close the bottom sheet
-      Navigator.pop(context);
-      
-    } else {
-      throw Exception('Failed to cancel order: ${response.statusCode}');
+    } finally {
+      setState(() {
+        _isCancelLoading = false;
+      });
     }
-    
-  } catch (e) {
-    print('Error cancelling order: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error: ${e.toString()}'),
-        backgroundColor: Colors.red,
-      ),
-    );
-  } finally {
-    setState(() {
-      _isCancelLoading = false;
-    });
   }
-}
 
 // Show Cancel Confirmation Dialog
-Future<void> _showCancelConfirmation(Order order, String shiprocketOrderId) async {
-  final bool? shouldCancel = await showDialog<bool>(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Cancel Order'),
-        content: Text('Are you sure you want to cancel order ${order.orderId}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('No'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
+  Future<void> _showCancelConfirmation(
+      Order order, String shiprocketOrderId) async {
+    final bool? shouldCancel = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Cancel Order'),
+          content:
+              Text('Are you sure you want to cancel order ${order.orderId}?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('No'),
             ),
-            child: const Text('Yes, Cancel'),
-          ),
-        ],
-      );
-    },
-  );
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Yes, Cancel'),
+            ),
+          ],
+        );
+      },
+    );
 
-  if (shouldCancel == true) {
-    await _cancelOrder(shiprocketOrderId);
+    if (shouldCancel == true) {
+      await _cancelOrder(shiprocketOrderId);
+    }
   }
-}
 
   Future<void> fetchOrders() async {
     try {
@@ -224,18 +222,16 @@ Future<void> _showCancelConfirmation(Order order, String shiprocketOrderId) asyn
                 .map((orderJson) => Order.fromJson(orderJson))
                 .toList();
 
-    // Sort by createdAt descending (latest first)
-    orders.sort((a, b) {
-      final dateA = DateTime.tryParse(a.createdAt) ?? DateTime(1970);
-      final dateB = DateTime.tryParse(b.createdAt) ?? DateTime(1970);
-      return dateB.compareTo(dateA); // descending order
-    });
-  // Extract all shiprocket_order_ids
-List<String> shiprocketOrderIds = orders.map((order) => order.shiprocketOrderId).toList();
-print('Shiprocket Order IDs: $shiprocketOrderIds');
-  
- 
-
+            // Sort by createdAt descending (latest first)
+            orders.sort((a, b) {
+              final dateA = DateTime.tryParse(a.createdAt) ?? DateTime(1970);
+              final dateB = DateTime.tryParse(b.createdAt) ?? DateTime(1970);
+              return dateB.compareTo(dateA); // descending order
+            });
+            // Extract all shiprocket_order_ids
+            List<String> shiprocketOrderIds =
+                orders.map((order) => order.shiprocketOrderId).toList();
+            print('Shiprocket Order IDs: $shiprocketOrderIds');
 
             isLoading = false;
           });
@@ -322,9 +318,8 @@ print('Shiprocket Order IDs: $shiprocketOrderIds');
                 error = null;
               });
               _animationController.reset();
-              
+
               fetchOrders();
-               
             },
           ),
         ],
@@ -583,7 +578,6 @@ print('Shiprocket Order IDs: $shiprocketOrderIds');
                                   color: Colors.grey[600],
                                 ),
                               ),
-                            
                               const SizedBox(height: 8),
                               Row(
                                 children: [
@@ -683,179 +677,199 @@ print('Shiprocket Order IDs: $shiprocketOrderIds');
       },
     );
   }
-void _showOrderDetails(Order order) {
-  showModalBottomSheet(
-    context: context,
-    backgroundColor: Colors.transparent,
-    isScrollControlled: true,
-    builder: (context) => StatefulBuilder(
-      builder: (BuildContext context, StateSetter setModalState) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        maxChildSize: 0.9,
-        minChildSize: 0.5,
-        builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(20),
-                  children: [
-                    Text(
-                      'Order Details',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildDetailRow('Order ID', order.orderId),
-                    _buildDetailRow('Product', order.productName),
-                    _buildDetailRow('Status', order.currentStatus),
-                    _buildDetailRow('Quantity', '${order.productQuantity}'),
-                    _buildDetailRow('Unit Price',
-                        '₹${order.productPrice.toStringAsFixed(0)}'),
-                    _buildDetailRow('Total Amount',
-                        '₹${order.totalPrice.toStringAsFixed(0)}'),
-                    _buildDetailRow(
-                        'Ordered Date', formatDate(order.createdAt)),
-                    _buildDetailRow('Expected Delivery',
-                        formatDate(order.expectedDeliveryDate)),
-                    _buildDetailRow('Courier', order.courierCompany),
-                    _buildDetailRow('AWB Code', order.awbCode),
-                    const SizedBox(height: 20),
 
-                    // Check if order is cancelled
-                    if (order.currentStatus.toLowerCase() == 'canceled' ||
-                        order.currentStatus.toLowerCase() == 'cancelled')
-                      // Show "Cancelled" message in red
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.red, width: 1),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.cancel,
-                              color: Colors.red,
-                              size: 24,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'CANCELLED',
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else ...[
-                      // Track Order Button
-                      ElevatedButton.icon(
-                        onPressed: _isTrackingLoading ? null : () async {
-                          // Use setModalState instead of setState
-                          setModalState(() {
-                            _isTrackingLoading = true;
-                          });
-                          
-                          try {
-                        //    await updateTrackingStatus(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    TrackingScreen1(awbCode: order.awbCode),
-                              ));
-                          } finally {
-                            // Use setModalState instead of setState
-                            setModalState(() {
-                              _isTrackingLoading = false;
-                            });
-                          }
-                        },
-                        icon: _isTrackingLoading 
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : const Icon(
-                                Icons.track_changes,
-                                color: Colors.white,
-                              ),
-                        label: Text(_isTrackingLoading ? 'Loading...' : 'Track Order'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Acolors.primary,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(double.infinity, 50),
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 12),
-                      
-                      // Cancel Order Button
-                      OutlinedButton.icon(
-                        onPressed: _isCancelLoading ? null : () async {
-                      
-                          await _showCancelConfirmation(order, order.shiprocketOrderId);
-                        },
-                        icon: _isCancelLoading 
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-                                ),
-                              )
-                            : const Icon(
-                                Icons.cancel_outlined,
-                                color: Acolors.primary,
-                              ),
-                        label: Text(
-                          _isCancelLoading ? 'Cancelling...' : 'Cancel Order',
-                          style: const TextStyle(color: Acolors.primary),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Acolors.primary),
-                          minimumSize: const Size(double.infinity, 50),
-                        ),
-                      ),
-                    ],
-                  ],
+  void _showOrderDetails(Order order) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setModalState) =>
+            DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          maxChildSize: 0.9,
+          minChildSize: 0.5,
+          builder: (context, scrollController) => Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.all(20),
+                    children: [
+                      Text(
+                        'Order Details',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _buildDetailRow('Order ID', order.orderId),
+                      _buildDetailRow('Product', order.productName),
+                      _buildDetailRow('Status', order.currentStatus),
+                      _buildDetailRow('Quantity', '${order.productQuantity}'),
+                      _buildDetailRow('Unit Price',
+                          '₹${order.productPrice.toStringAsFixed(0)}'),
+                      _buildDetailRow('Total Amount',
+                          '₹${order.totalPrice.toStringAsFixed(0)}'),
+                      _buildDetailRow(
+                          'Ordered Date', formatDate(order.createdAt)),
+                      _buildDetailRow('Expected Delivery',
+                          formatDate(order.expectedDeliveryDate)),
+                      _buildDetailRow('Courier', order.courierCompany),
+                      _buildDetailRow('AWB Code', order.awbCode),
+                      const SizedBox(height: 20),
+
+                      // Check if order is cancelled
+                      if (order.currentStatus.toLowerCase() == 'canceled' ||
+                          order.currentStatus.toLowerCase() == 'cancelled')
+                        // Show "Cancelled" message in red
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.red, width: 1),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.cancel,
+                                color: Colors.red,
+                                size: 24,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'CANCELLED',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  //  letterSpacing: ,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else ...[
+                        // Track Order Button
+                        ElevatedButton.icon(
+                          onPressed: _isTrackingLoading
+                              ? null
+                              : () async {
+                                  // Use setModalState instead of setState
+                                  setModalState(() {
+                                    _isTrackingLoading = true;
+                                  });
+
+                                  try {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => TrackingScreen1(
+                                              awbCode: order.awbCode),
+                                        ));
+                                  } finally {
+                                    // Use setModalState instead of setState
+                                    setModalState(() {
+                                      _isTrackingLoading = false;
+                                    });
+                                  }
+                                },
+                          icon: _isTrackingLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.track_changes,
+                                  color: Colors.white,
+                                ),
+                          label: Text(_isTrackingLoading
+                              ? 'Loading...'
+                              : 'Track Order'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Acolors.primary,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(double.infinity, 50),
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        // Cancel Order Button
+                        OutlinedButton.icon(
+                          onPressed: _isCancelLoading
+                              ? null
+                              : () async {
+                                  setModalState(() {
+                                    _isCancelLoading = true;
+                                  });
+
+                                  try {
+                                    await _showCancelConfirmation(
+                                        order, order.shiprocketOrderId);
+                                  } finally {
+                                    setModalState(() {
+                                      _isCancelLoading = false;
+                                    });
+                                  }
+                                },
+                          icon: _isCancelLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.red),
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.cancel_outlined,
+                                  color: Acolors.primary,
+                                ),
+                          label: Text(
+                            _isCancelLoading ? 'Cancelling...' : 'Cancel Order',
+                            style: const TextStyle(color: Acolors.primary),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Acolors.primary),
+                            minimumSize: const Size(double.infinity, 50),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
+
   Widget _buildDetailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -891,7 +905,8 @@ Future<void> updateTrackingStatus(BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userId = userProvider.id.toString(); // Convert to string
 
-    final url = Uri.parse('https://ambrosiaayurved.in/tracking/update_tracking_status_for_app');
+    final url = Uri.parse(
+        'https://ambrosiaayurved.in/tracking/update_tracking_status_for_app');
 
     final response = await http.post(
       url,
@@ -914,9 +929,6 @@ Future<void> updateTrackingStatus(BuildContext context) async {
     print('❌ Error updating tracking status: $e');
   }
 }
-
-
-
 
 // Deep
 /*
