@@ -70,21 +70,21 @@ class BaseScaffold extends StatefulWidget {
 }
 
 class _BaseScaffoldState extends State<BaseScaffold> {
-  String? _imageUrl;
-  String? _userName;
+  // String? _imageUrl;
+  // String? _userName;
   AddressModel? selectedAddress;
 
   @override
   void initState() {
     super.initState();
-    // _fetchProfileImage();
+    
     _fetchCartData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      setState(() {
-        _imageUrl = userProvider.user?.image;
-        _userName = userProvider.user?.fname ?? "User";
-      });
+      // final userProvider = Provider.of<UserProvider>(context, listen: false);
+      // setState(() {
+      //   _imageUrl = userProvider.user?.image;
+      //   _userName = userProvider.user?.fname ?? "User";
+      // });
     });
   }
 
@@ -92,9 +92,11 @@ class _BaseScaffoldState extends State<BaseScaffold> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
 
-    if (userProvider.id != null) {
+   if (userProvider.id != null) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       cartProvider.fetchCartData(userProvider.id);
-    }
+    });
+   }
   }
 
   @override
@@ -222,7 +224,6 @@ class _BaseScaffoldState extends State<BaseScaffold> {
       );
         },
       ),
-      
                   */
 
                     Positioned(
@@ -403,6 +404,7 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                       child: ListTile(
                         onTap: () {
                           Navigator.pop(context);
+                          
                           Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -1230,6 +1232,8 @@ class _BaseScaffoldState extends State<BaseScaffold> {
     );
   }
 }
+
+
 
 
 
