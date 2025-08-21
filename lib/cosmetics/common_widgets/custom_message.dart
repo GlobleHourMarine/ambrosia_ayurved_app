@@ -141,16 +141,20 @@ class SuccessPopup {
     VoidCallback? onClose,
     bool showButtonLoader = false,
   }) {
+    final rootContext = context; // save the parent context
+
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         if (autoCloseDuration > 0) {
           Timer(Duration(seconds: autoCloseDuration), () {
-            Navigator.of(context).pop();
-            if (navigateToScreen != null) {
+            if (Navigator.canPop(dialogContext)) {
+              Navigator.of(dialogContext).pop();
+            }
+            if (navigateToScreen != null && rootContext.mounted) {
               Navigator.pushReplacement(
-                context,
+                rootContext,
                 MaterialPageRoute(builder: (context) => navigateToScreen),
               );
             }
@@ -228,13 +232,13 @@ class SuccessPopup {
                                 ),
                               ),
                               onPressed: () {
-                                Navigator.of(context).pop();
-                                if (navigateToScreen != null) {
+                                Navigator.of(dialogContext).pop();
+                                if (navigateToScreen != null &&
+                                    rootContext.mounted) {
                                   Navigator.pushReplacement(
-                                    context,
+                                    rootContext,
                                     MaterialPageRoute(
-                                      builder: (context) => navigateToScreen,
-                                    ),
+                                        builder: (context) => navigateToScreen),
                                   );
                                 }
                                 onClose?.call();
