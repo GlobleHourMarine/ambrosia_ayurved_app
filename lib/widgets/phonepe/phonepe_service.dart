@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:ambrosia_ayurved/provider/user_provider.dart';
 import 'package:ambrosia_ayurved/widgets/phonepe/phonepe_sdk.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -22,7 +23,6 @@ class PhonePePaymentService {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"amount": amount}),
       );
-
       final Map<String, dynamic> json = jsonDecode(response.body);
       print('🔍 create order response: ${response.body}');
 
@@ -32,9 +32,10 @@ class PhonePePaymentService {
       print('payload Data : $payloadData');
       final String orderId = responseData['orderId'];
       final String token = responseData['token'];
+      PhonePeAuthToken.authToken = token;
       final String merchantOrderId = payloadData['merchantOrderId'];
       GlobalPaymentData.merchantOrderId = merchantOrderId;
-
+      print('✅ phonepe: $token');
       print('✅ orderId: $orderId');
       print('✅ token: $token');
       print('✅ merchantOrderId: $merchantOrderId');
@@ -56,8 +57,8 @@ class PhonePePaymentService {
       if (!isInitialized) {
         return "❌ Failed to initialize SDK";
       }
-
       // Step 3: Build and send transaction request
+
       final Map<String, dynamic> payload = {
         "orderId": orderId,
         "merchantId": _merchantId,
@@ -72,16 +73,20 @@ class PhonePePaymentService {
         final String status = result["status"] ?? "Unknown";
         final String error = result["error"] ?? "None";
         // await savePhonePeData(orderId: merchantOrderId, userId: userId);
+        if (status == "SUCCESS") {
+          // ✅ Play success sound
+          final player = AudioPlayer();
+          await player.play(AssetSource('sounds/payment_done.mp3'));
 
-        return status == "SUCCESS"
-            ? "Payment Successful"
-            : "Payment Failed | Status: $status | Error: $error";
+          return "Payment Successful";
+        } else {
+          return "Payment Failed | Status: $status | Error: $error";
+        }
       } else {
         return "Transaction flow interrupted or incomplete";
       }
     } catch (e) {
       print('Initiation Error : $e');
-
       return "Exception: $e";
     }
   }
@@ -128,4 +133,8 @@ Future<void> savePhonePeData({
 
 class GlobalPaymentData {
   static String? merchantOrderId;
+}
+
+class PhonePeAuthToken {
+  static String? authToken;
 }

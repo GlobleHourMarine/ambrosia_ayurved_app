@@ -31,24 +31,24 @@ class ProductNotifier extends ChangeNotifier {
     }
   }
 
-  Product? getProductById(String productId) {
-    try {
-      return _products.firstWhere(
-        (product) => product.id == productId,
-        orElse: () => Product(
-          id: 0, // Default value for id
-          name: 'Unknown', // Default name
-          price: 0.0, // Default price
-          description: 'No description available', // Default description
-          imageUrl: [], // Default image URL
-          quantity: 1, // Default quantity
-          //  category: '',
-        ),
-      );
-    } catch (e) {
-      return null; // Return null if something goes wrong
-    }
-  }
+  // Product? getProductById(String productId) {
+  //   try {
+  //     return _products.firstWhere(
+  //       (product) => product.id == productId,
+  //       orElse: () => Product(
+  //         id: 0, // Default value for id
+  //         name: 'Unknown', // Default name
+  //         price: 0.0, // Default price
+  //         description: 'No description available', // Default description
+  //         imageUrl: [], // Default image URL
+  //         quantity: 1, // Default quantity
+  //         //  category: '',
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     return null; // Return null if something goes wrong
+  //   }
+  // }
 
   void notifyListenersSafely() {
     if (!_disposed) notifyListeners();

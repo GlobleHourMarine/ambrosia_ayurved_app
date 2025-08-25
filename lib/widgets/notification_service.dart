@@ -1,4 +1,4 @@
-/*
+
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -11,7 +11,8 @@ class NotificationService {
   Future<void> initialize() async {
     try {
       // Request permissions (iOS)
-      NotificationSettings settings = await _firebaseMessaging.requestPermission(
+      NotificationSettings settings =
+          await _firebaseMessaging.requestPermission(
         alert: true,
         badge: true,
         sound: true,
@@ -27,15 +28,15 @@ class NotificationService {
       }
 
       // Subscribe to topic only on real devices
-     // Only subscribe on real devices
-if (!Platform.isIOS || !(await isSimulator())) {
-  try {
-    await _firebaseMessaging.subscribeToTopic("all_users");
-    print("Subscribed to topic: all_users");
-  } catch (e) {
-    print("Failed to subscribe to topic on simulator: $e");
-  }
-}
+      // Only subscribe on real devices
+      if (!Platform.isIOS || !(await isSimulator())) {
+        try {
+          await _firebaseMessaging.subscribeToTopic("all_users");
+          print("Subscribed to topic: all_users");
+        } catch (e) {
+          print("Failed to subscribe to topic on simulator: $e");
+        }
+      }
       // Initialize local notifications
       const AndroidInitializationSettings androidInitSettings =
           AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -95,8 +96,6 @@ if (!Platform.isIOS || !(await isSimulator())) {
 }
 
 
-
-
 */
 // from andriod one
 
@@ -124,24 +123,25 @@ class NotificationService {
       print('❌ Notification permission denied');
     }
 
-    FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
-      final apnsToken = await _firebaseMessaging.getAPNSToken();
-      if (apnsToken != null) {
-        print("📱 APNs token available. Subscribing to topic...");
-        await _firebaseMessaging.subscribeToTopic("all_users");
-      } else {
-        print("⏳ Waiting for APNs token...");
-      }
-    });
-    const AndroidInitializationSettings androidInitSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
+  final apnsToken = await _firebaseMessaging.getAPNSToken();
+  if (apnsToken != null) {
+    print("📱 APNs token available. Subscribing to topic...");
+    await _firebaseMessaging.subscribeToTopic("all_users");
+  } else {
+    print("⏳ Waiting for APNs token...");
+  }
+});
+  const AndroidInitializationSettings androidInitSettings =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+      
+final DarwinInitializationSettings iosInitSettings =
+    DarwinInitializationSettings(
+  requestAlertPermission: true,
+  requestBadgePermission: true,
+  requestSoundPermission: true,
+);
 
-    final DarwinInitializationSettings iosInitSettings =
-        DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
 
     final InitializationSettings initSettings = InitializationSettings(
       android: androidInitSettings,
@@ -190,6 +190,7 @@ class NotificationService {
     );
   }
 }
+
 
 
 /*
