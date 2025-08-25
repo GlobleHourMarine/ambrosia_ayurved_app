@@ -97,9 +97,7 @@ if (!Platform.isIOS || !(await isSimulator())) {
 
 
 
-
 */
-
 // from andriod one
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -192,7 +190,6 @@ class NotificationService {
     );
   }
 }
-
 
 
 /*

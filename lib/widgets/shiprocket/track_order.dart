@@ -107,79 +107,104 @@ class _TrackingScreen1State extends State<TrackingScreen1>
       });
     }
   }
+  // Updated methods to handle only the specific Shiprocket status terms
 
-  List<TrackingStep> _getTrackingSteps(int currentStatus) {
+  List<TrackingStep> _getTrackingSteps(String currentStatus) {
     return [
       TrackingStep(
         title: "Order Confirmed",
         subtitle: "Your order has been placed",
         icon: Icons.check_circle,
-        isCompleted: currentStatus >= 27,
-        isActive: currentStatus == 27,
+        isCompleted: _isStatusAtLeast(currentStatus, "Pickup Generated"),
+        isActive: currentStatus == "Pickup Generated",
       ),
       TrackingStep(
         title: "Packed",
         subtitle: "Your item has been packed",
         icon: Icons.inventory_2,
-        isCompleted: currentStatus >= 42,
-        isActive: currentStatus == 42,
+        isCompleted: _isStatusAtLeast(currentStatus, "Packed"),
+        isActive: currentStatus == "Packed",
       ),
       TrackingStep(
         title: "Shipped",
         subtitle: "Your order is on the way",
         icon: Icons.local_shipping,
-        isCompleted: currentStatus >= 6,
-        isActive: currentStatus == 6 || currentStatus == 18,
+        isCompleted: _isStatusAtLeast(currentStatus, "Shipped"),
+        isActive: currentStatus == "Shipped",
       ),
       TrackingStep(
         title: "Out for Delivery",
         subtitle: "Your order is out for delivery",
         icon: Icons.delivery_dining,
-        isCompleted: currentStatus >= 17,
-        isActive: currentStatus == 17,
+        isCompleted: _isStatusAtLeast(currentStatus, "Out For Delivery"),
+        isActive: currentStatus == "Out For Delivery",
       ),
       TrackingStep(
         title: "Delivered",
         subtitle: "Order delivered successfully",
         icon: Icons.home,
-        isCompleted: currentStatus == 7,
-        isActive: currentStatus == 7,
+        isCompleted: currentStatus == "Delivered",
+        isActive: currentStatus == "Delivered",
       ),
     ];
   }
 
-  Color _getStatusColor(int statusCode) {
-    switch (statusCode) {
-      case 7:
-      case 26:
+  bool _isStatusAtLeast(String currentStatus, String targetStatus) {
+    // Define the order of statuses
+    List<String> statusOrder = [
+      "Pickup Generated",
+      "Packed",
+      "Shipped",
+      "Out For Delivery",
+      "Delivered"
+    ];
+
+    int currentIndex = statusOrder.indexOf(currentStatus);
+    int targetIndex = statusOrder.indexOf(targetStatus);
+
+    // If current status is not found, return false
+    if (currentIndex == -1) return false;
+
+    // If target status is not found, return false
+    if (targetIndex == -1) return false;
+
+    // Return true if current status is at or beyond target status
+    return currentIndex >= targetIndex;
+  }
+
+  Color _getStatusColor(String currentStatus) {
+    switch (currentStatus) {
+      case "Delivered":
         return Colors.green;
-      case 8:
-      case 12:
-      case 24:
-      case 25:
-        return Colors.red;
-      case 17:
-      case 18:
-      case 42:
-      case 6:
+      case "Out For Delivery":
         return Colors.blue;
-      case 22:
-      case 20:
-      case 21:
+      case "Shipped":
+        return Colors.blue;
+      case "Packed":
+        return Colors.orange;
+      case "Pickup Generated":
         return Colors.orange;
       default:
         return Colors.grey;
     }
   }
 
-  String _getMainStatus(int statusCode) {
-    if (statusCode == 7) return "Delivered";
-    if (statusCode == 17) return "Out for Delivery";
-    if (statusCode == 18 || statusCode == 6) return "In Transit";
-    if (statusCode == 42) return "Picked Up";
-    if (statusCode == 27) return "Order Confirmed";
-    if (statusCode == 8) return "Cancelled";
-    return "Processing";
+  String _getMainStatus(String currentStatus) {
+    // Return the exact status from Shiprocket or a default
+    switch (currentStatus) {
+      case "Pickup Generated":
+        return "Pickup Generated";
+      case "Packed":
+        return "Packed";
+      case "Shipped":
+        return "Shipped";
+      case "Out For Delivery":
+        return "Out For Delivery";
+      case "Delivered":
+        return "Delivered";
+      default:
+        return currentStatus.isNotEmpty ? currentStatus : "Processing";
+    }
   }
 
   @override
@@ -313,6 +338,7 @@ class _TrackingScreen1State extends State<TrackingScreen1>
     );
   }
 
+// 3. Update the FadeTransition return in _buildTrackingContent:
   Widget _buildTrackingContent() {
     final trackingData = _trackingData!['tracking_data'];
 
@@ -333,7 +359,10 @@ class _TrackingScreen1State extends State<TrackingScreen1>
           children: [
             _buildOrderHeader(trackingData, shipmentData),
             SizedBox(height: 20),
-            _buildTrackingProgress(trackingData['track_status'] ?? 0),
+            // CHANGE THIS LINE:
+            _buildTrackingProgress(shipmentData != null
+                ? shipmentData['current_status'] ?? 'Processing'
+                : 'Processing'),
             SizedBox(height: 20),
             if (shipmentData != null) _buildOrderDetails(shipmentData),
             SizedBox(height: 20),
@@ -380,11 +409,21 @@ class _TrackingScreen1State extends State<TrackingScreen1>
     );
   }
 
+  // 1. Update _buildOrderHeader method - Change the parameter extraction:
   Widget _buildOrderHeader(
       Map<String, dynamic> trackingData, Map<String, dynamic>? shipmentData) {
-    final statusCode = trackingData['track_status'] ?? 0;
-    final mainStatus = _getMainStatus(statusCode);
-    final statusColor = _getStatusColor(statusCode);
+    // CHANGE THESE LINES:
+    // final statusCode = trackingData['track_status'] ?? 0;
+    // final mainStatus = _getMainStatus(statusCode);
+    // final statusColor = _getStatusColor(statusCode);
+
+    // TO THESE LINES:
+    final currentStatus = shipmentData != null
+        ? shipmentData['current_status'] ?? 'Processing'
+        : 'Processing';
+    final mainStatus = _getMainStatus(currentStatus);
+    final statusColor = _getStatusColor(currentStatus);
+
     return Card(
       elevation: 4,
       child: Padding(
@@ -397,11 +436,10 @@ class _TrackingScreen1State extends State<TrackingScreen1>
                 Row(
                   children: [
                     Icon(
-                      statusCode == 7
+                      // UPDATE THIS CONDITION TOO:
+                      currentStatus == 'Delivered'
                           ? Icons.check_circle
                           : Icons.local_shipping,
-                      // size: 50,
-                      //  color: Colors.white,
                     ),
                     SizedBox(width: 10),
                     Text(
@@ -414,25 +452,15 @@ class _TrackingScreen1State extends State<TrackingScreen1>
                 Text(
                   mainStatus,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: statusColor,
                   ),
                 ),
               ],
             ),
-            // SizedBox(height: 10),
-            // Text(
-            //   mainStatus,
-            //   style: TextStyle(
-            //     fontSize: 20,
-            //     fontWeight: FontWeight.bold,
-            //     color: statusColor,
-            //   ),
-            // ),
             SizedBox(height: 10),
             Text(
-              // 'Order #${widget.awbCode}',
               'AWB: ${widget.awbCode}',
               style: TextStyle(color: Colors.grey),
             ),
@@ -444,7 +472,6 @@ class _TrackingScreen1State extends State<TrackingScreen1>
                   style: TextStyle(
                     color: statusColor,
                     fontSize: 14,
-                    //  color: Colors.white.withOpacity(0.8),
                   ),
                 ),
               ),
@@ -452,66 +479,11 @@ class _TrackingScreen1State extends State<TrackingScreen1>
         ),
       ),
     );
-    // return Container(
-    //   width: double.infinity,
-    //   decoration: BoxDecoration(
-    //     gradient: LinearGradient(
-    //       colors: [statusColor, statusColor.withOpacity(0.8)],
-    //       begin: Alignment.topLeft,
-    //       end: Alignment.bottomRight,
-    //     ),
-    //     borderRadius: BorderRadius.circular(15),
-    //     boxShadow: [
-    //       BoxShadow(
-    //         color: statusColor.withOpacity(0.3),
-    //         spreadRadius: 2,
-    //         blurRadius: 10,
-    //         offset: Offset(0, 5),
-    //       ),
-    //     ],
-    //   ),
-    //   padding: EdgeInsets.all(20),
-    //   child: Column(
-    //     children: [
-    //       Icon(
-    //         statusCode == 7 ? Icons.check_circle : Icons.local_shipping,
-    //         size: 50,
-    //         color: Colors.white,
-    //       ),
-    //       SizedBox(height: 15),
-    //       Text(
-    //         mainStatus,
-    //         style: TextStyle(
-    //           fontSize: 24,
-    //           fontWeight: FontWeight.bold,
-    //           color: Colors.white,
-    //         ),
-    //       ),
-    //       SizedBox(height: 8),
-    //       Text(
-    //         'Order #${widget.awbCode}',
-    //         style: TextStyle(
-    //           fontSize: 16,
-    //           color: Colors.white.withOpacity(0.9),
-    //         ),
-    //       ),
-    //       if (shipmentData != null && shipmentData['edd'] != null)
-    //         Padding(
-    //           padding: EdgeInsets.only(top: 10),
-    //           child: Text(
-    //             'Expected delivery: ${_formatDate(shipmentData['edd'])}',
-    //             style: TextStyle(
-    //               fontSize: 14,
-    //               color: Colors.white.withOpacity(0.8),
-    //             ),
-    //           ),
-    //         ),
-    //     ],
-    //   ),
-    // );
   }
 
-  Widget _buildTrackingProgress(int currentStatus) {
+// 2. Update _buildTrackingProgress method signature:
+  Widget _buildTrackingProgress(String currentStatus) {
+    // String instead of int
     final steps = _getTrackingSteps(currentStatus);
 
     return Container(
@@ -553,6 +525,8 @@ class _TrackingScreen1State extends State<TrackingScreen1>
 
   Widget _buildProgressStep(TrackingStep step, bool isLast) {
     return Row(
+      crossAxisAlignment:
+          CrossAxisAlignment.start, // Align to start for proper positioning
       children: [
         Column(
           children: [
@@ -594,30 +568,35 @@ class _TrackingScreen1State extends State<TrackingScreen1>
               ),
           ],
         ),
-        SizedBox(width: 15),
+        SizedBox(width: 20),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                step.title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: step.isCompleted || step.isActive
-                      ? Colors.grey[800]
-                      : Colors.grey[500],
+          child: Container(
+            // Add padding top to align text with center of icon (40px height / 2 = 20px, minus text height adjustment)
+            padding: EdgeInsets.only(top: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  step.title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: step.isCompleted || step.isActive
+                        ? Colors.grey[800]
+                        : Colors.grey[500],
+                  ),
                 ),
-              ),
-              Text(
-                step.subtitle,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
+                SizedBox(height: 2), // Small spacing between title and subtitle
+                Text(
+                  step.subtitle,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
                 ),
-              ),
-              SizedBox(height: isLast ? 0 : 20),
-            ],
+                SizedBox(height: isLast ? 0 : 20),
+              ],
+            ),
           ),
         ),
       ],
