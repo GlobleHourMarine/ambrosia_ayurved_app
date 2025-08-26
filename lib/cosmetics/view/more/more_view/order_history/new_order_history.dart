@@ -1,6 +1,8 @@
 import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
+import 'package:ambrosia_ayurved/cosmetics/common_widgets/snackbar.dart';
 import 'package:ambrosia_ayurved/provider/user_provider.dart';
 import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
+import 'package:ambrosia_ayurved/widgets/phonepe/phonepe_service.dart';
 import 'package:ambrosia_ayurved/widgets/shiprocket/shiprocket_auth.dart';
 import 'package:ambrosia_ayurved/widgets/shiprocket/track_order.dart';
 import 'package:ambrosia_ayurved/widgets/shiprocket/shiprocket_service.dart';
@@ -75,7 +77,7 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
   String? error;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-
+  String? _shiprocketCancelMessage;
 // Add these variables to your class
   bool _isTrackingLoading = false;
   bool _isCancelLoading = false;
@@ -105,7 +107,7 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
   }
 
 // Cancel Order Function
-  Future<void> _cancelOrder(String shiprocketOrderId) async {
+  Future<void> _cancelOrder(Order order, String shiprocketOrderId) async {
     try {
       setState(() {
         _isCancelLoading = true;
@@ -134,12 +136,23 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
         final responseData = json.decode(response.body);
         print('Cancel response: $responseData');
         // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Order cancelled successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        setState(() {
+          _shiprocketCancelMessage = responseData['message']; // save to state
+        });
+
+        print(_shiprocketCancelMessage);
+        SnackbarMessage.showSnackbar(context, 'Order cancelled successfully');
+
+        //  PhonePe refund API here
+        final refundResponse =
+            await PhonePePaymentService().initiateRefund(order.orderId);
+        print('order id : ${order.orderId}');
+        if (refundResponse != null) {
+          print("Refund initiated: $refundResponse");
+          SnackbarMessage.showSnackbar(
+              context, 'Order cancelled & refund initiated');
+        }
+
         await updateTrackingStatus(context);
         // Refresh orders to get updated status
         await fetchOrders();
@@ -192,7 +205,7 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
     );
 
     if (shouldCancel == true) {
-      await _cancelOrder(shiprocketOrderId);
+      await _cancelOrder(order, shiprocketOrderId);
     }
   }
 
@@ -209,6 +222,7 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
           'user_id': userId,
         }),
       );
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         print('Order data : ${data}');
@@ -227,7 +241,6 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
             List<String> shiprocketOrderIds =
                 orders.map((order) => order.shiprocketOrderId).toList();
             print('Shiprocket Order IDs: $shiprocketOrderIds');
-
             isLoading = false;
           });
           _animationController.forward();
@@ -699,39 +712,77 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                           formatDate(order.expectedDeliveryDate)),
                       _buildDetailRow('Courier', order.courierCompany),
                       _buildDetailRow('AWB Code', order.awbCode),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
 
                       // Check if order is cancelled
                       if (order.currentStatus.toLowerCase() == 'canceled' ||
                           order.currentStatus.toLowerCase() == 'cancelled')
                         // Show "Cancelled" message in red
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red, width: 1),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.cancel,
-                                color: Colors.red,
-                                size: 24,
+                        Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.red, width: 1),
                               ),
-                              SizedBox(width: 8),
-                              Text(
-                                'CANCELLED',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  //  letterSpacing: ,
-                                ),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.cancel,
+                                    color: Colors.red,
+                                    size: 24,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'CANCELLED',
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      //  letterSpacing: ,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                            SizedBox(height: 10),
+                            //  if (_shiprocketCancelMessage != null)
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                    color: Colors.grey.shade400, width: 1),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(
+                                    Icons.info_outline,
+                                    color: Colors.black54,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      "Your request to cancel order id ${order.orderId} has been taken.The freight amount against the order is blocked and will be added back automatically to your wallet in 3-4 working days subject to confirmation from the courier.",
+                                      //  _shiprocketCancelMessage!,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black87,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                          ],
                         )
                       else ...[
                         // Track Order Button
@@ -743,7 +794,6 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                                   setModalState(() {
                                     _isTrackingLoading = true;
                                   });
-
                                   try {
                                     Navigator.push(
                                         context,
@@ -783,51 +833,57 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                         ),
 
                         const SizedBox(height: 12),
+                        if (order.currentStatus.toLowerCase() ==
+                            'pickup generated')
 
-                        // Cancel Order Button
-                        OutlinedButton.icon(
-                          onPressed: _isCancelLoading
-                              ? null
-                              : () async {
-                                  setModalState(() {
-                                    _isCancelLoading = true;
-                                  });
-
-                                  try {
-                                    await _showCancelConfirmation(
-                                        order, order.shiprocketOrderId);
-                                  } finally {
+                          // Cancel Order Button
+                          OutlinedButton.icon(
+                            onPressed: _isCancelLoading
+                                ? null
+                                : () async {
                                     setModalState(() {
-                                      _isCancelLoading = false;
+                                      _isCancelLoading = true;
                                     });
-                                  }
-                                },
-                          icon: _isCancelLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.red),
+
+                                    try {
+                                      await _showCancelConfirmation(
+                                          order, order.shiprocketOrderId);
+                                    } finally {
+                                      setModalState(() {
+                                        _isCancelLoading = false;
+                                      });
+                                    }
+                                  },
+                            icon: _isCancelLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.red),
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.cancel_outlined,
+                                    color: Acolors.primary,
                                   ),
-                                )
-                              : const Icon(
-                                  Icons.cancel_outlined,
-                                  color: Acolors.primary,
-                                ),
-                          label: Text(
-                            _isCancelLoading ? 'Cancelling...' : 'Cancel Order',
-                            style: const TextStyle(color: Acolors.primary),
+                            label: Text(
+                              _isCancelLoading
+                                  ? 'Cancelling...'
+                                  : 'Cancel Order',
+                              style: const TextStyle(color: Acolors.primary),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Acolors.primary),
+                              minimumSize: const Size(double.infinity, 50),
+                            ),
                           ),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Acolors.primary),
-                            minimumSize: const Size(double.infinity, 50),
-                          ),
-                        ),
                       ],
                     ],
                   ),
+                  // hey claude i will explain you a situation and you have make a prompt of that situation after i will send you that prompt .... :you have to make an flutter app where I will to express to whom i like express in a traditional way to like an king express to her queen in gazal andaz make full of animations and do what ever extra you can do
+                  // hey claude i will explain you a situation and you have make a prompt of that situation after i will send you that prompt .... :you have to make a flutter app where i will express to whom i like ...make a beautiful app for this is app is fully dedicated to her.
                 ),
               ],
             ),

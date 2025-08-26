@@ -36,6 +36,7 @@ class NotificationService {
           print("Failed to subscribe to topic on simulator: $e");
         }
       }
+
       // Initialize local notifications
       const AndroidInitializationSettings androidInitSettings =
           AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -95,8 +96,8 @@ class NotificationService {
 }
 
 
-/*
 
+/*
 // from andriod one
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -123,25 +124,25 @@ class NotificationService {
       print('❌ Notification permission denied');
     }
 
-    FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
-      final apnsToken = await _firebaseMessaging.getAPNSToken();
-      if (apnsToken != null) {
-        print("📱 APNs token available. Subscribing to topic...");
-        await _firebaseMessaging.subscribeToTopic("all_users");
-      } else {
-        print("⏳ Waiting for APNs token...");
-      }
-    });
+FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
+  final apnsToken = await _firebaseMessaging.getAPNSToken();
+  if (apnsToken != null) {
+    print("📱 APNs token available. Subscribing to topic...");
+    await _firebaseMessaging.subscribeToTopic("all_users");
+  } else {
+    print("⏳ Waiting for APNs token...");
+  }
+});
+  const AndroidInitializationSettings androidInitSettings =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+      
+final DarwinInitializationSettings iosInitSettings =
+    DarwinInitializationSettings(
+  requestAlertPermission: true,
+  requestBadgePermission: true,
+  requestSoundPermission: true,
+);
 
-    const AndroidInitializationSettings androidInitSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    final DarwinInitializationSettings iosInitSettings =
-        DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
 
     final InitializationSettings initSettings = InitializationSettings(
       android: androidInitSettings,
@@ -190,7 +191,6 @@ class NotificationService {
     );
   }
 }
-
 
 */
 

@@ -1,3 +1,4 @@
+import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
 import 'package:ambrosia_ayurved/cosmetics/common/contact_info.dart';
 import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
 import 'package:ambrosia_ayurved/widgets/shiprocket/shiprocket_auth.dart';
@@ -21,6 +22,7 @@ class _TrackingScreen1State extends State<TrackingScreen1>
   bool _isLoading = true;
   Map<String, dynamic>? _trackingData;
   String? _error;
+
   late AnimationController _progressAnimationController;
   late AnimationController _fadeAnimationController;
   late Animation<double> _progressAnimation;
@@ -181,9 +183,9 @@ class _TrackingScreen1State extends State<TrackingScreen1>
       case "Shipped":
         return Colors.blue;
       case "Packed":
-        return Colors.orange;
+        return const Color.fromARGB(255, 203, 166, 110);
       case "Pickup Generated":
-        return Colors.orange;
+        return const Color.fromARGB(255, 203, 166, 110);
       default:
         return Colors.grey;
     }
@@ -260,7 +262,7 @@ class _TrackingScreen1State extends State<TrackingScreen1>
             child: Column(
               children: [
                 CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[600]!),
+                  valueColor: AlwaysStoppedAnimation<Color>(Acolors.primary),
                   strokeWidth: 3,
                 ),
                 SizedBox(height: 20),
@@ -359,7 +361,6 @@ class _TrackingScreen1State extends State<TrackingScreen1>
           children: [
             _buildOrderHeader(trackingData, shipmentData),
             SizedBox(height: 20),
-            // CHANGE THIS LINE:
             _buildTrackingProgress(shipmentData != null
                 ? shipmentData['current_status'] ?? 'Processing'
                 : 'Processing'),

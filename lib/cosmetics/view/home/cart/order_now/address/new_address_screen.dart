@@ -179,7 +179,7 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
                   ),
                 ),
               ],
-            ),
+         ),
     );
   }
 }
