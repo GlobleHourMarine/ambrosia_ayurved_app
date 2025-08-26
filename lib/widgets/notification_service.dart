@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 /*
+=======
+>>>>>>> 11d951a78acd8088ea25d805e19e4bdc37f72d5f
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -11,7 +14,8 @@ class NotificationService {
   Future<void> initialize() async {
     try {
       // Request permissions (iOS)
-      NotificationSettings settings = await _firebaseMessaging.requestPermission(
+      NotificationSettings settings =
+          await _firebaseMessaging.requestPermission(
         alert: true,
         badge: true,
         sound: true,
@@ -27,15 +31,16 @@ class NotificationService {
       }
 
       // Subscribe to topic only on real devices
-     // Only subscribe on real devices
-if (!Platform.isIOS || !(await isSimulator())) {
-  try {
-    await _firebaseMessaging.subscribeToTopic("all_users");
-    print("Subscribed to topic: all_users");
-  } catch (e) {
-    print("Failed to subscribe to topic on simulator: $e");
-  }
-}
+      // Only subscribe on real devices
+      if (!Platform.isIOS || !(await isSimulator())) {
+        try {
+          await _firebaseMessaging.subscribeToTopic("all_users");
+          print("Subscribed to topic: all_users");
+        } catch (e) {
+          print("Failed to subscribe to topic on simulator: $e");
+        }
+      }
+
       // Initialize local notifications
       const AndroidInitializationSettings androidInitSettings =
           AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -96,8 +101,12 @@ if (!Platform.isIOS || !(await isSimulator())) {
 
 
 
+<<<<<<< HEAD
 
 */
+=======
+/*
+>>>>>>> 11d951a78acd8088ea25d805e19e4bdc37f72d5f
 // from andriod one
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -123,6 +132,7 @@ class NotificationService {
     } else {
       print('❌ Notification permission denied');
     }
+<<<<<<< HEAD
 
     FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
       final apnsToken = await _firebaseMessaging.getAPNSToken();
@@ -169,6 +179,55 @@ class NotificationService {
     print('📱 FCM Token: $token');
   }
 
+=======
+
+FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
+  final apnsToken = await _firebaseMessaging.getAPNSToken();
+  if (apnsToken != null) {
+    print("📱 APNs token available. Subscribing to topic...");
+    await _firebaseMessaging.subscribeToTopic("all_users");
+  } else {
+    print("⏳ Waiting for APNs token...");
+  }
+});
+  const AndroidInitializationSettings androidInitSettings =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+      
+final DarwinInitializationSettings iosInitSettings =
+    DarwinInitializationSettings(
+  requestAlertPermission: true,
+  requestBadgePermission: true,
+  requestSoundPermission: true,
+);
+
+
+    final InitializationSettings initSettings = InitializationSettings(
+      android: androidInitSettings,
+      iOS: iosInitSettings,
+    );
+
+    await _localNotificationsPlugin.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        print('🔔 Notification tapped with payload: ${response.payload}');
+        // Handle navigation or logic here
+      },
+    );
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('📬 Foreground Message: ${message.notification?.title}');
+      _showLocalNotification(message);
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('📲 Notification tapped: ${message.notification?.title}');
+    });
+
+    String? token = await _firebaseMessaging.getToken();
+    print('📱 FCM Token: $token');
+  }
+
+>>>>>>> 11d951a78acd8088ea25d805e19e4bdc37f72d5f
   Future<void> _showLocalNotification(RemoteMessage message) async {
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(

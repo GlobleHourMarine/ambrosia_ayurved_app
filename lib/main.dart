@@ -36,8 +36,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
   await NotificationService().initialize();
-
   final userProvider = UserProvider();
   await userProvider.loadUserFromPrefs();
 
@@ -54,7 +54,6 @@ void main() async {
         //  ChangeNotifierProvider(create: (context) => Address()),
         // ChangeNotifierProvider(create: (context) => AwbData()),
         ChangeNotifierProvider(create: (context) => ProductNotifier()),
-        
         ChangeNotifierProvider(create: (context) => CartProvider()),
         ChangeNotifierProvider(create: (context) => PaymentProvider()),
         ChangeNotifierProvider(create: (context) => PaymentDetailsProvider()),
@@ -119,3 +118,4 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+

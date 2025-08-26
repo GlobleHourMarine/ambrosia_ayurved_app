@@ -77,7 +77,7 @@ class _BaseScaffoldState extends State<BaseScaffold> {
   @override
   void initState() {
     super.initState();
-    
+
     _fetchCartData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -92,11 +92,11 @@ class _BaseScaffoldState extends State<BaseScaffold> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
 
-   if (userProvider.id != null) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      cartProvider.fetchCartData(userProvider.id);
-    });
-   }
+    if (userProvider.id != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        cartProvider.fetchCartData(userProvider.id);
+      });
+    }
   }
 
   @override
@@ -404,7 +404,7 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                       child: ListTile(
                         onTap: () {
                           Navigator.pop(context);
-                          
+
                           Navigator.push(
                               context,
                               MaterialPageRoute(

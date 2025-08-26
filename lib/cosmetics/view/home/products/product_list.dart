@@ -27,7 +27,6 @@ class ProductList extends StatefulWidget {
   State<ProductList> createState() => _ProductListState();
 }
 
-
 class _ProductListState extends State<ProductList> {
   @override
   void initState() {
@@ -59,9 +58,10 @@ class _ProductListState extends State<ProductList> {
   Widget build(BuildContext context) {
     final productNotifier = Provider.of<ProductNotifier>(context);
 
-    if (productNotifier.products.isEmpty && !productNotifier.isLoading) {
-      productNotifier.fetchProducts();
-    }
+    // if (productNotifier.products.isEmpty && !productNotifier.isLoading) {
+    //   productNotifier.fetchProducts();
+    // }
+
     // Get filtered products
     final filteredProducts = _getFilteredProducts(productNotifier.products);
 
@@ -121,7 +121,7 @@ class _ProductListState extends State<ProductList> {
                   final cardWidth =
                       (screenWidth - 32) / crossAxisCount; // 32 for padding
                   final cardHeight =
-                      screenHeight * 0.50; // 55% of screen height
+                      screenHeight * 0.40; // 55% of screen height
 
                   return GridView.builder(
                     shrinkWrap: true,
@@ -154,7 +154,7 @@ class _ProductListState extends State<ProductList> {
                         child: Card(
                           elevation: 5,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)),
+                              borderRadius: BorderRadius.circular(12)),
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
@@ -163,7 +163,7 @@ class _ProductListState extends State<ProductList> {
                               children: [
                                 // Image section - responsive height
                                 Expanded(
-                                  flex: 35,
+                                  flex: 30,
                                   child: Container(
                                     width: double.infinity,
                                     margin: const EdgeInsets.only(bottom: 10),
@@ -173,7 +173,7 @@ class _ProductListState extends State<ProductList> {
                                         product.imageUrl.isNotEmpty
                                             ? 'https://ambrosiaayurved.in/${product.imageUrl[0]}'
                                             : 'https://via.placeholder.com/150',
-                                        fit: BoxFit.cover,
+                                        fit: BoxFit.contain,
                                         loadingBuilder:
                                             (context, child, progress) {
                                           if (progress == null) return child;
@@ -191,7 +191,6 @@ class _ProductListState extends State<ProductList> {
                                     ),
                                   ),
                                 ),
-
                                 // Product name
                                 Container(
                                   width: double.infinity,
@@ -241,7 +240,7 @@ class _ProductListState extends State<ProductList> {
 
                                 // Description
                                 Expanded(
-                                  flex: 10,
+                                  flex: 9,
                                   child: HighlightedText(
                                     text: '${product.description}',
                                     searchQuery: widget.searchQuery,
@@ -261,7 +260,7 @@ class _ProductListState extends State<ProductList> {
 
                                 // Add to cart button - always at bottom
                                 Expanded(
-                                  flex: 7,
+                                  flex: 6,
                                   child: Container(
                                     width: double.infinity,
                                     margin: const EdgeInsets.only(top: 4),
