@@ -7,6 +7,7 @@ import 'package:ambrosia_ayurved/cosmetics/view/home/cart/order_now/bill_summary
 import 'package:ambrosia_ayurved/home/home_screen.dart';
 import 'package:ambrosia_ayurved/widgets/phonepe/phonepe_service.dart';
 import 'package:ambrosia_ayurved/widgets/shiprocket/shiprocket_service.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
@@ -41,7 +42,6 @@ class OrderNowPage extends StatefulWidget {
 class _OrderNowPageState extends State<OrderNowPage> {
   AddressModel? selectedAddress;
   final _formKey = GlobalKey<FormState>();
-
   final TextEditingController _fnameController = TextEditingController();
   final TextEditingController _lnameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -150,16 +150,6 @@ class _OrderNowPageState extends State<OrderNowPage> {
     _pincodeController.dispose();
     super.dispose();
   }
-
-  //
-  //
-  //
-  //
-  //
-  //
-
-  //
-  //
 
   Widget _buildTextField(
     TextEditingController controller,
@@ -1038,9 +1028,7 @@ class _OrderNowPageState extends State<OrderNowPage> {
                                     grandTotalProvider.grandTotal;
                                 double basePrice = grandTotal /
                                     1.12; // Calculate base price (grandTotal / (1 + 0.12))
-                                double gstAmount = grandTotal -
-                                    basePrice; // Calculate GST amount
-
+                                double gstAmount = grandTotal - basePrice;
                                 return Column(
                                   children: [
                                     Row(
@@ -1262,16 +1250,18 @@ class _OrderNowPageState extends State<OrderNowPage> {
                   ),
                 ),
 
-                AddressSelectionWidget(
-                  title: "Select Delivery Address",
-                  onAddressSelected: (AddressModel address) {
-                    setState(() {
-                      selectedAddress = address;
-                    });
-                    print('Selected: ${address.fname} ${address.lname}');
-                  },
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: AddressSelectionWidget(
+                    title: "Select Delivery Address",
+                    onAddressSelected: (AddressModel address) {
+                      setState(() {
+                        selectedAddress = address;
+                      });
+                      print('Selected: ${address.fname} ${address.lname}');
+                    },
+                  ),
                 ),
-
                 // Show selected address info
                 if (selectedAddress != null)
                   Container(
@@ -1344,7 +1334,9 @@ class _OrderNowPageState extends State<OrderNowPage> {
                 //       );
                 //     },
                 //   ),
+
                 const SizedBox(height: 10),
+/*
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
@@ -1404,8 +1396,14 @@ class _OrderNowPageState extends State<OrderNowPage> {
                                   // (grandTotalProvider.grandTotal * 100)
                                   //     .toInt(), // amount in paisa
                                 );
-                                Navigator.of(context)
-                                    .pop(); // close loader popup after payment
+                                Navigator.of(context).pop();
+                                // close loader popup after payment
+                                // final player = AudioPlayer();
+
+                                // if (paymentResult.contains("Success")) {
+                                //   await player.play(
+                                //       AssetSource('sounds/payment_done.mp3'));
+                                // }
 
                                 if (paymentResult.contains("FAILURE")) {
                                   SuccessPopup.show(
@@ -1500,167 +1498,170 @@ class _OrderNowPageState extends State<OrderNowPage> {
                             )
                           : Text("Create Shiprocket Order"),
                     ),
-
-                    /* 
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        backgroundColor: Acolors.primary,
-                        foregroundColor: Acolors.white,
-                      ),
-                      onPressed: () async {
-                        final grandTotalProvider =
-                            Provider.of<GrandTotalProvider>(context,
-                                listen: false);
-        
-                        if (selectedAddress == null) {
-                          SnackbarMessage.showSnackbar(
-                              context, 'Please select a delivery address');
-                          return;
-                        }
-        
-                        if (!_isPhonePeInitialized) {
-                          SnackbarMessage.showSnackbar(context,
-                              'PhonePe is not initialized. Please try again.');
-                          return;
-                        }
-        
-                        // Start PhonePe payment with grand total
-                        await _startPhonePePayment(grandTotalProvider.grandTotal);
-                        /*    
-                         print("Button pressed!");
-            
-                        // Remove form validation since there's no Form widget
-                        print("Selected address: $selectedAddress");
-                        print(
-                            "AddressProvider loading: ${addressProvider.isLoading}");
-            
-                        // Only check for selected address
-                        if (selectedAddress == null) {
-                          print("No address selected");
-                          SnackbarMessage.showSnackbar(
-                              context, 'Please select a delivery address');
-                          return;
-                        }
-            
-                        print("Address selected: ${selectedAddress!.id}");
-            
-                        setState(() {
-                          _isLoading = true;
-                        });
-            
-                        try {
-                          print("Navigating to PaymentScreen...");
-            
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PaymentScreen(
-                                addressId: selectedAddress!.id,
-                              ),
-                            ),
-                          );
-                        } catch (e) {
-                          print("Error occurred: $e");
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: ${e.toString()}')),
-                          );
-                        } finally {
-                          setState(() {
-                            _isLoading = false;
-                          });
-                        }
-            */
-                        if (_formKey.currentState!.validate()) {
-                          if (selectedAddress == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content:
-                                      Text('Please select a delivery address')),
-                            );
-                            return;
-                          }
-        
-                          setState(() {
-                            _isLoading = true;
-                          });
-        
-                          final cartProvider =
-                              Provider.of<CartProvider>(context, listen: false);
-                          final userProvider =
-                              Provider.of<UserProvider>(context, listen: false);
-                          String userId = userProvider.id;
-                          final grandTotalProvider =
-                              Provider.of<GrandTotalProvider>(context,
-                                  listen: false);
-        
-                          // Get the list of productIds from cart
-                          // List<String> productIds = cartProvider.cartItems
-                          //     .map((item) => item.productId.toString())
-                          //     .toList();
-                          // print(' product id: $productIds');
-        
-                          // Save address information
-                          //   final addressProvider =
-                          //     Provider.of<AddressProvider>(context, listen: false);
-                          //   bool success =
-                          //     await addressProvider.saveCheckoutInformation(
-                          //   //
-                          //   address_type: "home",
-                          //   district: _districtController.text,
-                          //   userid: userId,
-                          //   fname: _fnameController.text,
-                          //   lname: _lnameController.text,
-                          //   address: _addressController.text,
-                          //   city: _cityController.text,
-                          //   state: _stateController.text,
-                          //   mobile: _mobileController.text,
-                          //   country: _countryController.text,
-                          //   pincode: _pincodeController.text,
-                          //   context: context,
-                          // );
-        
-                          //     if (success) {
-                          
-                          //   _startPhonePePayment(grandTotalProvider.grandTotal);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  PaymentScreen(addressId: selectedAddress!.id),
-                            ),
-                          );
-                          //      }
-                          setState(() {
-                            _isLoading = false;
-                          });
-                        }
-                      },
-                      child: _isLoading || addressProvider.isLoading
-                          ? const CircularProgressIndicator(color: Acolors.white)
-                          : Text(
-                              "${AppLocalizations.of(context)!.proceedToCheckout}",
-                              // "Proceed to Checkout",
-                            ),
-                    ),
-                    */
                   ),
                 ),
-                // ElevatedButton(
-                //     onPressed: () async {
-                //       try {
-                //         final data = await fetchTrackingInfo('19041786623385',
-                //             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjY3NTMwMzksInNvdXJjZSI6InNyLWF1dGgtaW50IiwiZXhwIjoxNzU1NzcxNzkxLCJqdGkiOiJpWmFwVHdubURDMjRWS1ltIiwiaWF0IjoxNzU0OTA3NzkxLCJpc3MiOiJodHRwczovL3NyLWF1dGguc2hpcHJvY2tldC5pbi9hdXRob3JpemUvdXNlciIsIm5iZiI6MTc1NDkwNzc5MSwiY2lkIjo2NTE3MTM5LCJ0YyI6MzYwLCJ2ZXJib3NlIjpmYWxzZSwidmVuZG9yX2lkIjowLCJ2ZW5kb3JfY29kZSI6IiJ9.tfzREh0gVEGxz3WQ4D-JwM7QPIiQExv0BLcDJujo6D4');
-                //         print('Tracking data : $data');
-                //       } catch (e) {
-                //         print('Error: $e');
-                //       }
-                //     },
-                //     child: Text('click')),
+
                 SizedBox(height: 5),
+                */
               ],
             ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                backgroundColor: Acolors.primary,
+                foregroundColor: Acolors.white),
+            onPressed: _isLoading
+                ? null
+                : () async {
+                    setState(() => _isLoading = true);
+
+                    try {
+                      if (selectedAddress == null) {
+                        SnackbarMessage.showSnackbar(
+                            context, 'Please select a delivery address');
+                        return;
+                      }
+
+                      final placeOrderProvider =
+                          Provider.of<PlaceOrderProvider>(context,
+                              listen: false);
+                      // ✅ Pass the selected address ID to the provider
+                      placeOrderProvider
+                          .setAddressId(selectedAddress!.id.toString());
+
+                      final userProvider =
+                          Provider.of<UserProvider>(context, listen: false);
+                      final cartProvider =
+                          Provider.of<CartProvider>(context, listen: false);
+                      final grandTotalProvider =
+                          Provider.of<GrandTotalProvider>(context,
+                              listen: false);
+
+                      // 1️⃣ Show loader popup immediately
+                      SuccessPopup.show(
+                        context: context,
+                        title: "Processing...",
+                        subtitle:
+                            "Please wait while we complete your payment and order.",
+                        icon: Icons.hourglass_empty,
+                        iconColor: Colors.orange,
+                        autoCloseDuration: 0,
+                        showButtonLoader: true,
+                      );
+
+                      String paymentResult =
+                          await PhonePePaymentService.initiatePayment(
+                        amount: 100, context: context,
+
+                        // (grandTotalProvider.grandTotal * 100)
+                        //     .toInt(), // amount in paisa
+                      );
+                      Navigator.of(context).pop();
+                      // close loader popup after payment
+                      // final player = AudioPlayer();
+
+                      // if (paymentResult.contains("Success")) {
+                      //   await player.play(
+                      //       AssetSource('sounds/payment_done.mp3'));
+                      // }
+
+                      if (paymentResult.contains("FAILURE")) {
+                        SuccessPopup.show(
+                          context: context,
+                          title: "Payment Failed",
+                          subtitle: paymentResult,
+                          iconColor: Colors.red,
+                          icon: Icons.cancel,
+                          autoCloseDuration: 0,
+                          buttonText: "OK",
+                        );
+                        return;
+                      }
+
+                      // 3️⃣ If payment success, show "Creating Order..." loader
+                      SuccessPopup.show(
+                        context: context,
+                        title: "Creating Order...",
+                        subtitle: "We are placing your order in Shiprocket.",
+                        icon: Icons.hourglass_empty,
+                        iconColor: Colors.orange,
+                        autoCloseDuration: 0,
+                        showButtonLoader: true,
+                      );
+
+                      List<Map<String, dynamic>> orderItems =
+                          cartProvider.cartItems.map((cartItem) {
+                        return {
+                          "name": cartItem.productName,
+                          "sku": "AYUR${cartItem.productId}",
+                          "units": cartItem.quantity,
+                          "selling_price": cartItem.price,
+                          "discount":
+                              "", // You can calculate discount if available
+                          "tax": "", // Add tax if applicable
+                          "hsn": 123566 // Use HSN from product or default
+                        };
+                      }).toList();
+
+                      await createShiprocketOrder(
+                          billingCustomerName: selectedAddress!.fname,
+                          billingLastName: selectedAddress!.lname,
+                          billingAddress: selectedAddress!.address,
+                          billingAddress2: "",
+                          billingCity: selectedAddress!.city,
+                          billingPincode: selectedAddress!.pincode,
+                          billingState: selectedAddress!.state,
+                          billingCountry: selectedAddress!.country,
+                          billingEmail: userProvider.email,
+                          billingPhone: selectedAddress!.mobile,
+                          orderItems: orderItems,
+                          paymentMethod: "Prepaid",
+                          shippingCharges: 0,
+                          giftwrapCharges: 0,
+                          transactionCharges: 0,
+                          totalDiscount: 0,
+                          subTotal: grandTotalProvider.grandTotal,
+                          length: 2,
+                          breadth: 3,
+                          height: 4,
+                          weight: 0.1,
+                          context: context);
+                    } catch (e) {
+                      print(e);
+
+                      SuccessPopup.show(
+                        context: context,
+                        title: "Error",
+                        subtitle: e.toString(),
+                        iconColor: Colors.red,
+                        icon: Icons.error,
+                        autoCloseDuration: 0,
+                        buttonText: "OK",
+                      );
+                    } finally {
+                      if (mounted) {
+                        setState(() => _isLoading = false);
+                      }
+                    }
+                  },
+            child: _isLoading
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text("Create Shiprocket Order"),
           ),
         ),
       ),

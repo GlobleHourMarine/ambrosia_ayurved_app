@@ -83,7 +83,6 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
   @override
   void initState() {
     super.initState();
-
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -95,9 +94,8 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-
-    fetchOrders();
     updateTrackingStatus(context);
+    fetchOrders();
   }
 
   @override
@@ -136,7 +134,6 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         print('Cancel response: $responseData');
-
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -144,7 +141,7 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
             backgroundColor: Colors.green,
           ),
         );
-
+        await updateTrackingStatus(context);
         // Refresh orders to get updated status
         await fetchOrders();
 
@@ -216,7 +213,6 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
           'user_id': userId,
         }),
       );
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         print('Order data : ${data}');
@@ -225,7 +221,6 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
             orders = (data['data'] as List)
                 .map((orderJson) => Order.fromJson(orderJson))
                 .toList();
-
             // Sort by createdAt descending (latest first)
             orders.sort((a, b) {
               final dateA = DateTime.tryParse(a.createdAt) ?? DateTime(1970);
@@ -322,39 +317,11 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                 error = null;
               });
               _animationController.reset();
-
               fetchOrders();
             },
           ),
         ],
       ),
-
-      // AppBar(
-      //   title: const Text(
-      //     'Order History',
-      //     style: TextStyle(
-      //       fontWeight: FontWeight.bold,
-      //       fontSize: 24,
-      //     ),
-      //   ),
-      //   backgroundColor: Colors.white,
-      //   elevation: 0,
-      //   foregroundColor: Colors.black87,
-      //   centerTitle: true,
-      //   actions: [
-      //     IconButton(
-      //       icon: const Icon(Icons.refresh),
-      //       onPressed: () {
-      //         setState(() {
-      //           isLoading = true;
-      //           error = null;
-      //         });
-      //         _animationController.reset();
-      //         fetchOrders();
-      //       },
-      //     ),
-      //   ],
-      // ),
       body: RefreshIndicator(
         onRefresh: () async {
           setState(() {
@@ -912,16 +879,13 @@ Future<void> updateTrackingStatus(BuildContext context) async {
   try {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userId = userProvider.id.toString(); // Convert to string
-
     final url = Uri.parse(
         'https://ambrosiaayurved.in/tracking/update_tracking_status_for_app');
-
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'user_id': userId}), // Now userId is a string
     );
-
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       print('update tracking response : ${data}');
