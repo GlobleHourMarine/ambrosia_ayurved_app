@@ -308,19 +308,24 @@ class _CustomerReviewSectionState extends State<CustomerReviewSection> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const SizedBox(height: 10),
-                      buildStarRating(averageRating.toInt()),
-                      const SizedBox(width: 10),
-                      Text(
-                        "${averageRating.toStringAsFixed(1)} / 5.0",
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                      //   const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          buildStarRating(averageRating.toInt()),
+                          const SizedBox(width: 10),
+                          Text(
+                            "${averageRating.toStringAsFixed(1)} / 5.0",
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
-                      const Spacer(),
+
+                      //   const Spacer(),
                       Text(
                           '${AppLocalizations.of(context)!.basedOnReviews(reviews.length)}'),
-                      const SizedBox(width: 10),
                     ],
                   ),
                 ),

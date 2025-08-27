@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/snackbar.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/address/address_model.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
-import 'package:ambrosia_ayurved/widgets/newaddresssection.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/address/newaddresssection.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
