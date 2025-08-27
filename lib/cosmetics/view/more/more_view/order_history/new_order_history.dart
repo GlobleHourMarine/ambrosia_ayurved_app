@@ -107,14 +107,9 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
   }
 
 // Cancel Order Function
-<<<<<<< HEAD
-  Future<void> _cancelOrder(
-      String shiprocketOrderId, StateSetter modalSetState) async {
-=======
   Future<void> _cancelOrder(Order order, String shiprocketOrderId) async {
->>>>>>> 11d951a78acd8088ea25d805e19e4bdc37f72d5f
     try {
-      modalSetState(() {
+      setState(() {
         _isCancelLoading = true;
       });
 
@@ -178,7 +173,7 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
     } finally {
       // Only update modal state if the bottom sheet is still open
       if (ModalRoute.of(context)?.isCurrent ?? false) {
-        modalSetState(() {
+        setState(() {
           _isCancelLoading = false;
         });
       }
@@ -187,7 +182,7 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
 
 // Show Cancel Confirmation Dialog
   Future<void> _showCancelConfirmation(
-      Order order, String shiprocketOrderId, StateSetter modalSetState) async {
+      Order order, String shiprocketOrderId) async {
     final bool? shouldCancel = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -213,11 +208,7 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
     );
 
     if (shouldCancel == true) {
-<<<<<<< HEAD
-      await _cancelOrder(shiprocketOrderId, modalSetState);
-=======
       await _cancelOrder(order, shiprocketOrderId);
->>>>>>> 11d951a78acd8088ea25d805e19e4bdc37f72d5f
     }
   }
 
@@ -847,25 +838,6 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                         const SizedBox(height: 12),
                         if (order.currentStatus.toLowerCase() ==
                             'pickup generated')
-
-<<<<<<< HEAD
-                        // Cancel Order Button
-                        OutlinedButton.icon(
-                          onPressed: _isCancelLoading
-                              ? null
-                              : () async {
-                                  setModalState(() {
-                                    _isCancelLoading = true;
-                                  });
-
-                                  try {
-                                    await _showCancelConfirmation(order,
-                                        order.shiprocketOrderId, setModalState);
-                                  } finally {
-                                    // Only update if still mounted
-                                    if (ModalRoute.of(context)?.isCurrent ??
-                                        false) {
-=======
                           // Cancel Order Button
                           OutlinedButton.icon(
                             onPressed: _isCancelLoading
@@ -877,25 +849,14 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
 
                                     try {
                                       await _showCancelConfirmation(
-                                          order, order.shiprocketOrderId);
+                                        order,
+                                        order.shiprocketOrderId,
+                                      );
                                     } finally {
->>>>>>> 11d951a78acd8088ea25d805e19e4bdc37f72d5f
                                       setModalState(() {
                                         _isCancelLoading = false;
                                       });
                                     }
-<<<<<<< HEAD
-                                  }
-                                },
-                          icon: _isCancelLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.red),
-=======
                                   },
                             icon: _isCancelLoading
                                 ? const SizedBox(
@@ -910,7 +871,6 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                                 : const Icon(
                                     Icons.cancel_outlined,
                                     color: Acolors.primary,
->>>>>>> 11d951a78acd8088ea25d805e19e4bdc37f72d5f
                                   ),
                             label: Text(
                               _isCancelLoading
