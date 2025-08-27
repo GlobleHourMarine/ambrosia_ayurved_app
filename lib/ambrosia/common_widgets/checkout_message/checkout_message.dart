@@ -20,14 +20,12 @@ class _CheckoutMessageViewState extends State<CheckoutMessageView>
   @override
   void initState() {
     super.initState();
-    // Increased duration for slower animations
     _animationController = AnimationController(
       duration:
           const Duration(milliseconds: 2000), // Increased from 1200 to 2000
       vsync: this,
     );
 
-    // Opacity Animation with slower curve
     _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -36,7 +34,6 @@ class _CheckoutMessageViewState extends State<CheckoutMessageView>
       ),
     );
 
-    // Translation Animation with slower movement
     _translationAnimation = Tween<double>(begin: 50, end: 0).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -44,7 +41,6 @@ class _CheckoutMessageViewState extends State<CheckoutMessageView>
       ),
     );
 
-    // Start the animation
     _animationController.forward();
   }
 

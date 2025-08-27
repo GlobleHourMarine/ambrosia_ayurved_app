@@ -83,29 +83,6 @@ class _SignInScreenState extends State<SignInScreen> {
             navigateToScreen: HomeScreen(),
             autoCloseDuration: 2,
           );
-          ///////  showLoginSuccessPopup1(context);
-          // Get.snackbar(
-          //   "${AppLocalizations.of(context)!.loginSuccess}",
-          //   "${AppLocalizations.of(context)!.loginSuccessMsg}",
-          //   snackPosition: SnackPosition.BOTTOM,
-          //   backgroundColor: Acolors.primary,
-          //   colorText: Colors.white,
-          //   duration: Duration(seconds: 2),
-          //   titleText: Text(
-          //     "${AppLocalizations.of(context)!.loginSuccess}",
-          //     style:
-          //         TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-          //   ),
-          //   messageText: Text(
-          //     "${AppLocalizations.of(context)!.loginSuccessMsg}",
-          //     style:
-          //         TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-          //   ),
-          // );
-          // Navigator.pushReplacement(
-          //   context,
-          //   MaterialPageRoute(builder: (context) => HomeScreen()),
-          // );
         } else {
           Get.snackbar(
             "${AppLocalizations.of(context)!.invalidCredentials}",

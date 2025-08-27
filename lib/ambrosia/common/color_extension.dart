@@ -10,28 +10,4 @@ class Acolors {
   static const Color textfieldText = Color(0xffB6B7B7);
   static const Color placeholder = const Color(0xffB6B7B7);
   static const Color white = Color(0xffffffff);
-} 
-
-
-
-//  Color.fromARGB(255, 3, 154, 143);
-        // A5 packet colors : hex format 0xFF0A883E ,   Color.fromARGB(255, 10, 136, 62);
-        // A5 packet new color : Color(0xFF077B36) , Color.fromARGB(255, 7, 123, 54);
-        // A5 packet colors : Color(0xFF48AD3F) , Color.fromARGB(255, 72, 173, 63)
-        //     web header color : Color(0xFFF5F5DC);
-      
-
-
-     //    Color(0xFFFFE99D), // Bottom Color (Lighter Yellow)
-
-
-     // Color.fromARGB(166, 207, 250, 187),
-            //    const Color.fromARGB(255, 90, 196, 80),
-
-
-
-
-
-            // new pop gradient color           
-            // rgba(211, 160, 255, 1)
-            // rgba(179, 240, 208, 1)
+}

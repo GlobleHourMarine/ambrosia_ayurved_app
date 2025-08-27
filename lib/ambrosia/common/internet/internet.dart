@@ -4,10 +4,12 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/internet/network.dart';
 
 class BasePage extends StatefulWidget {
-  final Widget child; // Child widget that represents the content of the page
-  final Future<void> Function() fetchDataFunction; // Function to fetch data
+  final Widget child;
+  final Future<void> Function() fetchDataFunction;
 
-  BasePage({required this.child, required this.fetchDataFunction});
+  const BasePage(
+      {required this.child, required this.fetchDataFunction, Key? key})
+      : super(key: key);
 
   @override
   _BasePageState createState() => _BasePageState();
@@ -27,12 +29,12 @@ class _BasePageState extends State<BasePage> {
 
   Future<void> _checkInitialConnection() async {
     try {
-      bool initialConnection = await InternetConnectionChecker().hasConnection;
-      print('Initial connection check: $initialConnection');
+      bool initialConnection = await NetworkUtils.hasActiveInternetConnection();
+
+      print('Initial connection check (NetworkUtils): $initialConnection');
 
       if (!mounted) return;
 
-      // ✅ run after current build frame
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         setState(() {
@@ -55,15 +57,17 @@ class _BasePageState extends State<BasePage> {
 
       if (!mounted) return;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        setState(() {
-          isConnectedToInternet =
-              (status == InternetConnectionStatus.connected);
-        });
+      // 🔹 Double-check with NetworkUtils to avoid false negatives
+      final connected = status == InternetConnectionStatus.connected;
+      final confirmedConnection =
+          connected && await NetworkUtils.hasActiveInternetConnection();
+
+      if (!mounted) return;
+      setState(() {
+        isConnectedToInternet = confirmedConnection;
       });
 
-      if (status == InternetConnectionStatus.connected) {
+      if (confirmedConnection) {
         await NetworkUtils.fetchData(widget.fetchDataFunction);
       }
     });
@@ -71,7 +75,7 @@ class _BasePageState extends State<BasePage> {
 
   @override
   void dispose() {
-    _connectionSubscription.cancel(); // ✅ cancel the listener
+    _connectionSubscription.cancel();
     super.dispose();
   }
 
@@ -81,7 +85,6 @@ class _BasePageState extends State<BasePage> {
     return isConnectedToInternet ? widget.child : _noInternetUI();
   }
 
-  // UI to show when there is no internet connection
   Widget _noInternetUI() {
     return Scaffold(
       body: Center(
@@ -89,13 +92,13 @@ class _BasePageState extends State<BasePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.wifi_off, size: 100, color: const Color(0xFF272829)),
-            SizedBox(height: 20),
-            Text('No Internet Connection',
+            const SizedBox(height: 20),
+            const Text('No Internet Connection',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _checkInitialConnection,
-              child: Text('Retry'),
+              child: const Text('Retry'),
             ),
           ],
         ),

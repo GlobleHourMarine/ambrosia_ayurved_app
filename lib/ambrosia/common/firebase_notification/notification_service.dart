@@ -197,7 +197,6 @@ class NotificationService {
 }
 
 
-
 /*
 
 // directly from firebase 
