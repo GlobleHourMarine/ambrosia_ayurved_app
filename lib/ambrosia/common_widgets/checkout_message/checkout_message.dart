@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/home_screen.dart';
@@ -16,10 +17,13 @@ class _CheckoutMessageViewState extends State<CheckoutMessageView>
   late AnimationController _animationController;
   late Animation<double> _opacityAnimation;
   late Animation<double> _translationAnimation;
+  final AudioPlayer _player = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
+    // ✅ Play success sound when screen opens
+    _playSuccessSound();
     _animationController = AnimationController(
       duration:
           const Duration(milliseconds: 2000), // Increased from 1200 to 2000
@@ -42,6 +46,15 @@ class _CheckoutMessageViewState extends State<CheckoutMessageView>
     );
 
     _animationController.forward();
+  }
+
+  // ✅ play sound function
+  Future<void> _playSuccessSound() async {
+    try {
+      await _player.play(AssetSource('sounds/payment_done.mp3'));
+    } catch (e) {
+      print("Error playing sound: $e");
+    }
   }
 
   @override

@@ -32,6 +32,7 @@ class _AddressSectionState extends State<AddressSection> {
   final TextEditingController _stateController = TextEditingController();
   final TextEditingController _districtController = TextEditingController();
   bool _isLoading = false;
+  bool _isPinLoading = false;
   String? _addressType = 'Home';
 
   @override
@@ -63,7 +64,7 @@ class _AddressSectionState extends State<AddressSection> {
 
   Future<void> _fetchLocationData(String pincode) async {
     setState(() {
-      _isLoading = true;
+      _isPinLoading = true;
     });
 
     try {
@@ -104,7 +105,7 @@ class _AddressSectionState extends State<AddressSection> {
       _clearLocationFields();
     } finally {
       setState(() {
-        _isLoading = false;
+        _isPinLoading = false;
       });
     }
   }
@@ -293,7 +294,7 @@ class _AddressSectionState extends State<AddressSection> {
                           prefixIcon: Icon(Icons.location_on, size: 20),
                           contentPadding: EdgeInsets.symmetric(
                               vertical: 12, horizontal: 12),
-                          suffixIcon: _isLoading
+                          suffixIcon: _isPinLoading
                               ? SizedBox(
                                   width: 16,
                                   height: 16,

@@ -114,13 +114,7 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
                               ),
                               const SizedBox(height: 20),
                               ElevatedButton.icon(
-                                onPressed: () {
-                                  Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => AddressSection(),
-                                      ));
-                                },
+                                onPressed: _navigateToAddAddress,
                                 icon: const Icon(Icons.add_location_alt),
                                 label: Text(
                                   AppLocalizations.of(context)!.addAddress,
