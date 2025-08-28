@@ -2,6 +2,7 @@ import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/snackbar.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/order_history/order_history/order_model.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/order_history/submit_review/submit_review.dart';
 import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/phonepe/phonepe_service.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/shiprocket/shiprocket_auth.dart';
@@ -30,6 +31,7 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
 // Add these variables to your class
   bool _isTrackingLoading = false;
   bool _isCancelLoading = false;
+  bool _isReviewLoading = false;
 
   @override
   void initState() {
@@ -828,11 +830,61 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                               minimumSize: const Size(double.infinity, 50),
                             ),
                           ),
+                        SizedBox(height: 10),
+// Submit Review button if Delivered
+                        if (order.currentStatus.toLowerCase() == 'delivered')
+                          OutlinedButton.icon(
+                            onPressed: _isReviewLoading
+                                ? null
+                                : () async {
+                                    setModalState(() {
+                                      _isReviewLoading = true;
+                                    });
+
+                                    try {
+                                      // Navigate to Submit Review Screen
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              SubmitReviewScreen(
+                                            orderId: order.orderId,
+                                            productId: order.productId,
+                                          ),
+                                        ),
+                                      );
+                                    } finally {
+                                      setModalState(() {
+                                        _isReviewLoading = false;
+                                      });
+                                    }
+                                  },
+                            icon: _isReviewLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Acolors.primary),
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.rate_review_outlined,
+                                    color: Acolors.primary,
+                                  ),
+                            label: Text(
+                              _isReviewLoading ? 'Loading...' : 'Submit Review',
+                              style: const TextStyle(color: Acolors.primary),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Acolors.primary),
+                              minimumSize: const Size(double.infinity, 50),
+                            ),
+                          ),
                       ],
                     ],
                   ),
-                  // hey claude i will explain you a situation and you have make a prompt of that situation after i will send you that prompt .... :you have to make an flutter app where I will to express to whom i like express in a traditional way to like an king express to her queen in gazal andaz make full of animations and do what ever extra you can do
-                  // hey claude i will explain you a situation and you have make a prompt of that situation after i will send you that prompt .... :you have to make a flutter app where i will express to whom i like ...make a beautiful app for this is app is fully dedicated to her.
                 ),
               ],
             ),
