@@ -9,13 +9,28 @@ import 'package:provider/provider.dart';
 class CartProvider with ChangeNotifier {
   List<CartItemss> _cartItems = [];
   bool _isLoading = false;
+  bool _isQuantityLoading = false;
+
+  String? _loadingProductId;
+  String? _loadingAction; // 'increment' or 'decrement'
 
   List<CartItemss> get cartItems => _cartItems;
   bool get isLoading => _isLoading;
+  bool get isQuantityLoading => _isQuantityLoading;
+  String? get loadingProductId => _loadingProductId;
+  String? get loadingAction => _loadingAction;
 
   final CartService _cartService = CartService();
 
 // fetch cart items
+
+  // Set loading state for quantity operations
+  void _setQuantityLoading(bool loading, {String? productId, String? action}) {
+    _isQuantityLoading = loading;
+    _loadingProductId = productId;
+    _loadingAction = action;
+    notifyListeners();
+  }
 
   Future<void> fetchCartData(String userId) async {
     _isLoading = true;
@@ -130,21 +145,34 @@ class CartProvider with ChangeNotifier {
     }
   }
 
-  // Remove product from cart
+  // Remove product from cart with Loading
   Future<void> removeProductFromCart(
       String cartId, BuildContext context) async {
-    final success = await _cartService.removeProductFromCart(cartId);
+    // Find the product to get its productId for loading state
+    final cartItem = _cartItems.firstWhere((item) => item.cartId == cartId);
 
-    if (success) {
-      // Remove the product from the cartItems list
-      _cartItems.removeWhere((item) => item.cartId == cartId);
-      // Show success message using a Snackbar
-      SnackbarMessage.showSnackbar(
-          context, 'Product removed from cart successfully');
-      notifyListeners(); // Update the UI
-    } else {
+    // Set loading state for this specific product
+    _setQuantityLoading(true, productId: cartItem.productId, action: 'remove');
+
+    try {
+      final success = await _cartService.removeProductFromCart(cartId);
+
+      if (success) {
+        _cartItems.removeWhere((item) => item.cartId == cartId);
+
+        SnackbarMessage.showSnackbar(
+            context, '${cartItem.productName} removed from cart successfully');
+        notifyListeners();
+      } else {
+        SnackbarMessage.showSnackbar(
+            context, 'Failed to remove product from cart.');
+      }
+    } catch (e) {
+      print('Error removing product from cart: $e');
       SnackbarMessage.showSnackbar(
           context, 'Failed to remove product from cart.');
+    } finally {
+      _setQuantityLoading(false);
     }
   }
 
@@ -158,21 +186,30 @@ class CartProvider with ChangeNotifier {
       return;
     }
 
-    final existingItem =
-        _cartItems.firstWhere((item) => item.productId == productId);
+    // Set loading state for this specific product and action
+    _setQuantityLoading(true, productId: productId, action: 'increment');
 
-    if (existingItem != null) {
-      final newQuantity = (int.parse(existingItem.quantity) + 1);
-      final success =
-          await _cartService.updateQuantity(productId, newQuantity, userId!);
+    try {
+      final existingItem =
+          _cartItems.firstWhere((item) => item.productId == productId);
 
-      if (success) {
-        existingItem.quantity = newQuantity.toString();
-        print('updated quantity successfully!');
-        notifyListeners();
-      } else {
-        print('Failed to update quantity');
+      if (existingItem != null) {
+        final newQuantity = (int.parse(existingItem.quantity) + 1);
+        final success =
+            await _cartService.updateQuantity(productId, newQuantity, userId!);
+
+        if (success) {
+          existingItem.quantity = newQuantity.toString();
+          print('updated quantity successfully!');
+        } else {
+          print('Failed to update quantity');
+        }
       }
+    } catch (e) {
+      print('Error incrementing quantity: $e');
+    } finally {
+      // Always clear loading state
+      _setQuantityLoading(false);
     }
   }
 
@@ -186,24 +223,36 @@ class CartProvider with ChangeNotifier {
       return;
     }
 
-    final existingItem =
-        _cartItems.firstWhere((item) => item.productId == productId);
+    // Set loading state for this specific product and action
+    _setQuantityLoading(true, productId: productId, action: 'decrement');
 
-    if (existingItem != null && int.parse(existingItem.quantity) > 1) {
-      final newQuantity = (int.parse(existingItem.quantity) - 1);
-      final success =
-          await _cartService.updateQuantity(productId, newQuantity, userId!);
+    try {
+      final existingItem =
+          _cartItems.firstWhere((item) => item.productId == productId);
 
-      if (success) {
-        existingItem.quantity = newQuantity.toString();
-        print('updated to quantity succes fully');
-        notifyListeners();
-      } else {
-        print('Failed to update quantity');
+      if (existingItem != null && int.parse(existingItem.quantity) > 1) {
+        final newQuantity = (int.parse(existingItem.quantity) - 1);
+        final success =
+            await _cartService.updateQuantity(productId, newQuantity, userId!);
+
+        if (success) {
+          existingItem.quantity = newQuantity.toString();
+          print('updated to quantity successfully');
+        } else {
+          print('Failed to update quantity');
+        }
+      } else if (existingItem != null &&
+          int.parse(existingItem.quantity) == 1) {
+        // Optionally show a message that quantity can't go below 1
+        SnackbarMessage.showSnackbar(context, 'Quantity cannot be less than 1');
       }
+    } catch (e) {
+      print('Error decrementing quantity: $e');
+    } finally {
+      // Always clear loading state
+      _setQuantityLoading(false);
     }
   }
-
   // // Clear the entire cart
   // Future<void> clearCart() async {
   //   _cartItems.clear();

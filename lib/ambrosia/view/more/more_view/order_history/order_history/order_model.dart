@@ -7,6 +7,7 @@ class Order {
   final double productPrice;
   final int productQuantity;
   final String shiprocketOrderId;
+  final String productId;
   final double totalPrice;
   final String currentStatus;
   final String expectedDeliveryDate;
@@ -19,6 +20,7 @@ class Order {
     required this.orderId,
     required this.productName,
     required this.shiprocketOrderId,
+    required this.productId,
     required this.image,
     required this.productPrice,
     required this.productQuantity,
@@ -40,6 +42,7 @@ class Order {
       productPrice: double.parse(json['product_price']),
       productQuantity: int.parse(json['product_quantity']),
       totalPrice: double.parse(json['total_price']),
+      productId: json['product_id'],
       currentStatus: json['current_status'],
       expectedDeliveryDate: json['expected_delivery_date'],
       createdAt: json['created_at'],

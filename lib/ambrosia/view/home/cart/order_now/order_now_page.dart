@@ -730,7 +730,46 @@ class _OrderNowPageState extends State<OrderNowPage> {
                         // (grandTotalProvider.grandTotal * 100)
                         //     .toInt(), // amount in paisa
                       );
-                      Navigator.of(context).pop();
+                      final merchantOrderId =
+                          GlobalPaymentData.merchantOrderId.toString();
+                      // ✅ Call saveUserCartData before creating Shiprocket Order
+                      // final saveResponse =
+                      await saveUserCartData(
+                        orderId: merchantOrderId,
+                        fname: selectedAddress!.fname,
+                        lname: selectedAddress!.lname,
+                        phone: selectedAddress!.mobile,
+                        address: selectedAddress!.address,
+                        city: selectedAddress!.city,
+                        state: selectedAddress!.state,
+                        pincode: selectedAddress!.pincode,
+                        country: selectedAddress!.country,
+                        productData: jsonEncode(cartProvider.cartItems
+                            .map((item) => {
+                                  "product_id": item.productId,
+                                  "product_name": item.productName,
+                                  "quantity": item.quantity,
+                                  "price": item.price,
+                                })
+                            .toList()),
+                        subtotal: grandTotalProvider.grandTotal.toString(),
+                      );
+                      Navigator.of(context).pop(); // close popup
+                      // if (saveResponse == null ||
+                      //     saveResponse["status"] != true) {
+                      //   Navigator.of(context).pop(); // close popup
+                      //   SuccessPopup.show(
+                      //     context: context,
+                      //     title: "Error",
+                      //     subtitle:
+                      //         "Failed to save cart data before creating order",
+                      //     iconColor: Colors.red,
+                      //     icon: Icons.error,
+                      //     autoCloseDuration: 0,
+                      //     buttonText: "OK",
+                      //   );
+                      //   return;
+                      // }
 
                       if (paymentResult.contains("FAILURE")) {
                         SuccessPopup.show(
@@ -825,5 +864,55 @@ class _OrderNowPageState extends State<OrderNowPage> {
         ),
       ),
     );
+  }
+}
+
+Future<Map<String, dynamic>?> saveUserCartData({
+  required String orderId,
+  required String fname,
+  required String lname,
+  required String phone,
+  required String address,
+  required String city,
+  required String state,
+  required String pincode,
+  required String country,
+  required String productData,
+  required String subtotal,
+}) async {
+  const String url =
+      "https://ambrosiaayurved.in/api/save_user_cart_data_for_shiprocket";
+
+  try {
+    final body = {
+      "order_id": orderId,
+      "fname": fname,
+      "lname": lname,
+      "phone": phone,
+      "address": address,
+      "city": city,
+      "state": state,
+      "pincode": pincode,
+      "country": country,
+      "product_data": productData,
+      "subtotal": subtotal,
+    };
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      print('✅ Save user data response : ${response.body}');
+      return jsonDecode(response.body);
+    } else {
+      print("Failed with status: ${response.statusCode}");
+      return null;
+    }
+  } catch (e) {
+    print("Error while saving cart data: $e");
+    return null;
   }
 }

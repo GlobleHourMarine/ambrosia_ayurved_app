@@ -107,105 +107,230 @@ class _TrackingScreen1State extends State<TrackingScreen1>
       });
     }
   }
-  // Updated methods to handle only the specific Shiprocket status terms
+  // Updated methods to handle only the specific Shiprocket status terms// Updated methods to handle status progression - stays on current step until next step is confirmed
 
   List<TrackingStep> _getTrackingSteps(String currentStatus) {
+    int currentStepIndex = _getCurrentStepIndex(currentStatus);
+
     return [
       TrackingStep(
         title: "Order Confirmed",
         subtitle: "Your order has been placed",
         icon: Icons.check_circle,
-        isCompleted: _isStatusAtLeast(currentStatus, "Pickup Generated"),
-        isActive: currentStatus == "Pickup Generated",
+        isCompleted: currentStepIndex > 0,
+        isActive: currentStepIndex == 0,
       ),
       TrackingStep(
-        title: "Packed",
+        title: "Ready to Ship",
         subtitle: "Your item has been packed",
         icon: Icons.inventory_2,
-        isCompleted: _isStatusAtLeast(currentStatus, "Packed"),
-        isActive: currentStatus == "Packed",
+        isCompleted: currentStepIndex > 1,
+        isActive: currentStepIndex == 1,
       ),
       TrackingStep(
         title: "Shipped",
         subtitle: "Your order is on the way",
         icon: Icons.local_shipping,
-        isCompleted: _isStatusAtLeast(currentStatus, "Shipped"),
-        isActive: currentStatus == "Shipped",
+        isCompleted: currentStepIndex > 2,
+        isActive: currentStepIndex == 2,
       ),
       TrackingStep(
         title: "Out for Delivery",
         subtitle: "Your order is out for delivery",
         icon: Icons.delivery_dining,
-        isCompleted: _isStatusAtLeast(currentStatus, "Out For Delivery"),
-        isActive: currentStatus == "Out For Delivery",
+        isCompleted: currentStepIndex > 3,
+        isActive: currentStepIndex == 3,
       ),
       TrackingStep(
         title: "Delivered",
         subtitle: "Order delivered successfully",
         icon: Icons.home,
-        isCompleted: currentStatus == "Delivered",
-        isActive: currentStatus == "Delivered",
+        isCompleted: currentStepIndex > 4,
+        isActive: currentStepIndex == 4,
       ),
     ];
   }
 
-  bool _isStatusAtLeast(String currentStatus, String targetStatus) {
-    // Define the order of statuses
-    List<String> statusOrder = [
-      "Pickup Generated",
-      "Packed",
-      "Shipped",
-      "Out For Delivery",
-      "Delivered"
-    ];
+// Determine current step index based on status
+  int _getCurrentStepIndex(String currentStatus) {
+    String status = currentStatus.toLowerCase().trim();
 
-    int currentIndex = statusOrder.indexOf(currentStatus);
-    int targetIndex = statusOrder.indexOf(targetStatus);
+    // Step 4: Delivered (final step)
+    if (status.contains("delivered")) {
+      return 4;
+    }
 
-    // If current status is not found, return false
-    if (currentIndex == -1) return false;
+    // Step 3: Out for Delivery
+    if (status.contains("out for delivery") ||
+        status.contains("out-for-delivery") ||
+        status.contains("out_for_delivery")) {
+      return 3;
+    }
 
-    // If target status is not found, return false
-    if (targetIndex == -1) return false;
+    // Step 2: Shipped/Dispatched
+    if (status.contains("shipped") ||
+        status.contains("dispatched") ||
+        status.contains("in transit") ||
+        status.contains("in_transit") ||
+        status.contains("intransit")) {
+      return 2;
+    }
 
-    // Return true if current status is at or beyond target status
-    return currentIndex >= targetIndex;
+    // Step 1: Packed
+    if (status.contains("packed") ||
+        status.contains("ready to ship") ||
+        status.contains("ready_to_ship") ||
+        status.contains("manifest")) {
+      return 1;
+    }
+
+    // Step 0: Order Confirmed (default for all other statuses)
+    // This includes: pickup generated, out for pickup, pickup error, pickup exception, etc.
+    return 0;
   }
 
+  // bool _isStatusAtLeast(String currentStatus, String targetStatus) {
+  //   int currentStepIndex = _getCurrentStepIndex(currentStatus);
+
+  //   // Map target status to step index
+  //   Map<String, int> targetStepMap = {
+  //     "Pickup Generated": 0,
+  //     "Packed": 1,
+  //     "Shipped": 2,
+  //     "Out For Delivery": 3,
+  //     "Delivered": 4,
+  //   };
+
+  //   int targetStepIndex = targetStepMap[targetStatus] ?? 0;
+
+  //   return currentStepIndex >= targetStepIndex;
+  // }
+
   Color _getStatusColor(String currentStatus) {
-    switch (currentStatus) {
-      case "Delivered":
+    int stepIndex = _getCurrentStepIndex(currentStatus);
+
+    switch (stepIndex) {
+      case 4: // Delivered
         return Colors.green;
-      case "Out For Delivery":
+      case 3: // Out for Delivery
         return Colors.blue;
-      case "Shipped":
+      case 2: // Shipped
         return Colors.blue;
-      case "Packed":
+      case 1: // Packed
         return const Color.fromARGB(255, 203, 166, 110);
-      case "Pickup Generated":
-        return const Color.fromARGB(255, 203, 166, 110);
+      case 0: // Order Confirmed
       default:
-        return Colors.grey;
+        return const Color.fromARGB(255, 203, 166, 110);
     }
   }
 
   String _getMainStatus(String currentStatus) {
-    // Return the exact status from Shiprocket or a default
-    switch (currentStatus) {
-      case "Pickup Generated":
-        return "Pickup Generated";
-      case "Packed":
-        return "Packed";
-      case "Shipped":
-        return "Shipped";
-      case "Out For Delivery":
-        return "Out For Delivery";
-      case "Delivered":
-        return "Delivered";
+    int stepIndex = _getCurrentStepIndex(currentStatus);
+
+    List<String> stepTitles = [
+      "Order Confirmed",
+      "Packed",
+      "Shipped",
+      "Out for Delivery",
+      "Delivered"
+    ];
+
+    return stepTitles[stepIndex];
+  }
+
+// Helper method to get user-friendly status message
+  String _getStatusMessage(String currentStatus) {
+    int stepIndex = _getCurrentStepIndex(currentStatus);
+    String status = currentStatus.toLowerCase().trim();
+
+    // For error/exception cases, show generic message
+    if (status.contains("error") || status.contains("exception")) {
+      switch (stepIndex) {
+        case 0:
+          return "We're processing your order";
+        case 1:
+          return "Your order is being prepared";
+        case 2:
+          return "Your order is on the way";
+        case 3:
+          return "Your order will be delivered soon";
+        default:
+          return "Your order is being processed";
+      }
+    }
+
+    // For normal statuses, show appropriate message
+    switch (stepIndex) {
+      case 4:
+        return "Your order has been delivered successfully";
+      case 3:
+        return "Your order is out for delivery";
+      case 2:
+        return "Your order is on the way to you";
+      case 1:
+        return "Your order is ready to ship";
+      case 0:
       default:
-        return currentStatus.isNotEmpty ? currentStatus : "Processing";
+        return "Your order is being processed";
     }
   }
+  // bool _isStatusAtLeast(String currentStatus, String targetStatus) {
+  //   // Define the order of statuses
+  //   List<String> statusOrder = [
+  //     "Pickup Generated",
+  //     "Packed",
+  //     "Shipped",
+  //     "Out For Delivery",
+  //     "Delivered"
+  //   ];
+
+  //   int currentIndex = statusOrder.indexOf(currentStatus);
+  //   int targetIndex = statusOrder.indexOf(targetStatus);
+
+  //   // If current status is not found, return false
+  //   if (currentIndex == -1) return false;
+
+  //   // If target status is not found, return false
+  //   if (targetIndex == -1) return false;
+
+  //   // Return true if current status is at or beyond target status
+  //   return currentIndex >= targetIndex;
+  // }
+
+  // Color _getStatusColor(String currentStatus) {
+  //   switch (currentStatus) {
+  //     case "Delivered":
+  //       return Colors.green;
+  //     case "Out For Delivery":
+  //       return Colors.blue;
+  //     case "Shipped":
+  //       return Colors.blue;
+  //     case "Packed":
+  //       return const Color.fromARGB(255, 203, 166, 110);
+  //     case "Pickup Generated":
+  //       return const Color.fromARGB(255, 203, 166, 110);
+  //     default:
+  //       return Colors.grey;
+  //   }
+  // }
+
+  // String _getMainStatus(String currentStatus) {
+  //   // Return the exact status from Shiprocket or a default
+  //   switch (currentStatus) {
+  //     case "Pickup Generated":
+  //       return "Pickup Generated";
+  //     case "Packed":
+  //       return "Packed";
+  //     case "Shipped":
+  //       return "Shipped";
+  //     case "Out For Delivery":
+  //       return "Out For Delivery";
+  //     case "Delivered":
+  //       return "Delivered";
+  //     default:
+  //       return currentStatus.isNotEmpty ? currentStatus : "Processing";
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -408,7 +533,7 @@ class _TrackingScreen1State extends State<TrackingScreen1>
     );
   }
 
-  // 1. Update _buildOrderHeader method - Change the parameter extraction:
+// Updated _buildOrderHeader method
   Widget _buildOrderHeader(
       Map<String, dynamic> trackingData, Map<String, dynamic>? shipmentData) {
     final currentStatus = shipmentData != null
@@ -416,9 +541,10 @@ class _TrackingScreen1State extends State<TrackingScreen1>
         : 'Processing';
     final mainStatus = _getMainStatus(currentStatus);
     final statusColor = _getStatusColor(currentStatus);
+    final statusMessage = _getStatusMessage(currentStatus);
 
     return Card(
-      elevation: 4,
+      elevation: 3,
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -429,10 +555,10 @@ class _TrackingScreen1State extends State<TrackingScreen1>
                 Row(
                   children: [
                     Icon(
-                      // UPDATE THIS CONDITION TOO:
-                      currentStatus == 'Delivered'
+                      _getCurrentStepIndex(currentStatus) == 4
                           ? Icons.check_circle
                           : Icons.local_shipping,
+                      //  color: statusColor,
                     ),
                     SizedBox(width: 10),
                     Text(
@@ -442,21 +568,33 @@ class _TrackingScreen1State extends State<TrackingScreen1>
                     ),
                   ],
                 ),
-                Text(
-                  mainStatus,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: statusColor,
+                Flexible(
+                  child: Text(
+                    mainStatus,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: statusColor,
+                    ),
+                    textAlign: TextAlign.right,
                   ),
                 ),
               ],
             ),
             SizedBox(height: 10),
             Text(
-              'AWB: ${widget.awbCode}',
-              style: TextStyle(color: Colors.grey),
+              statusMessage,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
             ),
+            // SizedBox(height: 10),
+            // Text(
+            //   'AWB: ${widget.awbCode}',
+            //   style: TextStyle(color: Colors.grey),
+            // ),
             if (shipmentData != null && shipmentData['edd'] != null)
               Padding(
                 padding: EdgeInsets.only(top: 10),
@@ -478,7 +616,6 @@ class _TrackingScreen1State extends State<TrackingScreen1>
   Widget _buildTrackingProgress(String currentStatus) {
     // String instead of int
     final steps = _getTrackingSteps(currentStatus);
-
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -508,7 +645,6 @@ class _TrackingScreen1State extends State<TrackingScreen1>
             int index = entry.key;
             TrackingStep step = entry.value;
             bool isLast = index == steps.length - 1;
-
             return _buildProgressStep(step, isLast);
           }).toList(),
         ],
@@ -529,9 +665,9 @@ class _TrackingScreen1State extends State<TrackingScreen1>
               height: 40,
               decoration: BoxDecoration(
                 color: step.isCompleted
-                    ? Colors.green
+                    ? Acolors.primary
                     : step.isActive
-                        ? Colors.blue
+                        ? Acolors.primary
                         : Colors.grey[300],
                 shape: BoxShape.circle,
                 boxShadow: step.isActive

@@ -17,127 +17,12 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  // bool _isLoading = true;
-
-  // List<CartItemss> _cartItems = [];
-
-  // static const String apiUrl =
-  //     'http://192.168.1.10/klizard/api/fetch_cart_data';
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _fetchCartData();
-  // }
-
-  // // Fetch the cart data of the logged-in user
-  // Future<void> _fetchCartData() async {
-  //   final userProvider = Provider.of<UserProvider>(context, listen: false);
-  //   final userId = userProvider.id;
-
-  //   if (userId == null) {
-  //     print(userId);
-  //     // Handle case if the user is not logged in
-  //     setState(() {
-  //       _isLoading = false;
-  //     });
-  //     return;
-  //   }
-
-  //   try {
-  //     final response = await http.post(
-  //       Uri.parse(apiUrl),
-  //       body: json.encode({"user_id": userId}),
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       final responseData = json.decode(response.body);
-  //       if (responseData['status']) {
-  //         List<CartItemss> cartItems = [];
-  //         for (var item in responseData['data']) {
-  //           cartItems.add(CartItemss.fromJson(item));
-  //         }
-
-  //         print('Cart data fetched successfully.');
-  //         print(responseData);
-  //         print('Cart items count: ${_cartItems.length}');
-
-  //         setState(() {
-  //           _cartItems = cartItems;
-  //           _isLoading = false;
-  //         });
-  //       } else {
-  //         setState(() {
-  //           _isLoading = false;
-  //           _cartItems = [];
-  //         });
-  //       }
-  //     } else {
-  //       setState(() {
-  //         _isLoading = false;
-  //       });
-  //       throw Exception('Failed to load cart data');
-  //     }
-  //   } catch (error) {
-  //     setState(() {
-  //       _isLoading = false;
-  //     });
-  //     print(error);
-  //   }
-  // }
-
-  // // remove product from cart api
-  // Future<void> removeProductFromCart(
-  //     BuildContext context, String cartId) async {
-  //   const String apiUrl =
-  //       'http://192.168.1.10/klizard/api/delete_product_from_cart';
-
-  //   try {
-  //     final response = await http.post(
-  //       Uri.parse(apiUrl),
-  //       body: json.encode({"cart_id": cartId}),
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       final responseData = json.decode(response.body);
-  //       print("Response Code: ${response.statusCode}");
-  //       print("Response Body: ${response.body}");
-  //       if (responseData['status'] == 'success') {
-  //         // Remove product from cart provider or update UI here
-  //         SnackbarMessage.showSnackbar(
-  //             context, 'Product deleted from cart successfully!');
-  //         setState(() {
-  //           _cartItems.removeWhere((item) => item.cartId == cartId);
-  //         });
-  //         // Ensure UI updates
-  //         if (mounted) {
-  //           setState(() {});
-  //         }
-  //       } else {
-  //         SnackbarMessage.showSnackbar(
-  //             context, 'Failed to remove product from cart.');
-  //       }
-  //     } else {
-  //       throw Exception('Failed to remove product');
-  //     }
-  //   } catch (error) {
-  //     SnackbarMessage.showSnackbar(context, 'Error: $error');
-  //   }
-  // }
-
   @override
   void initState() {
     super.initState();
     Future.microtask(() async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final cartProvider = Provider.of<CartProvider>(context, listen: false);
-
       cartProvider.fetchCartData(userProvider.id);
     });
   }
@@ -146,8 +31,6 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
     final cartItems = cartProvider.cartItems;
-    // final cart = Provider.of<CartProvider>(context);
-    // final productNotifier = Provider.of<ProductNotifier>(context);
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -156,41 +39,6 @@ class _CartPageState extends State<CartPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Container(
-            //   height: 70,
-            //   decoration: BoxDecoration(
-            //     gradient: LinearGradient(
-            //       begin: Alignment.topCenter,
-            //       end: Alignment.bottomCenter,
-            //       colors: [
-            //         //  Color.fromARGB(166, 207, 250, 187),
-            //         //Acolors.gradientss,
-            //         const Color.fromARGB(255, 188, 233, 186),
-            //         const Color.fromARGB(255, 90, 196, 80),
-            //         // Bottom Color (Lighter Yellow)
-            //       ],
-            //     ),
-            //   ),
-            //   child: Padding(
-            //     padding: const EdgeInsets.all(12),
-            //     child: Row(
-            //       children: [
-            //         Material(
-            //           color: Colors.black.withOpacity(0.21),
-            //           borderRadius: BorderRadius.circular(12),
-            //           child: const BackButton(
-            //             color: Colors.black,
-            //           ),
-            //         ),
-            //         const SizedBox(width: 30),
-            //         const Text(
-            //           'Cart',
-            //           style: TextStyle(fontSize: 24, color: Colors.black),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
             const SizedBox(height: 10),
             Expanded(
               child: cartProvider.isLoading
@@ -254,49 +102,6 @@ class _CartPageState extends State<CartPage> {
                           itemBuilder: (context, index) {
                             final cartItem = cartItems[index];
 
-                            // to convert the image from local to http
-
-                            // String imageUrl = cartItem.image.startsWith("http")
-                            //     ? cartItem.image
-                            //     : "https://klizardcosmetics.com/${cartItem.image}";
-
-                            // // final product = productNotifier
-                            // //     .getProductById(cartItem.productId);
-
-                            // // if (product == null) {
-                            // //   return SizedBox(); // Prevents crash if product is not found
-                            // // }
-
-                            // //  // comnt
-                            // final quantity =
-                            //     cart.cartItems[cartItem.productId] ?? 1;
-
-                            // // final price =
-                            // //     double.tryParse(product.price.toString()) ??
-                            // //         0.0;
-
-                            // // final productId =
-                            // //     cart.cartItems.keys.elementAt(index);
-                            // // // Debugging prints
-                            // // print("Cart Product ID: $productId");
-                            // // print(
-                            // //     "Available Product IDs: ${productNotifier.products.map((p) => p.id).toList()}");
-                            // // final product =
-                            // //     productNotifier.getProductById(productId);
-                            // // if (product == null) {
-                            // //   // Handle case when no product is found
-                            // //   SnackbarMessage.showSnackbar(
-                            // //       context, "Product not found");
-                            // // }
-
-                            // // if (product == null) {
-                            // //   return SizedBox(); // Prevents crash
-                            // // }
-                            // // final quantity = cart.cartItems[productId] ?? 1;
-                            // // final price =
-                            // //     double.tryParse(product.price.toString()) ??
-                            // //         0.0;
-
                             return Card(
                               elevation: 3,
                               child: Column(
@@ -325,7 +130,7 @@ class _CartPageState extends State<CartPage> {
                                                   BorderRadius.circular(20),
                                               child: Image.network(
                                                 'https://ambrosiaayurved.in/${cartItem.image}',
-                                                fit: BoxFit.fill,
+                                                fit: BoxFit.contain,
                                                 loadingBuilder:
                                                     (context, child, progress) {
                                                   if (progress == null)
@@ -389,56 +194,103 @@ class _CartPageState extends State<CartPage> {
                                   Row(
                                     children: [
                                       TextButton.icon(
-                                        onPressed: () async {
-                                          await cartProvider
-                                              .removeProductFromCart(
-                                                  cartItem.cartId, context);
-                                          // final cartItem = _cartItems[
-                                          //     index]; // Get the cart item
-                                          // final cartId = cartItem
-                                          //     .cartId; // Get the cart ID
-
-                                          // Call the API to remove the product
-                                          // await removeProductFromCart(
-                                          //     context, cartId);
-
-                                          // // cart.removeFromCart(
-                                          // //     cartItem.productId);
-                                        },
-                                        icon:
-                                            Icon(Icons.delete_outline_outlined),
+                                        onPressed:
+                                            cartProvider.isQuantityLoading
+                                                ? null
+                                                : () async {
+                                                    await cartProvider
+                                                        .removeProductFromCart(
+                                                            cartItem.cartId,
+                                                            context);
+                                                  },
+                                        icon: cartProvider.isQuantityLoading &&
+                                                cartProvider.loadingProductId ==
+                                                    cartItem.productId &&
+                                                cartProvider.loadingAction ==
+                                                    'remove'
+                                            ? SizedBox(
+                                                width: 16,
+                                                height: 16,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                          Color>(
+                                                    Theme.of(context)
+                                                        .primaryColor,
+                                                  ),
+                                                ),
+                                              )
+                                            : Icon(
+                                                Icons.delete_outline_outlined),
                                         label: Text(
-                                          "${AppLocalizations.of(context)!.remove}",
-                                          //  'Remove',
+                                          cartProvider.isQuantityLoading &&
+                                                  cartProvider
+                                                          .loadingProductId ==
+                                                      cartItem.productId &&
+                                                  cartProvider.loadingAction ==
+                                                      'remove'
+                                              ? "Removing..."
+                                              : "${AppLocalizations.of(context)!.remove}",
                                         ),
                                       ),
                                       SizedBox(width: 80),
+                                      // Decrement Button
                                       InkWell(
-                                        onTap: () {
-                                          cartProvider.decrementQuantity(
-                                              cartItem.productId, context);
-                                          // Provider.of<CartProvider>(context,
-                                          //         listen: false)
-                                          //     .decrementQuantity(
-                                          //         cartItem.productId,
-                                          //         context);
-                                        },
+                                        onTap: cartProvider.isQuantityLoading
+                                            ? null
+                                            : () {
+                                                cartProvider.decrementQuantity(
+                                                    cartItem.productId,
+                                                    context);
+                                              },
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 15),
                                           height: 25,
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
-                                              color: Acolors.primary,
+                                              color: cartProvider
+                                                          .isQuantityLoading &&
+                                                      cartProvider
+                                                              .loadingProductId ==
+                                                          cartItem.productId &&
+                                                      cartProvider
+                                                              .loadingAction ==
+                                                          'decrement'
+                                                  ? Acolors.primary
+                                                      .withOpacity(0.5)
+                                                  : Acolors.primary,
                                               borderRadius:
                                                   BorderRadius.circular(12.5)),
-                                          child: Text(
-                                            "-",
-                                            style: TextStyle(
-                                                color: Acolors.white,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w700),
-                                          ),
+                                          child: cartProvider
+                                                      .isQuantityLoading &&
+                                                  cartProvider
+                                                          .loadingProductId ==
+                                                      cartItem.productId &&
+                                                  cartProvider.loadingAction ==
+                                                      'decrement'
+                                              ? SizedBox(
+                                                  width: 12,
+                                                  height: 12,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    strokeWidth: 1.5,
+                                                    valueColor:
+                                                        AlwaysStoppedAnimation<
+                                                                Color>(
+                                                            Acolors.white),
+                                                  ),
+                                                )
+                                              : Text(
+                                                  "-",
+                                                  style: TextStyle(
+                                                      color: Acolors.white,
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w700),
+                                                ),
                                         ),
                                       ),
                                       const SizedBox(
@@ -468,29 +320,65 @@ class _CartPageState extends State<CartPage> {
                                       const SizedBox(
                                         width: 8,
                                       ),
+
+                                      // Increment Button
                                       InkWell(
-                                        onTap: () {
-                                          Provider.of<CartProvider>(context,
-                                                  listen: false)
-                                              .incrementQuantity(
-                                                  cartItem.productId, context);
-                                        },
+                                        onTap: cartProvider.isQuantityLoading
+                                            ? null
+                                            : () {
+                                                Provider.of<CartProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .incrementQuantity(
+                                                        cartItem.productId,
+                                                        context);
+                                              },
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 15),
                                           height: 25,
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
-                                              color: Acolors.primary,
+                                              color: cartProvider
+                                                          .isQuantityLoading &&
+                                                      cartProvider
+                                                              .loadingProductId ==
+                                                          cartItem.productId &&
+                                                      cartProvider
+                                                              .loadingAction ==
+                                                          'increment'
+                                                  ? Acolors.primary
+                                                      .withOpacity(0.5)
+                                                  : Acolors.primary,
                                               borderRadius:
                                                   BorderRadius.circular(12.5)),
-                                          child: const Text(
-                                            "+",
-                                            style: TextStyle(
-                                                color: Acolors.white,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w700),
-                                          ),
+                                          child: cartProvider
+                                                      .isQuantityLoading &&
+                                                  cartProvider
+                                                          .loadingProductId ==
+                                                      cartItem.productId &&
+                                                  cartProvider.loadingAction ==
+                                                      'increment'
+                                              ? SizedBox(
+                                                  width: 12,
+                                                  height: 12,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    strokeWidth: 1.5,
+                                                    valueColor:
+                                                        AlwaysStoppedAnimation<
+                                                                Color>(
+                                                            Acolors.white),
+                                                  ),
+                                                )
+                                              : const Text(
+                                                  "+",
+                                                  style: TextStyle(
+                                                      color: Acolors.white,
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w700),
+                                                ),
                                         ),
                                       ),
                                     ],
@@ -505,12 +393,14 @@ class _CartPageState extends State<CartPage> {
             if (cartItems.isNotEmpty && !cartProvider.isLoading)
               //  if (cartItems.isNotEmpty && !_isLoading)
               Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(16.0),
                 child: SizedBox(
                   height: 40,
                   width: double.infinity,
                   child: FloatingActionButton(
                     splashColor: Acolors.primary,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                     backgroundColor: Acolors.primary,
                     onPressed: () {
                       Navigator.push(
@@ -531,7 +421,6 @@ class _CartPageState extends State<CartPage> {
           ],
         ),
       ),
-      // bottomNavigationBar: BottomNav(selectedIndex: 2),
     );
   }
 }
