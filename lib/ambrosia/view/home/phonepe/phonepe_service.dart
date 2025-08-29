@@ -85,8 +85,7 @@ class PhonePePaymentService {
           // ✅ Save orderId & userId to backend
           await savePhonePeData(orderId: merchantOrderId, userId: userId);
 
-          final player = AudioPlayer();
-          await player.play(AssetSource('sounds/payment_done.mp3'));
+        
 
           return "Payment Successful";
         } else {
