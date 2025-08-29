@@ -786,7 +786,6 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                         const SizedBox(height: 12),
                         if (order.currentStatus.toLowerCase() ==
                             'pickup generated')
-
                           // Cancel Order Button
                           OutlinedButton.icon(
                             onPressed: _isCancelLoading
