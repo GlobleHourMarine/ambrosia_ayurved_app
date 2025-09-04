@@ -47,9 +47,9 @@ class UserProvider with ChangeNotifier {
   void setUser(User user) {
     _user = user;
     _id = user.id;
-    _email = user.email;
+    // _email = user.email;
     _fname = user.fname;
-    _lname = user.lname;
+    // _lname = user.lname;
     notifyListeners();
   }
 

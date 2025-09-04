@@ -1,7 +1,7 @@
+import 'package:ambrosia_ayurved/ambrosia/view/login&register/user_register.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/snackbar.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/cart_model.dart';
-import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/register_onpop.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/cart_service.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
 import 'package:provider/provider.dart';
@@ -23,8 +23,7 @@ class CartProvider with ChangeNotifier {
   final CartService _cartService = CartService();
 
 // fetch cart items
-
-  // Set loading state for quantity operations
+// Set loading state for quantity operations
   void _setQuantityLoading(bool loading, {String? productId, String? action}) {
     _isQuantityLoading = loading;
     _loadingProductId = productId;
@@ -35,7 +34,6 @@ class CartProvider with ChangeNotifier {
   Future<void> fetchCartData(String userId) async {
     _isLoading = true;
     notifyListeners();
-
     try {
       _cartItems = await _cartService.fetchCartData(userId);
       _isLoading = false;
@@ -58,7 +56,10 @@ class CartProvider with ChangeNotifier {
     if (userId == null || userId.isEmpty) {
       // Show login required dialog
       print('User Id not found');
-      RegisterService().showRegistrationBottomSheet(context);
+      // Call the modal bottom sheet directly here
+      RegisterService().showModalBottomSheetregister(context);
+
+      // RegisterService().showRegistrationBottomSheet(context);
       return;
 
       //   // showDialog(
@@ -229,12 +230,10 @@ class CartProvider with ChangeNotifier {
     try {
       final existingItem =
           _cartItems.firstWhere((item) => item.productId == productId);
-
       if (existingItem != null && int.parse(existingItem.quantity) > 1) {
         final newQuantity = (int.parse(existingItem.quantity) - 1);
         final success =
             await _cartService.updateQuantity(productId, newQuantity, userId!);
-
         if (success) {
           existingItem.quantity = newQuantity.toString();
           print('updated to quantity successfully');
@@ -253,12 +252,12 @@ class CartProvider with ChangeNotifier {
       _setQuantityLoading(false);
     }
   }
+
   // // Clear the entire cart
   // Future<void> clearCart() async {
   //   _cartItems.clear();
   //   notifyListeners();
   //   print("Cart cleared, total items: ${_cartItems.length}");
   // }
-
   int get totalUniqueItems => _cartItems.length;
 }

@@ -1,6 +1,6 @@
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/contact_info.dart';
-import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/ourpolicies/terms&conditions/terms&conditions1.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/ourpolicies/terms&conditions/terms&conditions2.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/ourpolicies/terms&conditions/terms&condtions3.dart';
-import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_app_bar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TermsAndConditionsScreen extends StatelessWidget {

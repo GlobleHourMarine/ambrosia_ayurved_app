@@ -58,19 +58,7 @@ class CartService {
           if (responseBody.containsKey('data') &&
               responseBody['data'] is List &&
               responseBody['data'].isNotEmpty) {
-            // Extract the user_id from the response
-            //  String userIdfromResponse = responseBody['user_id'].toString();
-            // Fix: Properly extract the first item from the list
             Map<String, dynamic> itemData = responseBody['data'][0];
-
-            // // Set user_id in the UserProvider
-            // final userProvider =
-            //     Provider.of<UserProvider>(context, listen: false);
-            // userProvider
-            //     .setid(userIdfromResponse); // Update user_id in the provider
-            // print('User Id from api =   $userIdfromResponse');
-            // print(responseBody);
-            // print('Item added to database');
 
             return CartItemss.fromJson(itemData);
           } else {
@@ -83,7 +71,7 @@ class CartService {
         throw Exception('Failed to add item to cart in database.');
       }
     } catch (error) {
-      print('Error: $error'); // Debugging log
+      print('Error: $error');
       throw Exception('Error: $error');
     }
   }

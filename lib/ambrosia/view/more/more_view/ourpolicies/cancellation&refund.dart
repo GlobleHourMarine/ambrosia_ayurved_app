@@ -3,7 +3,7 @@ import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/ourpolicies/cancel
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/ourpolicies/cancellation/cancellation&refund2.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/ourpolicies/cancellation/cancellation&refund3.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/ourpolicies/cancellation/cancellation&refund4.dart';
-import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_app_bar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CancellationRefundPolicyScreen extends StatelessWidget {

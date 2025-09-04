@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/ourpolicies/shipping&delivery/shipping&delivery1.dart';
-import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_app_bar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ShippingAndDeliveryPolicyScreen extends StatelessWidget {

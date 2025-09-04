@@ -7,7 +7,7 @@ import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/prod
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_description_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_fetch/products_model.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/review_section/review_section_screen.dart';
-import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

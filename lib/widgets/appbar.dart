@@ -1,6 +1,7 @@
-
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/address/address_model.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/address/new_address_screen.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/login&register/phone_number_flow/c_flow/user-register_flow.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/login&register/user_register.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/contact/contact_us_new.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/order_history/order_history/order_history_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/cart_page.dart';
@@ -61,13 +62,12 @@ class _BaseScaffoldState extends State<BaseScaffold> {
     final cart = Provider.of<CartProvider>(context);
     final user = Provider.of<UserProvider>(context).user;
     if (user != null) {
-      print('User data available in build');
+      print('User data available in build ${user}');
     }
 
     return Consumer<LanguageProvider>(
       builder: (context, languageProvider, child) {
         final currentLanguage = languageProvider.selectedLocale.languageCode;
-
         return Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
@@ -180,12 +180,8 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                             TextButton(
                                 onPressed: () {
                                   Navigator.pop(context);
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const SignInScreen(),
-                                      ));
+                                  RegisterService()
+                                      .showModalBottomSheetregister(context);
                                 },
                                 child: Text(
                                   AppLocalizations.of(context)!.welcomeUser,
@@ -203,14 +199,14 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                               style:
                                   TextStyle(color: Colors.black, fontSize: 18),
                             ),
-                            SizedBox(height: 8),
-                            Text(
-                              '${AppLocalizations.of(context)!.email} : ${user.email}',
-                              //   'Email: ${user.email}', // Use string interpolation to insert the userId
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 14),
-                            ),
-                            SizedBox(height: 8),
+                            SizedBox(height: 15),
+                            // Text(
+                            //   '${AppLocalizations.of(context)!.email} : ${user.email}',
+                            //   //   'Email: ${user.email}', // Use string interpolation to insert the userId
+                            //   style:
+                            //       TextStyle(color: Colors.black, fontSize: 14),
+                            // ),
+                            // SizedBox(height: 8),
                             Text(
                               '${AppLocalizations.of(context)!.userId} : ${user.id}',
                               //   'User Id: ${user.id}',
@@ -426,6 +422,25 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                         ));
                   },
                 ),
+                // ListTile(
+                //   leading: Icon(
+                //     Icons.person_pin_circle_outlined,
+                //     color: Acolors.primary,
+                //   ),
+                //   title: Text(
+                //     'register user',
+                //     style: TextStyle(fontSize: 18),
+                //   ),
+                //   onTap: () {
+                //     Navigator.pop(context);
+                //     Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //           builder: (context) => RegisterModalSheet(),
+                //           // ContactUsPage(),
+                //         ));
+                //   },
+                // ),
                 ListTile(
                   leading: Icon(
                     Icons.format_quote_outlined,
@@ -460,11 +475,13 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                   onTap: () {
                     if (user == null) {
                       Navigator.pop(context);
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SignInScreen(),
-                          ));
+                      // Use the RegisterService to show the bottom sheet
+                      RegisterService().showModalBottomSheetregister(context);
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //       builder: (context) => SignInScreen(),
+                      //     ));
                     } else {
                       showDialog(
                         context: context,
