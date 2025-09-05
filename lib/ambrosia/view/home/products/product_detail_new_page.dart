@@ -35,7 +35,6 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
     super.initState();
     // Initialize the TabController in initState
     _tabController = TabController(length: 5, vsync: this);
-
     // Add listener to update selected tab based on scroll position
     itemPositionsListener.itemPositions.addListener(() {
       final positions = itemPositionsListener.itemPositions.value;

@@ -104,6 +104,7 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                         .changeLanguage(value);
                   }
                 },
+                offset: const Offset(0, 60),
                 icon: Icon(Icons.language),
                 itemBuilder: (BuildContext context) => LanguageProvider
                     .languages
@@ -111,7 +112,6 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                           value: language['locale'],
                           child: Row(
                             children: [
-                              // Add a checkmark for the currently selected language
                               if (language['locale'] == currentLanguage)
                                 Icon(Icons.check, size: 16, color: Colors.green)
                               else
@@ -227,7 +227,7 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(
+                    Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                           builder: (context) => HomeScreen(),

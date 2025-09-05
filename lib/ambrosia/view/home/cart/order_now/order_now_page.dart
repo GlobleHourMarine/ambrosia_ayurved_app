@@ -824,7 +824,8 @@ class _OrderNowPageState extends State<OrderNowPage> {
                             SuccessPopup.show(
                               context: context,
                               title: "Payment Failed",
-                              subtitle: paymentResult,
+                              subtitle: "Failed to place order",
+                              //paymentResult,
                               iconColor: Colors.red,
                               icon: Icons.cancel,
                               autoCloseDuration: 0,
@@ -832,19 +833,16 @@ class _OrderNowPageState extends State<OrderNowPage> {
                             );
                             return;
                           }
-
                           // 3️⃣ If payment success, show "Creating Order..." loader
                           SuccessPopup.show(
                             context: context,
-                            title: "Creating Order...",
-                            subtitle:
-                                "We are placing your order in Shiprocket.",
+                            title: "Placing Order...",
+                            subtitle: "Please wait we placing the order",
                             icon: Icons.hourglass_empty,
                             iconColor: Colors.orange,
                             autoCloseDuration: 0,
                             showButtonLoader: true,
                           );
-
                           await createShiprocketOrder(
                               billingCustomerName: selectedAddress!.fname,
                               billingLastName: selectedAddress!.lname,
@@ -870,11 +868,11 @@ class _OrderNowPageState extends State<OrderNowPage> {
                               context: context);
                         } catch (e) {
                           print(e);
-
                           SuccessPopup.show(
                             context: context,
-                            title: "Error",
-                            subtitle: e.toString(),
+                            title: "Failed",
+                            subtitle: "Failed to place Order",
+                            // e.toString(),
                             iconColor: Colors.red,
                             icon: Icons.error,
                             autoCloseDuration: 0,
@@ -896,7 +894,7 @@ class _OrderNowPageState extends State<OrderNowPage> {
                               AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : Text("Create Shiprocket Order"),
+                    : Text("Checkout"),
               ),
             ),
           ),

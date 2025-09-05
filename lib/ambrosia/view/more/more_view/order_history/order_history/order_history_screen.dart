@@ -268,19 +268,19 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: CustomAppBar(
         title: 'Order History',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              setState(() {
-                isLoading = true;
-                error = null;
-              });
-              _animationController.reset();
-              fetchOrders();
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.refresh),
+        //     onPressed: () {
+        //       setState(() {
+        //         isLoading = true;
+        //         error = null;
+        //       });
+        //       _animationController.reset();
+        //       fetchOrders();
+        //     },
+        //   ),
+        // ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {

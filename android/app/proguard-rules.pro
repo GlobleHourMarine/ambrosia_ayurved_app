@@ -152,3 +152,6 @@
 # -------------------------------
 -keep class androidx.work.** { *; }
 -dontwarn androidx.work.**
+
+# For flutter_local_notifications
+-keep class com.dexterous.** { *; }
