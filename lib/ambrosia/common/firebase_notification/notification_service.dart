@@ -1,3 +1,5 @@
+/*
+
 // ios simulator
 
 import 'dart:io';
@@ -96,9 +98,8 @@ class NotificationService {
     );
   }
 }
+*/
 
-
-/*
 // new working one
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -108,6 +109,7 @@ class NotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  bool _isSubscribing = false;
 
   Future<void> initialize() async {
     // Request permissions first
@@ -127,10 +129,7 @@ class NotificationService {
       print('❌ Notification permission denied');
       return;
     }
-
     await _initializeLocalNotifications();
-
-    // CRITICAL: Create notification channel for Android 8+
     if (Platform.isAndroid) {
       await _createNotificationChannel();
     }
@@ -141,12 +140,9 @@ class NotificationService {
       await _subscribeToTopic();
     });
 
-    // Subscribe to topic initially
     await _subscribeToTopic();
-
     // Set up message handlers
     _setupMessageHandlers();
-
     // Get and print initial token
     String? token = await _firebaseMessaging.getToken();
     print('📱 FCM Token: $token');
@@ -177,40 +173,46 @@ class NotificationService {
     );
   }
 
-  // CRITICAL: Create notification channel for Android 8+
   Future<void> _createNotificationChannel() async {
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'high_importance_channel', // Must match your manifest meta-data
+      'high_importance_channel',
       'High Importance Notifications',
       description: 'This channel is used for important notifications.',
       importance: Importance.max,
       playSound: true,
       enableVibration: true,
     );
+
     final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
         _localNotificationsPlugin.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
-
     if (androidPlugin != null) {
       await androidPlugin.createNotificationChannel(channel);
       print('✅ Notification channel created');
     }
   }
 
+  Future<bool> isSimulator() async {
+    // Simple iOS simulator detection
+    return Platform.isIOS && (await _firebaseMessaging.getAPNSToken()) == null;
+  }
+
   Future<void> _subscribeToTopic() async {
+    if (_isSubscribing)
+      return; // Prevent multiple simultaneous subscription attempts
+    _isSubscribing = true;
+
     try {
       if (Platform.isIOS) {
-        // For iOS, wait for APNS token
+        // For iOS, check if we have APNS token first
         final apnsToken = await _firebaseMessaging.getAPNSToken();
         if (apnsToken != null) {
           print("📱 APNs token available. Subscribing to topic...");
           await _firebaseMessaging.subscribeToTopic("all_users");
           print("✅ Subscribed to topic: all_users");
         } else {
-          print("⏳ Waiting for APNs token...");
-          // Retry after delay
-          await Future.delayed(const Duration(seconds: 2));
-          await _subscribeToTopic();
+          print("⏳ APNs token not available yet. Skipping topic subscription.");
+          // Don't retry recursively - let token refresh handle it
         }
       } else {
         // For Android, subscribe directly
@@ -219,6 +221,8 @@ class NotificationService {
       }
     } catch (e) {
       print('❌ Error subscribing to topic: $e');
+    } finally {
+      _isSubscribing = false;
     }
   }
 
@@ -304,11 +308,10 @@ class NotificationService {
   }
 }
 
-*/
+
 
 
 /*
-
 // from andriod one
 
 import 'package:firebase_messaging/firebase_messaging.dart';

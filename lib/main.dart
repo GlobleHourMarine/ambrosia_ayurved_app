@@ -34,6 +34,7 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   await NotificationService().initialize();
+
   final userProvider = UserProvider();
   await userProvider.loadUserFromPrefs();
 

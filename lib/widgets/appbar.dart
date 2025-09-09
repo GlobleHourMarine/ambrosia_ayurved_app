@@ -200,13 +200,13 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                                   TextStyle(color: Colors.black, fontSize: 18),
                             ),
                             SizedBox(height: 15),
-                            // Text(
-                            //   '${AppLocalizations.of(context)!.email} : ${user.email}',
-                            //   //   'Email: ${user.email}', // Use string interpolation to insert the userId
-                            //   style:
-                            //       TextStyle(color: Colors.black, fontSize: 14),
-                            // ),
-                            // SizedBox(height: 8),
+                            Text(
+                              '${AppLocalizations.of(context)!.phone} : ${user.mobile}',
+                              //   'Email: ${user.email}', // Use string interpolation to insert the userId
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 14),
+                            ),
+                            SizedBox(height: 8),
                             Text(
                               '${AppLocalizations.of(context)!.userId} : ${user.id}',
                               //   'User Id: ${user.id}',

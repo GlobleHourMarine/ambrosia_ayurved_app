@@ -23,7 +23,6 @@ class AddressFetchService {
           'Content-Type': 'application/json',
         },
       );
-
       print('Request sent to: ${url.toString()}');
       print('Request body: ${jsonEncode({'user_id': userid})}');
       print('Response status: ${response.statusCode}');
@@ -522,7 +521,7 @@ class _AddressSelectionWidgetState extends State<AddressSelectionWidget> {
                         fontSize: 12,
                         color: Colors.grey[700],
                       ),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],

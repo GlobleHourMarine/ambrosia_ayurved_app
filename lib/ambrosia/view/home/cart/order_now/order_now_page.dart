@@ -705,7 +705,6 @@ class _OrderNowPageState extends State<OrderNowPage> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: SizedBox(

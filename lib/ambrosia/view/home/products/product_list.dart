@@ -93,7 +93,6 @@ class _ProductListState extends State<ProductList> {
                   // Calculate responsive dimensions
                   final screenWidth = MediaQuery.of(context).size.width;
                   final screenHeight = MediaQuery.of(context).size.height;
-
                   // Determine cross axis count based on screen width
                   int crossAxisCount = 2;
                   if (screenWidth > 600) {
@@ -168,9 +167,10 @@ class _ProductListState extends State<ProductList> {
                                         },
                                         errorBuilder:
                                             (context, error, stackTrace) {
-                                          return const ShimmerEffect(
-                                              width: double.infinity,
-                                              height: double.infinity);
+                                          return const Icon(
+                                              Icons.image_not_supported,
+                                              color: Colors.grey,
+                                              size: 150);
                                         },
                                       ),
                                     ),

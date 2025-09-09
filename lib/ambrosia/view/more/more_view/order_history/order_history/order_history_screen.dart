@@ -154,7 +154,6 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
         );
       },
     );
-
     if (shouldCancel == true) {
       await _cancelOrder(order, shiprocketOrderId);
     }
@@ -750,7 +749,9 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => TrackingScreen1(
-                                              awbCode: order.awbCode),
+                                            orderId: order.orderId,
+                                            //    awbCode: order.awbCode
+                                          ),
                                         ));
                                   } finally {
                                     // Use setModalState instead of setState

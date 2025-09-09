@@ -13,7 +13,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>ambrosiaayurved</string>
+    <string>Ambrosia Ayurved</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -21,7 +21,7 @@
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>ambrosiaayurved</string>
+    <string>ambrosia ayurved</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -70,8 +70,5 @@
     <array>
         <string>remote-notification</string>
     </array>
-
-    <key>NSUserTrackingUsageDescription</key>
-    <string>We use this to deliver notifications.</string>
 </dict>
 </plist>

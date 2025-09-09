@@ -28,7 +28,6 @@ class _HowToUseSectionState extends State<HowToUseSection> {
       Uri.parse(
           'https://ambrosiaayurved.in/api/how_to_use?product_id=${widget.productId}'),
     );
-
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       if (jsonData['status'] == true) {
@@ -39,7 +38,6 @@ class _HowToUseSectionState extends State<HowToUseSection> {
           _isLoading = false;
         });
       } else {
-        // status is false
         setState(() {
           _steps = [];
           _isLoading = false;
@@ -55,7 +53,6 @@ class _HowToUseSectionState extends State<HowToUseSection> {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Column(
@@ -120,7 +117,11 @@ class _HowToUseSectionState extends State<HowToUseSection> {
               imageUrl,
               width: 120,
               height: 120,
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.image_not_supported,
+                    color: Colors.grey, size: 110);
+              },
             ),
           ),
           const SizedBox(width: 12),
