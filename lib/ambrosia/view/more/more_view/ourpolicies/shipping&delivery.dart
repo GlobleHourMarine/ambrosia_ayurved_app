@@ -9,11 +9,12 @@ class ShippingAndDeliveryPolicyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          CustomAppBar(title: '${AppLocalizations.of(context)!.shippingPolicy}'
-              // 'Shipping & Delivery Policy'
+      appBar: CustomAppBar(
+          leading: const BackButton(color: Colors.black),
+          title: '${AppLocalizations.of(context)!.shippingPolicy}'
+          // 'Shipping & Delivery Policy'
 
-              ),
+          ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

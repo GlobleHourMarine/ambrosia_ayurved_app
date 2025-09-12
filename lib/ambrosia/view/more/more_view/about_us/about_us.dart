@@ -11,7 +11,9 @@ class AboutUsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: '${AppLocalizations.of(context)!.aboutUs}'
+      appBar: CustomAppBar(
+          leading: const BackButton(color: Colors.black),
+          title: '${AppLocalizations.of(context)!.aboutUs}'
           // 'About Us',
           ),
       body: SafeArea(

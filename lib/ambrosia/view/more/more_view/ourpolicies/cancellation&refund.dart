@@ -13,6 +13,7 @@ class CancellationRefundPolicyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
+          leading: const BackButton(color: Colors.black),
           title: '${AppLocalizations.of(context)!.cancellationRefundPolicy}'
           // 'Cancellation, Return & Refund Policy',
           ),

@@ -1,8 +1,9 @@
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_app_bar.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_list.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/cart_page.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/cart_provider.dart';
-import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_list.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -15,7 +16,6 @@ class _MedicineScreenState extends State<MedicineScreen> {
   @override
   void initState() {
     super.initState();
-
     _fetchCartData();
   }
 
@@ -72,73 +72,107 @@ class _MedicineScreenState extends State<MedicineScreen> {
   @override
   Widget build(BuildContext context) {
     final cart = Provider.of<CartProvider>(context);
-    return SafeArea(
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                height: 70,
-                color: Acolors.primary,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Material(
-                        color: Colors.white.withOpacity(0.21),
-                        borderRadius: BorderRadius.circular(12),
-                        child: const BackButton(
-                          color: Acolors.white,
-                        ),
-                      ),
-                      //  const SizedBox(width: 30),
-                      const Text(
-                        'Medicine',
-                        style: TextStyle(fontSize: 24, color: Acolors.white),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(1),
-                        child: IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const CartPage(),
-                                ));
-                          },
-                          icon: Stack(alignment: Alignment.center, children: [
-                            const Icon(
-                              Icons.shopping_cart_outlined,
-                              size: 35,
-                            ),
-                            Positioned(
-                              right: 0,
-                              top: 0,
-                              child: CircleAvatar(
-                                radius: 8,
-                                backgroundColor:
-                                    const Color.fromARGB(255, 245, 114, 74),
-                                child: Text(
-                                  '${cart.totalUniqueItems}',
-                                  style: TextStyle(
-                                      fontSize: 12, color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          ]),
-                        ),
-                      ),
-                    ],
+    return Scaffold(
+      appBar: CustomAppBar(
+        title: 'Supplements',
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(6),
+            child: IconButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CartPage(),
+                    ));
+              },
+              icon: Stack(alignment: Alignment.center, children: [
+                const Icon(
+                  Icons.shopping_cart_outlined,
+                  size: 35,
+                ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: CircleAvatar(
+                    radius: 8,
+                    backgroundColor: const Color.fromARGB(255, 245, 114, 74),
+                    child: Text(
+                      '${cart.totalUniqueItems}',
+                      style: TextStyle(fontSize: 12, color: Colors.white),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              ProductList(),
-            ],
+              ]),
+            ),
           ),
-        ),
+        ],
       ),
+
+      body: ProductList(),
+      // body: SingleChildScrollView(
+      //   child: Column(
+      //     children: [
+      // Container(
+      //   height: 70,
+      //   color: Acolors.primary,
+      //   child: Padding(
+      //     padding: const EdgeInsets.all(12),
+      //     child: Row(
+      //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //       children: [
+      //         Material(
+      //           color: Colors.white.withOpacity(0.21),
+      //           borderRadius: BorderRadius.circular(12),
+      //           child: const BackButton(
+      //             color: Acolors.white,
+      //           ),
+      //         ),
+      //         //  const SizedBox(width: 30),
+      //         const Text(
+      //           'Supplements',
+      //           style: TextStyle(fontSize: 24, color: Acolors.white),
+      //         ),
+      //         Padding(
+      //           padding: const EdgeInsets.all(1),
+      //           child: IconButton(
+      //             onPressed: () {
+      //               Navigator.push(
+      //                   context,
+      //                   MaterialPageRoute(
+      //                     builder: (context) => const CartPage(),
+      //                   ));
+      //             },
+      //             icon: Stack(alignment: Alignment.center, children: [
+      //               const Icon(
+      //                 Icons.shopping_cart_outlined,
+      //                 size: 35,
+      //               ),
+      //               Positioned(
+      //                 right: 0,
+      //                 top: 0,
+      //                 child: CircleAvatar(
+      //                   radius: 8,
+      //                   backgroundColor:
+      //                       const Color.fromARGB(255, 245, 114, 74),
+      //                   child: Text(
+      //                     '${cart.totalUniqueItems}',
+      //                     style: TextStyle(
+      //                         fontSize: 12, color: Colors.white),
+      //                   ),
+      //                 ),
+      //               ),
+      //             ]),
+      //           ),
+      //         ),
+      //       ],
+      //     ),
+      //   ),
+      // ),
+      //       const SizedBox(height: 10),
+      //     ],
+      //   ),
+      // ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_message.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/home_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/models/user_model.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
+import 'package:ambrosia_ayurved/widgets/new_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -183,7 +184,6 @@ class _RegistrationModalState extends State<RegistrationModal> {
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         userProvider.setUser(user);
         await userProvider.saveUserData(user);
-
         Navigator.of(context).pop();
         SuccessPopup.show(
           context: context,
@@ -192,7 +192,7 @@ class _RegistrationModalState extends State<RegistrationModal> {
               "${AppLocalizations.of(context)!.youHaveBeenredirectedtohomescreen}",
           icon: Icons.verified_user,
           iconColor: Acolors.primary,
-          navigateToScreen: HomeScreen(),
+          navigateToScreen: MainTabView(),
           autoCloseDuration: 2,
         );
       } else {

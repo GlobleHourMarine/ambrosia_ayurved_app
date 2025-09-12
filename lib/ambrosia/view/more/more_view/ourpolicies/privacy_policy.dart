@@ -12,6 +12,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
+          leading: const BackButton(color: Colors.black),
           title:
               //'Privacy Policy',
               '${AppLocalizations.of(context)!.privacyPolicy}'

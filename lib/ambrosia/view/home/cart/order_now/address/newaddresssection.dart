@@ -23,6 +23,7 @@ class _AddressSectionState extends State<AddressSection> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _fnameController = TextEditingController();
   final TextEditingController _lnameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _pincodeController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
@@ -31,6 +32,7 @@ class _AddressSectionState extends State<AddressSection> {
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _stateController = TextEditingController();
   final TextEditingController _districtController = TextEditingController();
+
   bool _isLoading = false;
   bool _isPinLoading = false;
   String? _addressType = 'Home';
@@ -45,6 +47,7 @@ class _AddressSectionState extends State<AddressSection> {
   void dispose() {
     _fnameController.dispose();
     _lnameController.dispose();
+    _emailController.dispose();
     _mobileController.dispose();
     _countryController.dispose();
     _pincodeController.dispose();
@@ -252,6 +255,30 @@ class _AddressSectionState extends State<AddressSection> {
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(10),
                         ],
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.email,
+                          //  'Phone Number',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.email, size: 20),
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 12),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "${AppLocalizations.of(context)!.pleaseEnterEmail}";
+                            //  'Please enter Email';
+                          } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                              .hasMatch(value)) {
+                            return "${AppLocalizations.of(context)!.pleaseEnterValidEmail}";
+                            // 'Please enter a valid email';
+                          }
+                          return null;
+                        },
                       ),
                     ],
                   ),
@@ -497,110 +524,109 @@ class _AddressSectionState extends State<AddressSection> {
                 ),
               ),
 
-              const SizedBox(height: 30),
-
-              // Save Button
-              SizedBox(
-                width: double.infinity,
-                //  height: 48,
-                child: OutlinedButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () async {
-                          if (_formKey.currentState!.validate()) {
-                            setState(() {
-                              _isLoading = true;
-                            });
-
-                            final userProvider = Provider.of<UserProvider>(
-                                context,
-                                listen: false);
-                            final userId = userProvider.id;
-
-                            final addressProvider =
-                                Provider.of<AddressProvider>(context,
-                                    listen: false);
-
-                            bool success =
-                                await addressProvider.saveCheckoutInformation(
-                              address_type: _addressType.toString(),
-                              district: _districtController.text,
-                              userid: userId,
-                              fname: _fnameController.text,
-                              lname: _lnameController.text,
-                              address: _addressController.text,
-                              city: _cityController.text,
-                              state: _stateController.text,
-                              mobile: _mobileController.text,
-                              country: _countryController.text,
-                              pincode: _pincodeController.text,
-                              context: context,
-                            );
-
-                            setState(() {
-                              _isLoading = false;
-                            });
-
-                            if (success) {
-                              // FIXED: Navigate based on where this screen was opened from
-                              if (widget.isFromManageAddress) {
-                                // If opened from manage address screen, go back
-                                Navigator.pop(context);
-                              } else {
-                                // If opened from checkout/order flow, go to order page
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => OrderNowPage()),
-                                );
-                              }
-                            }
-                          }
-                        },
-
-                  // if (success) {
-                  //  _openRazorpayCheckout(grandTotalProvider.grandTotal);
-                  // _startPhonePePayment(grandTotalProvider.grandTotal);
-                  // Navigator.pushReplacement(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => OrderNowPage(),
-                  //   ),
-                  // );
-                  //     }
-                  // setState(() {
-                  //   _isLoading = false;
-                  // });
-
-                  style: OutlinedButton.styleFrom(
-                    // backgroundColor: Colors.blue[600],
-                    foregroundColor: Acolors.primary,
-                    side: BorderSide(color: Acolors.primary, width: 1),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    padding: EdgeInsets.zero,
-                  ),
-                  child: _isLoading
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  Acolors.primary),
-                            ),
-                          ),
-                        )
-                      : Text(
-                          AppLocalizations.of(context)!.saveAddress,
-                          //"Save Address"
-                        ),
-                ),
-              ),
+              // const SizedBox(height: 30),
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: // Save Button
+          Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: SizedBox(
+          child: OutlinedButton(
+            onPressed: _isLoading
+                ? null
+                : () async {
+                    if (_formKey.currentState!.validate()) {
+                      setState(() {
+                        _isLoading = true;
+                      });
+
+                      final userProvider =
+                          Provider.of<UserProvider>(context, listen: false);
+                      final userId = userProvider.id;
+
+                      final addressProvider =
+                          Provider.of<AddressProvider>(context, listen: false);
+
+                      bool success =
+                          await addressProvider.saveCheckoutInformation(
+                        address_type: _addressType.toString(),
+                        district: _districtController.text,
+                        userid: userId,
+                        fname: _fnameController.text,
+                        lname: _lnameController.text,
+                        email: _emailController.text,
+                        address: _addressController.text,
+                        city: _cityController.text,
+                        state: _stateController.text,
+                        mobile: _mobileController.text,
+                        country: _countryController.text,
+                        pincode: _pincodeController.text,
+                        context: context,
+                      );
+
+                      setState(() {
+                        _isLoading = false;
+                      });
+
+                      if (success) {
+                        // FIXED: Navigate based on where this screen was opened from
+                        if (widget.isFromManageAddress) {
+                          // If opened from manage address screen, go back
+                          Navigator.pop(context);
+                        } else {
+                          // If opened from checkout/order flow, go to order page
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => OrderNowPage()),
+                          );
+                        }
+                      }
+                    }
+                  },
+
+            // if (success) {
+            //  _openRazorpayCheckout(grandTotalProvider.grandTotal);
+            // _startPhonePePayment(grandTotalProvider.grandTotal);
+            // Navigator.pushReplacement(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => OrderNowPage(),
+            //   ),
+            // );
+            //     }
+            // setState(() {
+            //   _isLoading = false;
+            // });
+
+            style: OutlinedButton.styleFrom(
+              // backgroundColor: Colors.blue[600],
+              foregroundColor: Acolors.primary,
+              side: BorderSide(color: Acolors.primary, width: 1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+              padding: EdgeInsets.zero,
+            ),
+            child: _isLoading
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Acolors.primary),
+                      ),
+                    ),
+                  )
+                : Text(
+                    AppLocalizations.of(context)!.saveAddress,
+                    //"Save Address"
+                  ),
           ),
         ),
       ),

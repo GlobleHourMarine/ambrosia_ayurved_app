@@ -1,8 +1,9 @@
+// import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
+// import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_detail_new_page.dart';
+// import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_fetch/product_provider.dart';
+// import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_fetch/products_model.dart';
 // import 'package:flutter/material.dart';
-// import 'package:ambrosia_ayurved/cosmetics/common/color_extension.dart';
-// import 'package:ambrosia_ayurved/cosmetics/view/home/products/product_detail.dart';
-// import 'package:ambrosia_ayurved/cosmetics/view/home/products/product_notifier_class.dart';
-// import 'package:ambrosia_ayurved/cosmetics/view/home/products/products_model.dart';
+
 // import 'package:provider/provider.dart';
 
 // class CategoryProductScreen extends StatelessWidget {
@@ -44,7 +45,8 @@
 //                               context,
 //                               MaterialPageRoute(
 //                                 builder: (context) =>
-//                                     ProductDetail(product: product),
+
+//                                     ProductDetailNewPage(product: product),
 //                               ));
 //                         },
 //                         child: Stack(

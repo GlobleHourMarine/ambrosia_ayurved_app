@@ -1,3 +1,4 @@
+import 'package:ambrosia_ayurved/widgets/new_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/home_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
@@ -73,7 +74,10 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(Duration(seconds: 1));
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => HomeScreen()),
+      MaterialPageRoute(
+        builder: (context) => MainTabView(),
+        //HomeScreen()
+      ),
     );
   }
 

@@ -12,6 +12,7 @@ class TermsAndConditionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
+        leading: const BackButton(color: Colors.black),
         title: '${AppLocalizations.of(context)!.termsConditions}'
             'Terms and Conditions',
       ),

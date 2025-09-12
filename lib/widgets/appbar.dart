@@ -6,6 +6,7 @@ import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/contact/contact_us
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/order_history/order_history/order_history_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/cart_page.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/cart_provider.dart';
+import 'package:ambrosia_ayurved/widgets/new_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/Faq/faq.dart';
@@ -230,7 +231,7 @@ class _BaseScaffoldState extends State<BaseScaffold> {
                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => HomeScreen(),
+                          builder: (context) => MainTabView(),
                         ));
                   },
                 ),

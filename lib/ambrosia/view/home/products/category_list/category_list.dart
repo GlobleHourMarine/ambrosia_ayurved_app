@@ -1,3 +1,4 @@
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/shimmer_effect/shimmer_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/rounded_textfield.dart';
@@ -28,7 +29,7 @@ class _CategoryListState extends State<CategoryList> {
       "items_count": "0",
     },
     {
-      "name": "Medicene",
+      "name": "Supplements",
       "imageurl":
           "https://cdn.pixabay.com/photo/2017/05/23/21/01/jar-2338584_1280.jpg",
       "items_count": "1",
@@ -55,9 +56,9 @@ class _CategoryListState extends State<CategoryList> {
         body: Stack(
           children: [
             Container(
-              margin: const EdgeInsets.only(top: 180),
+              margin: const EdgeInsets.only(top: 130),
               width: media.width * 0.27,
-              height: 486,
+              height: 492,
               decoration: const BoxDecoration(
                 color: Acolors.primary,
                 borderRadius: BorderRadius.only(
@@ -117,14 +118,14 @@ class _CategoryListState extends State<CategoryList> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      const RoundedTextfield(
-                        hinttext: 'Search',
-                        suffixIcon: Icon(
-                          Icons.search,
-                          size: 30,
-                          color: Acolors.primary,
-                        ),
-                      ),
+                      // const RoundedTextfield(
+                      //   hinttext: 'Search',
+                      //   suffixIcon: Icon(
+                      //     Icons.search,
+                      //     size: 30,
+                      //     color: Acolors.primary,
+                      //   ),
+                      // ),
                       //  SizedBox(height: 50),
                       const SizedBox(height: 30),
                       ListView.builder(
@@ -146,7 +147,7 @@ class _CategoryListState extends State<CategoryList> {
                                 case "SkinCare":
                                   nextScreen = SkincareScreen();
                                   break;
-                                case "Medicene":
+                                case "Supplements":
                                   nextScreen = MedicineScreen();
                                   break;
                                 case "Cosmetics":
@@ -212,9 +213,17 @@ class _CategoryListState extends State<CategoryList> {
                                         width: 80,
                                         height: 80,
                                         fit: BoxFit.fill,
+                                        loadingBuilder:
+                                            (context, child, progress) {
+                                          if (progress == null) return child;
+                                          return const ShimmerEffect(
+                                              width: 50, height: 50);
+                                        },
                                         errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                CircularProgressIndicator(),
+                                            (context, error, stackTrace) {
+                                          return const ShimmerEffect(
+                                              width: 50, height: 50);
+                                        },
                                       ),
                                     ),
                                     const SizedBox(width: 20),

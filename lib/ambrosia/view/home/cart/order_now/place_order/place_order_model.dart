@@ -6,6 +6,7 @@ class PlaceOrderModel {
   final String orderId;
   final String productPrice;
   final String totalPrice;
+  final String orderSource;
 
   PlaceOrderModel({
     required this.userId,
@@ -15,6 +16,7 @@ class PlaceOrderModel {
     required this.orderId,
     required this.productPrice,
     required this.totalPrice,
+    required this.orderSource,
   });
 
   // Factory constructor to create an instance from JSON
@@ -27,6 +29,7 @@ class PlaceOrderModel {
       orderId: json['order_id'] ?? '',
       productPrice: json['product_price'] ?? '',
       totalPrice: json['total_price'] ?? '',
+      orderSource: json['order_source'] ?? '',
     );
   }
 
@@ -40,6 +43,7 @@ class PlaceOrderModel {
       "order_id": orderId,
       "product_price": productPrice,
       "total_price": totalPrice,
+      "order_source": orderSource,
     };
   }
 }

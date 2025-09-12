@@ -4,6 +4,7 @@ class Address {
   final String fname;
   final String lname;
   final String mobile;
+  final String email;
   final String address;
   final String city;
   final String district;
@@ -19,6 +20,7 @@ class Address {
     required this.fname,
     required this.lname,
     required this.mobile,
+    required this.email,
     required this.address,
     required this.city,
     required this.district,
@@ -36,6 +38,7 @@ class Address {
       fname: json['fname'] ?? '',
       lname: json['lname'] ?? '',
       mobile: json['mobile'] ?? '',
+      email: json['email'] ?? '',
       address: json['address'] ?? '',
       city: json['city'] ?? '',
       district: json['district'] ?? '',

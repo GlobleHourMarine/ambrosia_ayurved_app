@@ -1,4 +1,5 @@
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_loading_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/snackbar.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/order_history/order_history/order_model.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
@@ -297,23 +298,10 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
 
   Widget _buildBody() {
     if (isLoading) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Acolors.primary),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Loading your orders...',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
+      return AnimatedLoadingScreen(
+        message: 'Loading your orders...',
+        primaryColor: Acolors.primary,
+        animationDuration: Duration(milliseconds: 1000),
       );
     }
 

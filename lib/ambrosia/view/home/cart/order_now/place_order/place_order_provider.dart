@@ -41,7 +41,6 @@ class PlaceOrderProvider with ChangeNotifier {
 
     final double grandTotal = grandTotalProvider.grandTotal;
 
-    // Create an instance of ItemTotalPriceProvider
     final itemTotalPriceProvider = ItemTotalPriceProvider();
 
     _isLoading = true;
@@ -50,7 +49,6 @@ class PlaceOrderProvider with ChangeNotifier {
     notifyListeners();
 
     for (var item in cartProvider.cartItems) {
-      // Calculate total price for this item using the provider function
       double totalPrice = itemTotalPriceProvider.calculateTotalPrice(
         item.price.toString(),
         item.quantity.toString(),
@@ -65,29 +63,25 @@ class PlaceOrderProvider with ChangeNotifier {
         "order_id": merchantOrderId.toString(),
         "product_price": item.price.toString(),
         "total_price": totalPrice.toString(),
+        "order_source": "App",
       };
 
       print('order data api : $orderData');
-
       try {
         final response = await http.post(
           Uri.parse("https://ambrosiaayurved.in/api/order_data"),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode(orderData),
         );
-
         final responseData = jsonDecode(response.body);
-        print(responseData);
+
+        print('order data api response: $responseData');
         if (responseData["status"] == true) {
           _message = responseData["message"];
-
-          print('order data : $responseData');
         } else {
-          print('order data else  : $responseData');
           _message = "Order placement failed!";
         }
       } catch (error) {
-        print('orderdata error : $error');
         _message = "An error occurred!";
       }
     }

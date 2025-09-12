@@ -8,7 +8,6 @@ class CustomScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-
       body: Stack(
         children: [
           SizedBox(

@@ -12,6 +12,7 @@ import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/place_order/p
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/item_calculations/order_grandtotal_provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_app_bar.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/cart_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -39,6 +40,12 @@ class _OrderNowPageState extends State<OrderNowPage> {
   final TextEditingController _pincodeController = TextEditingController();
 
   bool _isLoading = false; // Loader State
+  String _couponCode = '';
+  bool _isApplyingCoupon = false;
+  bool _showDiscountAnimation = false;
+  double _discountAmount = 0.0;
+  double _discountPercentage = 0.0;
+  String _couponMessage = '';
 
   void initState() {
     super.initState();
@@ -118,6 +125,111 @@ class _OrderNowPageState extends State<OrderNowPage> {
     );
   }
 
+// coupon code
+// Add this method to apply coupon
+  Future<void> _applyCoupon() async {
+    if (_couponCode.isEmpty) {
+      setState(() {
+        _couponMessage = 'Please enter a coupon code';
+      });
+      return;
+    }
+
+    setState(() {
+      _isApplyingCoupon = true;
+      _couponMessage = '';
+    });
+
+    try {
+      final response = await http.get(
+        Uri.parse('https://ambrosiaayurved.in/api/coupon?coupon=$_couponCode'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data['status'] == true &&
+            data['data'] != null &&
+            data['data'].isNotEmpty) {
+          final couponData = data['data'][0];
+          final discountPercentage =
+              double.tryParse(couponData['discount']) ?? 0.0;
+          final expiryDate = DateTime.parse(couponData['expiry_date']);
+          final currentDate = DateTime.now();
+
+          if (currentDate.isAfter(expiryDate)) {
+            setState(() {
+              _couponMessage = 'Coupon has expired';
+            });
+
+            final grandTotalProvider =
+                Provider.of<GrandTotalProvider>(context, listen: false);
+            grandTotalProvider.removeDiscount();
+            return;
+          }
+
+          if (couponData['status'] != 'active') {
+            setState(() {
+              _couponMessage = 'Coupon is not active';
+            });
+
+            final grandTotalProvider =
+                Provider.of<GrandTotalProvider>(context, listen: false);
+            grandTotalProvider.removeDiscount();
+            return;
+          }
+
+          final grandTotalProvider =
+              Provider.of<GrandTotalProvider>(context, listen: false);
+          grandTotalProvider.applyDiscount(discountPercentage);
+
+          setState(() {
+            _couponMessage =
+                'Coupon applied successfully! You saved ₹${grandTotalProvider.discountAmount.toStringAsFixed(2)}';
+            _showDiscountAnimation = true;
+          });
+          Future.delayed(Duration(seconds: 2), () {
+            if (mounted) {
+              setState(() {
+                _showDiscountAnimation = false;
+              });
+            }
+          });
+        } else {
+          setState(() {
+            _couponMessage = 'Invalid coupon code';
+          });
+
+          final grandTotalProvider =
+              Provider.of<GrandTotalProvider>(context, listen: false);
+          grandTotalProvider.removeDiscount();
+        }
+      } else {
+        setState(() {
+          _couponMessage = 'Failed to validate coupon';
+        });
+
+        final grandTotalProvider =
+            Provider.of<GrandTotalProvider>(context, listen: false);
+        grandTotalProvider.removeDiscount();
+      }
+    } catch (e) {
+      setState(() {
+        _couponMessage = 'Error applying coupon';
+      });
+
+      final grandTotalProvider =
+          Provider.of<GrandTotalProvider>(context, listen: false);
+      grandTotalProvider.removeDiscount();
+    } finally {
+      setState(() {
+        _isApplyingCoupon = false;
+      });
+    }
+  }
+//
+//
+
   @override
   void dispose() {
     // Dispose all controllers
@@ -141,237 +253,204 @@ class _OrderNowPageState extends State<OrderNowPage> {
 
     return Scaffold(
       appBar: CustomAppBar(
+        leading: BackButton(color: Colors.black),
         title: "${AppLocalizations.of(context)!.orderNow}",
         //  'Order Now',
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                cartProvider.isLoading
-                    ? Center(child: CircularProgressIndicator())
-                    : SizedBox(height: 2),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: cartList.length,
-                  itemBuilder: (context, index) {
-                    final item = cartList[index];
-                    print(item.description);
-                    // Access the provider
-                    // final totalPriceProvider =
-                    //     Provider.of<ItemTotalPriceProvider>(context,
-                    //         listen: false);
-                    // Calculate total price using provider
-                    // double totalPrice = totalPriceProvider.calculateTotalPrice(
-                    //   item.price.toString(),
-                    //   item.quantity.toString(),
-                    // );
+      body: Stack(
+        children: [
+          SafeArea(
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    cartProvider.isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : SizedBox(height: 2),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: cartList.length,
+                      itemBuilder: (context, index) {
+                        final item = cartList[index];
+                        print(item.description);
 
-                    double price =
-                        double.tryParse(item.price.toString()) ?? 0.0;
-                    int quantity = int.tryParse(item.quantity.toString()) ?? 1;
-                    double basePricePerItem = price / 1.12;
+                        // Access the provider
+                        // final totalPriceProvider =
+                        //     Provider.of<ItemTotalPriceProvider>(context,
+                        //         listen: false);
+                        // Calculate total price using provider
+                        // double totalPrice = totalPriceProvider.calculateTotalPrice(
+                        //   item.price.toString(),
+                        //   item.quantity.toString(),
+                        // );
 
-                    //
-                    double gstPerItem = price - basePricePerItem;
+                        double price =
+                            double.tryParse(item.price.toString()) ?? 0.0;
+                        int quantity =
+                            int.tryParse(item.quantity.toString()) ?? 1;
+                        double basePricePerItem = price / 1.12;
 
-                    //
-                    double baseTotal = basePricePerItem * quantity;
-                    double gstTotal = gstPerItem * quantity;
-                    double totalWithGst = price * quantity;
+                        //
+                        double gstPerItem = price - basePricePerItem;
 
-                    return Card(
-                      elevation: 3,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        //
+                        double baseTotal = basePricePerItem * quantity;
+                        double gstTotal = gstPerItem * quantity;
+                        double totalWithGst = price * quantity;
+
+                        return Card(
+                          elevation: 3,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
                               children: [
-                                Container(
-                                  width: 100, // Adjust as needed
-                                  height: 120, // Adjust as needed
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Image.network(
-                                      'https://ambrosiaayurved.in/${item.image}',
-                                      fit: BoxFit.fill,
-                                      loadingBuilder:
-                                          (context, child, progress) {
-                                        if (progress == null) return child;
-                                        return const ShimmerEffect(
-                                            width: 100, height: 100);
-                                      },
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return const ShimmerEffect(
-                                            width: 100, height: 100);
-                                      },
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: 100, // Adjust as needed
+                                      height: 120, // Adjust as needed
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.network(
+                                          'https://ambrosiaayurved.in/${item.image}',
+                                          fit: BoxFit.contain,
+                                          loadingBuilder:
+                                              (context, child, progress) {
+                                            if (progress == null) return child;
+                                            return const ShimmerEffect(
+                                                width: 100, height: 100);
+                                          },
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return const ShimmerEffect(
+                                                width: 100, height: 100);
+                                          },
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
 
-                                const SizedBox(width: 20),
-                                //
-                                Expanded(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      //    Directionality(
-                                      //  textDirection: TextDirection.ltr,
-                                      // child:
-                                      Text(
-                                        //  AppLocalizations.of(context)!.a5product,
-                                        item.productName,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      //    ),
-                                      //  SizedBox(height: 3),
-                                      Text(
-                                        // AppLocalizations.of(context)!
-                                        //     .descriptionproduct,
-                                        item.description,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          // fontWeight: FontWeight.w700,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      //
-                                      //
-                                      Column(
+                                    const SizedBox(width: 20),
+                                    //
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          const SizedBox(height: 8),
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.grey
-                                                      .withOpacity(0.2),
-                                                  spreadRadius: 1,
-                                                  blurRadius: 3,
-                                                  offset: Offset(0, 1),
-                                                ),
-                                              ],
+                                          //    Directionality(
+                                          //  textDirection: TextDirection.ltr,
+                                          // child:
+                                          Text(
+                                            //  AppLocalizations.of(context)!.a5product,
+                                            item.productName,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 16,
                                             ),
-                                            padding: EdgeInsets.all(5),
-                                            child: Column(
-                                              children: [
-                                                // Price breakdown header
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Text(
-                                                      // "Price Break Down : ",
-                                                      "${AppLocalizations.of(context)!.priceBreakDown}",
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        fontSize: 12,
-                                                        color: Acolors.primary,
-                                                      ),
+                                          ),
+                                          //    ),
+                                          //  SizedBox(height: 3),
+                                          Text(
+                                            // AppLocalizations.of(context)!
+                                            //     .descriptionproduct,
+                                            item.description,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              // fontWeight: FontWeight.w700,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          //
+                                          //
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const SizedBox(height: 8),
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.grey
+                                                          .withOpacity(0.2),
+                                                      spreadRadius: 1,
+                                                      blurRadius: 3,
+                                                      offset: Offset(0, 1),
                                                     ),
-                                                    Container(
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                              horizontal: 6,
-                                                              vertical: 0),
-                                                      decoration: BoxDecoration(
-                                                        color: Acolors.primary
-                                                            .withOpacity(0.1),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(8),
-                                                        border: Border.all(
+                                                  ],
+                                                ),
+                                                padding: EdgeInsets.all(5),
+                                                child: Column(
+                                                  children: [
+                                                    // Price breakdown header
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Text(
+                                                          // "Price Break Down : ",
+                                                          "${AppLocalizations.of(context)!.priceBreakDown}",
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize: 12,
+                                                            color:
+                                                                Acolors.primary,
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal: 6,
+                                                                  vertical: 0),
+                                                          decoration:
+                                                              BoxDecoration(
                                                             color: Acolors
                                                                 .primary
                                                                 .withOpacity(
-                                                                    0.3)),
-                                                      ),
-                                                      child: Text(
-                                                        "Rs ${totalWithGst.toStringAsFixed(2)}",
-                                                        style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 14,
-                                                          color:
-                                                              Acolors.primary,
+                                                                    0.1),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        8),
+                                                            border: Border.all(
+                                                                color: Acolors
+                                                                    .primary
+                                                                    .withOpacity(
+                                                                        0.3)),
+                                                          ),
+                                                          child: Text(
+                                                            "Rs ${totalWithGst.toStringAsFixed(2)}",
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 14,
+                                                              color: Acolors
+                                                                  .primary,
+                                                            ),
+                                                          ),
                                                         ),
-                                                      ),
+                                                      ],
                                                     ),
-                                                  ],
-                                                ),
-                                                Divider(
-                                                    height: 5, thickness: 1),
+                                                    Divider(
+                                                        height: 5,
+                                                        thickness: 1),
 
-                                                // Base price row
-                                                Row(
-                                                  children: [
-                                                    Icon(Icons.circle,
-                                                        size: 8,
-                                                        color:
-                                                            Colors.grey[700]),
-                                                    SizedBox(width: 3),
-                                                    Text(
-                                                      //  'Base Price : ',
-                                                      "${AppLocalizations.of(context)!.basePrice} (${item.quantity})",
-                                                      style: TextStyle(
-                                                          fontSize: 12,
-                                                          color:
-                                                              Colors.grey[700]),
-                                                    ),
-                                                    Spacer(),
-                                                    Container(
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                              horizontal: 6,
-                                                              vertical: 2),
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.grey[200],
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(4),
-                                                      ),
-                                                      child: Text(
-                                                        "Rs ${baseTotal.toStringAsFixed(2)}",
-                                                        style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          fontSize: 14,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: 1),
-
-                                                // GST row
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
+                                                    // Base price row
                                                     Row(
                                                       children: [
                                                         Icon(Icons.circle,
@@ -380,25 +459,14 @@ class _OrderNowPageState extends State<OrderNowPage> {
                                                                 .grey[700]),
                                                         SizedBox(width: 3),
                                                         Text(
-                                                          "${AppLocalizations.of(context)!.gst} (${item.quantity})",
-                                                          //  "Gst  (12%) :",
+                                                          //  'Base Price : ',
+                                                          "${AppLocalizations.of(context)!.basePrice} (${item.quantity})",
                                                           style: TextStyle(
                                                               fontSize: 12,
                                                               color: Colors
                                                                   .grey[700]),
                                                         ),
-                                                      ],
-                                                    ),
-                                                    Row(
-                                                      children: [
-                                                        // Text(
-                                                        //   "Rs ${gstPerItem.toStringAsFixed(2)} × ${item.quantity}",
-                                                        //   style: TextStyle(
-                                                        //       fontSize: 14,
-                                                        //       color: Colors
-                                                        //           .grey[700]),
-                                                        // ),
-                                                        // SizedBox(width: 8),
+                                                        Spacer(),
                                                         Container(
                                                           padding: EdgeInsets
                                                               .symmetric(
@@ -414,7 +482,7 @@ class _OrderNowPageState extends State<OrderNowPage> {
                                                                         4),
                                                           ),
                                                           child: Text(
-                                                            "Rs ${gstTotal.toStringAsFixed(2)}",
+                                                            "Rs ${baseTotal.toStringAsFixed(2)}",
                                                             style: TextStyle(
                                                               fontWeight:
                                                                   FontWeight
@@ -425,34 +493,383 @@ class _OrderNowPageState extends State<OrderNowPage> {
                                                         ),
                                                       ],
                                                     ),
+                                                    SizedBox(height: 1),
+
+                                                    // GST row
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Row(
+                                                          children: [
+                                                            Icon(Icons.circle,
+                                                                size: 8,
+                                                                color: Colors
+                                                                    .grey[700]),
+                                                            SizedBox(width: 3),
+                                                            Text(
+                                                              "${AppLocalizations.of(context)!.gst} (${item.quantity})",
+                                                              //  "Gst  (12%) :",
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      700]),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Row(
+                                                          children: [
+                                                            // Text(
+                                                            //   "Rs ${gstPerItem.toStringAsFixed(2)} × ${item.quantity}",
+                                                            //   style: TextStyle(
+                                                            //       fontSize: 14,
+                                                            //       color: Colors
+                                                            //           .grey[700]),
+                                                            // ),
+                                                            // SizedBox(width: 8),
+                                                            Container(
+                                                              padding: EdgeInsets
+                                                                  .symmetric(
+                                                                      horizontal:
+                                                                          6,
+                                                                      vertical:
+                                                                          2),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .grey[200],
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            4),
+                                                              ),
+                                                              child: Text(
+                                                                "Rs ${gstTotal.toStringAsFixed(2)}",
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                  fontSize: 14,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ],
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
-                                    ],
-                                  ),
-                                ),
+                                    ),
 
-                                //
+                                    //
+                                  ],
+                                ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                          ),
+                        );
+                      },
+                    ),
 
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 8),
-                      Container(
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 8),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.2),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            padding: EdgeInsets.all(8),
+                            child: Column(
+                              children: [
+                                // Price breakdown header
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Bill Summary',
+                                      // "Price Break Down : ",
+                                      // "${AppLocalizations.of(context)!.priceBreakDown}",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        color: Acolors.primary,
+                                      ),
+                                    ),
+                                    Consumer<GrandTotalProvider>(
+                                      builder:
+                                          (context, grandTotalProvider, child) {
+                                        return Text(
+                                          "Rs ${grandTotalProvider.grandTotal.toStringAsFixed(2)}",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: Acolors.primary,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                // Text(
+                                //   "Rs ${totalWithGst.toStringAsFixed(2)}",
+                                //   style: TextStyle(
+                                //     fontWeight: FontWeight.bold,
+                                //     fontSize: 16,
+                                //     color: Acolors.primary,
+                                //   ),
+                                // ),
+                                //      ],
+                                //  ),
+                                Divider(height: 12, thickness: 1),
+                                Consumer<GrandTotalProvider>(
+                                  builder:
+                                      (context, grandTotalProvider, child) {
+                                    double grandTotal =
+                                        grandTotalProvider.grandTotal;
+                                    double basePrice = grandTotal /
+                                        1.12; // Calculate base price (grandTotal / (1 + 0.12))
+                                    double gstAmount = grandTotal - basePrice;
+                                    double finalTotal =
+                                        grandTotalProvider.finalTotal;
+
+                                    return Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(Icons.circle,
+                                                    size: 8,
+                                                    color: Colors.grey[700]),
+                                                SizedBox(width: 6),
+                                                Text(
+                                                  "${AppLocalizations.of(context)!.basePrice}",
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.grey[700]),
+                                                ),
+                                              ],
+                                            ),
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[200],
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                "Rs ${basePrice.toStringAsFixed(2)}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 8),
+                                        // GST row
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(Icons.circle,
+                                                    size: 8,
+                                                    color: Colors.grey[700]),
+                                                SizedBox(width: 6),
+                                                Text(
+                                                  "${AppLocalizations.of(context)!.gst}",
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.grey[700]),
+                                                ),
+                                              ],
+                                            ),
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[200],
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                "Rs ${gstAmount.toStringAsFixed(2)}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 8),
+                                        // GST row
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(Icons.circle,
+                                                    size: 8,
+                                                    color: Colors.grey[700]),
+                                                SizedBox(width: 6),
+                                                Text(
+                                                  'Delivery charges :',
+                                                  // "${AppLocalizations.of(context)!.gst}",
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.grey[700]),
+                                                ),
+                                              ],
+                                            ),
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[200],
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                "Rs 0",
+                                                //"Rs ${gstAmount.toStringAsFixed(2)}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        if (grandTotalProvider.discountAmount >
+                                            0) ...[
+                                          SizedBox(height: 8),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(Icons.discount,
+                                                      size: 16,
+                                                      color: Colors.green),
+                                                  SizedBox(width: 6),
+                                                  Text(
+                                                    "Discount (${grandTotalProvider.discountPercentage.toStringAsFixed(0)}% off)",
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.green,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 6, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.green[50],
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  "-₹${grandTotalProvider.discountAmount.toStringAsFixed(2)}",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 14,
+                                                    color: Colors.green,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ],
+                                    );
+                                  },
+                                ),
+
+                                Divider(height: 12, thickness: 1),
+
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Acolors.primary.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                            color: Acolors.primary
+                                                .withOpacity(0.3)),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            "${AppLocalizations.of(context)!.total}: ",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          Consumer<GrandTotalProvider>(
+                                            builder: (context,
+                                                grandTotalProvider, child) {
+                                              return Text(
+                                                "Rs ${grandTotalProvider.finalTotal.toStringAsFixed(2)}",
+                                                //  "₹${totalWithGst.toStringAsFixed(2)}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                  color: Acolors.primary,
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    //
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(8),
@@ -465,246 +882,148 @@ class _OrderNowPageState extends State<OrderNowPage> {
                             ),
                           ],
                         ),
-                        padding: EdgeInsets.all(8),
+                        padding: EdgeInsets.all(12),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Price breakdown header
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Bill Summary',
-                                  // "Price Break Down : ",
-                                  // "${AppLocalizations.of(context)!.priceBreakDown}",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                    color: Acolors.primary,
-                                  ),
-                                ),
-                                Consumer<GrandTotalProvider>(
-                                  builder:
-                                      (context, grandTotalProvider, child) {
-                                    return Text(
-                                      "Rs ${grandTotalProvider.grandTotal.toStringAsFixed(2)}",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: Acolors.primary,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
+                            Text(
+                              "Apply Coupon",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                color: Acolors.primary,
+                              ),
                             ),
-                            // Text(
-                            //   "Rs ${totalWithGst.toStringAsFixed(2)}",
-                            //   style: TextStyle(
-                            //     fontWeight: FontWeight.bold,
-                            //     fontSize: 16,
-                            //     color: Acolors.primary,
-                            //   ),
-                            // ),
-                            //      ],
-                            //  ),
-                            Divider(height: 12, thickness: 1),
-                            Consumer<GrandTotalProvider>(
-                              builder: (context, grandTotalProvider, child) {
-                                double grandTotal =
-                                    grandTotalProvider.grandTotal;
-                                double basePrice = grandTotal /
-                                    1.12; // Calculate base price (grandTotal / (1 + 0.12))
-                                double gstAmount = grandTotal - basePrice;
-                                return Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(Icons.circle,
-                                                size: 8,
-                                                color: Colors.grey[700]),
-                                            SizedBox(width: 6),
-                                            Text(
-                                              "${AppLocalizations.of(context)!.basePrice}",
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Colors.grey[700]),
-                                            ),
-                                          ],
+                            SizedBox(height: 12),
+                            TextFormField(
+                              decoration: InputDecoration(
+                                hintText: 'Enter coupon code',
+                                border: OutlineInputBorder(),
+                                focusedBorder: OutlineInputBorder(),
+                                suffixIcon: _isApplyingCoupon
+                                    ? Transform.scale(
+                                        scale: 0.5,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
+                                      )
+                                    : TextButton(
+                                        onPressed: _applyCoupon,
+                                        child: Text(
+                                          'Apply',
+                                          style: TextStyle(
+                                              color: Acolors.primary,
+                                              fontSize: 16),
                                         ),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 6, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[200],
-                                            borderRadius:
-                                                BorderRadius.circular(4),
-                                          ),
-                                          child: Text(
-                                            "Rs ${basePrice.toStringAsFixed(2)}",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 8),
-                                    // GST row
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(Icons.circle,
-                                                size: 8,
-                                                color: Colors.grey[700]),
-                                            SizedBox(width: 6),
-                                            Text(
-                                              "${AppLocalizations.of(context)!.gst}",
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Colors.grey[700]),
-                                            ),
-                                          ],
-                                        ),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 6, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[200],
-                                            borderRadius:
-                                                BorderRadius.circular(4),
-                                          ),
-                                          child: Text(
-                                            "Rs ${gstAmount.toStringAsFixed(2)}",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                );
+                                      ),
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 12),
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  _couponCode = value.trim();
+                                });
                               },
                             ),
-
-                            Divider(height: 12, thickness: 1),
-                            // Total row with highlight
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Acolors.primary.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                        color:
-                                            Acolors.primary.withOpacity(0.3)),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        "${AppLocalizations.of(context)!.total}: ",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      Consumer<GrandTotalProvider>(
-                                        builder: (context, grandTotalProvider,
-                                            child) {
-                                          return Text(
-                                            "Rs ${grandTotalProvider.grandTotal.toStringAsFixed(2)}",
-                                            //  "₹${totalWithGst.toStringAsFixed(2)}",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                              color: Acolors.primary,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ],
+                            if (_couponMessage.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Text(
+                                  _couponMessage,
+                                  style: TextStyle(
+                                    color:
+                                        _couponMessage.contains('successfully')
+                                            ? Colors.green
+                                            : Colors.red,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
+                    ),
 
-                // Padding(
-                //   padding: const EdgeInsets.all(12.0),
-                //   child: AddressSelectionWidget(
-                //     title: "Select Delivery Address",
-                //     onAddressSelected: (Address address) {
-                //       setState(() {
-                //         selectedAddress = address;
-                //       });
-                //       print('Selected: ${address.fname} ${address.lname}');
-                //     },
-                //   ),
-                // ),
-                // // Show selected address info
-                // if (selectedAddress != null)
-                //   Container(
-                //     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                //     child: Text(
-                //       'Delivering to: ${selectedAddress!.fname} ${selectedAddress!.lname}',
-                //       style: TextStyle(fontWeight: FontWeight.bold),
-                //     ),
-                //   ),
-                // const SizedBox(height: 10),
-//
-//
-//
-//
-//
-//
-              ],
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Address section title
+                          Text(
+                            "Select Delivery Address",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Acolors.primary,
+                            ),
+                          ),
+                          SizedBox(height: 12),
+
+                          // Integrated address selection without container wrapper
+                          AddressSelectionContent(
+                            onAddressSelected: (Address address) {
+                              setState(() {
+                                selectedAddress = address;
+                              });
+                              print(
+                                  'Selected: ${address.fname} ${address.lname}');
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    //
+                    //
+                    //
+                    //
+                    //
+                    //
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
+          // Discount Animation Overlay
+          if (_showDiscountAnimation)
+            Container(
+              color: Colors.white.withOpacity(0.5),
+              child: Center(
+                child: Container(
+                  child: Lottie.asset(
+                    'assets/lottie/discount_animatino.json',
+                    fit: BoxFit.contain,
+                    repeat: false,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: AddressSelectionWidget(
-              title: "Select Delivery Address",
-              onAddressSelected: (Address address) {
-                setState(() {
-                  selectedAddress = address;
-                });
-                print('Selected: ${address.fname} ${address.lname}');
-              },
-            ),
-          ),
-          // Show selected address info
-          if (selectedAddress != null)
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-              child: Text(
-                'Delivering to: ${selectedAddress!.fname} ${selectedAddress!.lname}',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
+          // Padding(
+          //   padding: const EdgeInsets.all(12.0),
+          //   child: AddressSelectionWidget(
+          //     title: "Select Delivery Address",
+          //     onAddressSelected: (Address address) {
+          //       setState(() {
+          //         selectedAddress = address;
+          //       });
+          //       print('Selected: ${address.fname} ${address.lname}');
+          //     },
+          //   ),
+          // ),
+          // // Show selected address info
+          // if (selectedAddress != null)
+          //   Container(
+          //     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+          //     child: Text(
+          //       'Delivering to: ${selectedAddress!.fname} ${selectedAddress!.lname}',
+          //       style: TextStyle(fontWeight: FontWeight.bold),
+          //     ),
+          //   ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: SizedBox(
@@ -727,15 +1046,7 @@ class _OrderNowPageState extends State<OrderNowPage> {
                             return;
                           }
 
-                          final placeOrderProvider =
-                              Provider.of<PlaceOrderProvider>(context,
-                                  listen: false);
-
-                          placeOrderProvider
-                              .setAddressId(selectedAddress!.id.toString());
-
-                          final userProvider =
-                              Provider.of<UserProvider>(context, listen: false);
+                          //
                           final cartProvider =
                               Provider.of<CartProvider>(context, listen: false);
                           final grandTotalProvider =
@@ -763,7 +1074,17 @@ class _OrderNowPageState extends State<OrderNowPage> {
                           );
                           final merchantOrderId =
                               GlobalPaymentData.merchantOrderId.toString();
-                          // ✅ Call saveUserCartData before creating Shiprocket Order
+
+                          final placeOrderProvider =
+                              Provider.of<PlaceOrderProvider>(context,
+                                  listen: false);
+
+                          placeOrderProvider
+                              .setAddressId(selectedAddress!.id.toString());
+                          //
+                          //
+
+                          await placeOrderProvider.placeOrder(context);
 
                           List<Map<String, dynamic>> orderItems =
                               cartProvider.cartItems.map((cartItem) {
@@ -798,6 +1119,7 @@ class _OrderNowPageState extends State<OrderNowPage> {
                             //           "price": item.price,
                             //         })
                             //     .toList()),
+
                             subtotal: grandTotalProvider.grandTotal.toString(),
                           );
                           Navigator.of(context).pop();
@@ -851,7 +1173,8 @@ class _OrderNowPageState extends State<OrderNowPage> {
                               billingPincode: selectedAddress!.pincode,
                               billingState: selectedAddress!.state,
                               billingCountry: selectedAddress!.country,
-                              billingEmail: userProvider.email,
+                              billingEmail: selectedAddress!.email,
+                              //  billingEmail: userProvider.email,
                               billingPhone: selectedAddress!.mobile,
                               orderItems: orderItems,
                               paymentMethod: "Prepaid",

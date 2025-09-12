@@ -146,6 +146,7 @@ class _AnimatedCountersScreenState extends State<AnimatedCountersScreen>
         }
       },
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(height: 20),
           Column(

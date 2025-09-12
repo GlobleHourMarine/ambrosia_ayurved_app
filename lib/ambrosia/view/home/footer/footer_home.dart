@@ -83,7 +83,7 @@ class FooterHome extends StatelessWidget {
                   fontSize: 12.0,
                   color: Color(0xFF162A49)),
             ),
-            SizedBox(height: 20)
+            SizedBox(height: 25),
           ],
         ),
         padding: EdgeInsets.all(5.0),

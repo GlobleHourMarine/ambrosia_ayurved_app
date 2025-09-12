@@ -1,4 +1,6 @@
 import 'package:ambrosia_ayurved/ambrosia/common/contact_info.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_description_loader.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_detail_new_page.dart';
 import 'package:ambrosia_ayurved/firebase_options.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/firebase_notification/notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -45,7 +47,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: userProvider),
-        //ChangeNotifierProvider(create: (context) => UserProvider()),
+        //  ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider.value(value: languageProvider),
         ChangeNotifierProvider(create: (context) => ProductNotifier()),
         ChangeNotifierProvider(create: (context) => CartProvider()),
