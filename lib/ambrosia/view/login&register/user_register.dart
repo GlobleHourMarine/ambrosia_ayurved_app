@@ -159,8 +159,8 @@ class _RegistrationModalState extends State<RegistrationModal> {
     try {
       final Map<String, dynamic> requestBody = {
         'mobile': _mobileController.text,
-        'session_id': _sessionId,
         'otp': _otpController.text,
+        'session_id': _sessionId,
       };
 
       if (_isNewUser) {
@@ -174,16 +174,20 @@ class _RegistrationModalState extends State<RegistrationModal> {
       );
 
       final responseBody = jsonDecode(response.body);
+
+      print('Response from _submitOtp: $responseBody');
       debugPrint('Response from _submitOtp: $responseBody');
 
       if (response.statusCode == 200 && responseBody['success']) {
         Map<String, dynamic> responseBody = jsonDecode(response.body);
         User user = User.fromJson(responseBody['user'][0]);
+        print('user : $responseBody');
 
         // Save data to SharedPreferences
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         userProvider.setUser(user);
         await userProvider.saveUserData(user);
+
         Navigator.of(context).pop();
         SuccessPopup.show(
           context: context,
@@ -197,12 +201,14 @@ class _RegistrationModalState extends State<RegistrationModal> {
         );
       } else {
         setState(() {
+          print('user : $responseBody');
           _errorMessage =
               responseBody['message'] ?? 'Invalid OTP or an error occurred.';
         });
       }
     } catch (e) {
       setState(() {
+        print('Response from _submitOtp: $e');
         _errorMessage = 'An error occurred. Please try again.';
       });
     } finally {

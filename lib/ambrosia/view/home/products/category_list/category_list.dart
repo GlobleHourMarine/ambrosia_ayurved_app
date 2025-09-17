@@ -6,9 +6,9 @@ import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/cart_provide
 // import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/cart_page.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/filter_category/filter_category.dart';
-import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/mediciene/medicine_screen.dart';
-import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/pharama/pharma_screen.dart';
-import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/ship/ship_screen.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/supplement/supplement_screen.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/cosmetics/cosmetics.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/Hair_care/hari_care.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/skincare/skincare_screen.dart';
 
 import 'package:provider/provider.dart';
@@ -24,26 +24,22 @@ class _CategoryListState extends State<CategoryList> {
   List category = [
     {
       "name": "SkinCare",
-      "imageurl":
-          "https://cdn.pixabay.com/photo/2016/04/13/22/26/cream-1327847_1280.jpg",
+      "image_asset": "assets/images/category_skin_care.jpg",
       "items_count": "0",
     },
     {
       "name": "Supplements",
-      "imageurl":
-          "https://cdn.pixabay.com/photo/2017/05/23/21/01/jar-2338584_1280.jpg",
+      "image_asset": "assets/images/category_supplements.png",
       "items_count": "1",
     },
     {
       "name": "Cosmetics",
-      "imageurl":
-          "https://cdn.pixabay.com/photo/2014/03/25/16/24/medicine-296966_1280.png",
+      "image_asset": "assets/images/category_makeup.png",
       "items_count": "0",
     },
     {
-      "name": "Clothes",
-      "imageurl":
-          "https://cdn.pixabay.com/photo/2016/04/19/13/39/store-1338629_1280.jpg",
+      "name": "Hair Care",
+      "image_asset": "assets/images/category_hair_care.jpg",
       "items_count": "0",
     },
   ];
@@ -148,12 +144,12 @@ class _CategoryListState extends State<CategoryList> {
                                   nextScreen = SkincareScreen();
                                   break;
                                 case "Supplements":
-                                  nextScreen = MedicineScreen();
+                                  nextScreen = SupplementScreen();
                                   break;
                                 case "Cosmetics":
                                   nextScreen = CosmeticsScreen();
                                   break;
-                                case "Clothes":
+                                case "Hair Care":
                                   nextScreen = ClothesScreen();
                                   break;
                                 default:
@@ -208,21 +204,22 @@ class _CategoryListState extends State<CategoryList> {
                                 Row(
                                   children: [
                                     ClipOval(
-                                      child: Image.network(
-                                        category[index]['imageurl'],
+                                      child: Image.asset(
+                                        category[index]['image_asset'],
                                         width: 80,
                                         height: 80,
                                         fit: BoxFit.fill,
-                                        loadingBuilder:
-                                            (context, child, progress) {
-                                          if (progress == null) return child;
-                                          return const ShimmerEffect(
-                                              width: 50, height: 50);
-                                        },
+
+                                        // loadingBuilder:
+                                        //     (context, child, progress) {
+                                        //   if (progress == null) return child;
+                                        //   return const ShimmerEffect(
+                                        //       width: 50, height: 50);
+                                        // },
                                         errorBuilder:
                                             (context, error, stackTrace) {
                                           return const ShimmerEffect(
-                                              width: 50, height: 50);
+                                              width: 80, height: 80);
                                         },
                                       ),
                                     ),

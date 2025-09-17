@@ -1,3 +1,4 @@
+import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/address/new_address_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/user_register.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/contact/contact_us_new.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/order_history/order_history/order_history_screen.dart';
@@ -32,24 +33,30 @@ class _MoreViewState extends State<MoreView> {
       },
       {
         "index": "2",
+        "name": "Manage Address",
+        "image": "assets/images/address_icon.png",
+        "base": 0
+      },
+      {
+        "index": "3",
         "name": "About Us",
         "image": "assets/images/more_info.png",
         "base": 0
       },
       {
-        "index": "3",
+        "index": "4",
         "name": "Contact Us",
         "image": "assets/images/call.png",
         "base": 0
       },
       {
-        "index": "4",
+        "index": "5",
         "name": "Our Policies",
         "image": "assets/images/more_payment.png",
         "base": 0
       },
       {
-        "index": "5",
+        "index": "6",
         "name": user == null ? "Login" : "Logout",
         "image": "assets/images/logout.png",
         "base": 0
@@ -135,24 +142,32 @@ class _MoreViewState extends State<MoreView> {
                                         Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                                builder: (context) =>
-                                                    AboutUsScreen()));
+                                              builder: (context) =>
+                                                  AddressNewScreen(),
+                                            ));
                                         break;
                                       case "3":
                                         Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    ContactUsScreen()));
+                                                    AboutUsScreen()));
                                         break;
                                       case "4":
                                         Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    PoliciesScreen()));
+                                                    ContactUsScreen()));
                                         break;
                                       case "5":
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    PoliciesScreen()));
+                                        break;
+                                      case "6":
                                         if (user == null) {
                                           RegisterService()
                                               .showModalBottomSheetregister(

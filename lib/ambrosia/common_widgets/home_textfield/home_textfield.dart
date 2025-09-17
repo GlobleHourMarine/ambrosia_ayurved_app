@@ -100,53 +100,58 @@ class _HomeTextfieldState extends State<HomeTextfield> {
     typingTimer?.cancel();
     searchTimer?.cancel();
     _controller.dispose();
-    _focusNode.dispose(); // Dispose FocusNode
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: TextField(
-        controller: _controller,
-        focusNode: _focusNode, // Use FocusNode
-        textInputAction: TextInputAction.search,
-        onChanged: _onSearchChanged,
-        onTap: () {
-          // Handle tap to show search state
-          setState(() {
-            isSearchActive = true;
-          });
-        },
-        onEditingComplete: () {
-          _focusNode.unfocus(); // Use FocusNode to unfocus
-        },
-        enableInteractiveSelection: true,
-        autofocus: false, // Prevent automatic focus
-        decoration: InputDecoration(
-          fillColor: Acolors.textfield,
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(25),
-            borderSide: BorderSide(color: Acolors.textfield),
+      padding: const EdgeInsets.symmetric(horizontal: 40),
+      child: SizedBox(
+        height: 45,
+        child: TextField(
+          controller: _controller,
+          focusNode: _focusNode, // Use FocusNode
+          textInputAction: TextInputAction.search,
+          onChanged: _onSearchChanged,
+          onTap: () {
+            // Handle tap to show search state
+            setState(() {
+              isSearchActive = true;
+            });
+          },
+          onEditingComplete: () {
+            _focusNode.unfocus(); // Use FocusNode to unfocus
+          },
+          enableInteractiveSelection: true,
+          autofocus: false, // Prevent automatic focus
+          decoration: InputDecoration(
+            fillColor: Acolors.textfield,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Acolors.textfield),
+            ),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Acolors.primary)),
+            filled: true,
+            hintText: (isSearchActive || _focusNode.hasFocus)
+                ? 'Search products...'
+                : visibleHintText,
+            prefixIcon: const Icon(
+              Icons.search,
+              color: Acolors.primary,
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 12, horizontal: 0),
+            suffixIcon: (isSearchActive && _controller.text.isNotEmpty)
+                ? IconButton(
+                    icon: const Icon(Icons.clear, color: Acolors.primary),
+                    onPressed: _clearSearch,
+                  )
+                : null,
           ),
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(25),
-              borderSide: const BorderSide(color: Acolors.primary)),
-          filled: true,
-          hintText: (isSearchActive || _focusNode.hasFocus)
-              ? 'Search products...'
-              : visibleHintText,
-          prefixIcon: const Icon(
-            Icons.search,
-            color: Acolors.primary,
-          ),
-          suffixIcon: (isSearchActive && _controller.text.isNotEmpty)
-              ? IconButton(
-                  icon: const Icon(Icons.clear, color: Acolors.primary),
-                  onPressed: _clearSearch,
-                )
-              : null,
         ),
       ),
     );

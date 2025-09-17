@@ -11,7 +11,6 @@ import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_fetch/produ
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/review_section/review_section_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -26,14 +25,17 @@ class ProductDetailNewPage extends StatefulWidget {
 
 class ProductDetailNewPageState extends State<ProductDetailNewPage>
     with SingleTickerProviderStateMixin {
-  final ItemScrollController itemScrollController = ItemScrollController();
-  final ItemPositionsListener itemPositionsListener =
-      ItemPositionsListener.create();
   late TabController _tabController;
+  final ScrollController _scrollController = ScrollController();
 
-  final List<int> sectionIndices = [0, 2, 3, 4, 5];
+  // GlobalKeys for each section
+  final GlobalKey _descriptionKey = GlobalKey();
+  final GlobalKey _benefitsKey = GlobalKey();
+  final GlobalKey _howToUseKey = GlobalKey();
+  final GlobalKey _ingredientsKey = GlobalKey();
+  final GlobalKey _reviewsKey = GlobalKey();
 
-  // Centralized loading state
+  // Loading state
   bool _isLoading = true;
   Map<String, bool> _loadingStates = {
     'benefits': true,
@@ -43,31 +45,19 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
     'faq': true,
   };
 
-  // Scroll prevention variables
-  bool _isUserScrolling = true;
   bool _isProgrammaticScroll = false;
-  int _lastTabIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
-
-    // Initialize all API calls
     _initializeAllData();
 
-    // Setup scroll listener (only after data is loaded)
-    itemPositionsListener.itemPositions.addListener(() {
-      if (!_isProgrammaticScroll && _isUserScrolling && !_isLoading) {
-        _updateTabBasedOnScroll();
-      }
-    });
+    _scrollController.addListener(_onScroll);
   }
 
-  // Initialize all API calls at once
   Future<void> _initializeAllData() async {
     try {
-      // Call all APIs simultaneously
       await Future.wait([
         _loadBenefits(),
         _loadHowToUse(),
@@ -76,14 +66,12 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
         _loadFAQ(),
       ]);
 
-      // All APIs completed
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
       }
     } catch (e) {
-      // Handle error - you might want to show error state
       print('Error loading data: $e');
       if (mounted) {
         setState(() {
@@ -93,62 +81,31 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
     }
   }
 
-  // Individual API loading methods
   Future<void> _loadBenefits() async {
-    try {
-      // Your benefits API call here
-      // await YourBenefitsAPI.fetch(widget.product.id.toString());
-      await Future.delayed(Duration(seconds: 1)); // Simulate API call
-      _markAsLoaded('benefits');
-    } catch (e) {
-      _markAsLoaded('benefits');
-    }
+    await Future.delayed(Duration(seconds: 1));
+    _markAsLoaded('benefits');
   }
 
   Future<void> _loadHowToUse() async {
-    try {
-      // Your how to use API call here
-      // await YourHowToUseAPI.fetch(widget.product.id.toString());
-      await Future.delayed(Duration(seconds: 2)); // Simulate API call
-      _markAsLoaded('howToUse');
-    } catch (e) {
-      _markAsLoaded('howToUse');
-    }
+    await Future.delayed(Duration(seconds: 1));
+    _markAsLoaded('howToUse');
   }
 
   Future<void> _loadIngredients() async {
-    try {
-      // Your ingredients API call here (if product id is 14)
-      if (widget.product.id == 14) {
-        // await YourIngredientsAPI.fetch();
-        await Future.delayed(Duration(seconds: 1)); // Simulate API call
-      }
-      _markAsLoaded('ingredients');
-    } catch (e) {
-      _markAsLoaded('ingredients');
+    if (widget.product.id == 14) {
+      await Future.delayed(Duration(seconds: 1));
     }
+    _markAsLoaded('ingredients');
   }
 
   Future<void> _loadReviews() async {
-    try {
-      // Your reviews API call here
-      // await YourReviewsAPI.fetch(widget.product.id.toString());
-      await Future.delayed(Duration(seconds: 3)); // Simulate API call
-      _markAsLoaded('reviews');
-    } catch (e) {
-      _markAsLoaded('reviews');
-    }
+    await Future.delayed(Duration(seconds: 1));
+    _markAsLoaded('reviews');
   }
 
   Future<void> _loadFAQ() async {
-    try {
-      // Your FAQ API call here
-      // await YourFAQAPI.fetch(widget.product.id.toString());
-      await Future.delayed(Duration(seconds: 1)); // Simulate API call
-      _markAsLoaded('faq');
-    } catch (e) {
-      _markAsLoaded('faq');
-    }
+    await Future.delayed(Duration(seconds: 1));
+    _markAsLoaded('faq');
   }
 
   void _markAsLoaded(String key) {
@@ -159,38 +116,85 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
     }
   }
 
-  void _updateTabBasedOnScroll() {
-    final positions = itemPositionsListener.itemPositions.value;
-    if (positions.isEmpty) return;
+  void _onScroll() {
+    if (_isProgrammaticScroll) return;
 
-    int mostVisibleIndex = 0;
-    double maxVisibility = 0;
+    double scrollOffset = _scrollController.offset;
 
-    for (final position in positions) {
-      final sectionIndex = _getSectionIndexFromItemIndex(position.index);
-      if (sectionIndex != -1) {
-        final visibility = position.itemTrailingEdge - position.itemLeadingEdge;
-        if (visibility > maxVisibility) {
-          maxVisibility = visibility;
-          mostVisibleIndex = sectionIndex;
-        }
-      }
+    double descOffset = _getOffsetFromGlobalKey(_descriptionKey) ?? 0.0;
+    double benefitsOffset = _getOffsetFromGlobalKey(_benefitsKey) ?? 0.0;
+    double howToUseOffset = _getOffsetFromGlobalKey(_howToUseKey) ?? 0.0;
+    double ingredientsOffset =
+        _getOffsetFromGlobalKey(_ingredientsKey) ?? double.infinity;
+    double reviewsOffset =
+        _getOffsetFromGlobalKey(_reviewsKey) ?? double.infinity;
+
+    int newIndex = 0;
+
+    if (scrollOffset >= reviewsOffset - 100) {
+      newIndex = 4;
+    } else if (scrollOffset >= ingredientsOffset - 100) {
+      newIndex = 3;
+    } else if (scrollOffset >= howToUseOffset - 100) {
+      newIndex = 2;
+    } else if (scrollOffset >= benefitsOffset - 100) {
+      newIndex = 1;
+    } else {
+      newIndex = 0;
     }
 
-    if (_tabController.index != mostVisibleIndex &&
-        _lastTabIndex != mostVisibleIndex) {
-      _lastTabIndex = mostVisibleIndex;
-      _tabController.animateTo(mostVisibleIndex);
+    if (_tabController.index != newIndex) {
+      _tabController.animateTo(newIndex);
     }
   }
 
-  int _getSectionIndexFromItemIndex(int itemIndex) {
-    for (int i = 0; i < sectionIndices.length; i++) {
-      if (i == sectionIndices.length - 1 || itemIndex < sectionIndices[i + 1]) {
-        return i;
-      }
+  void _scrollToSection(int tabIndex) {
+    double targetOffset = 0;
+
+    switch (tabIndex) {
+      case 0:
+        targetOffset = _getOffsetFromGlobalKey(_descriptionKey) ?? 0;
+        break;
+      case 1:
+        targetOffset = _getOffsetFromGlobalKey(_benefitsKey) ?? 0;
+        break;
+      case 2:
+        targetOffset = _getOffsetFromGlobalKey(_howToUseKey) ?? 0;
+        break;
+      case 3:
+        targetOffset = _getOffsetFromGlobalKey(_ingredientsKey) ?? 0;
+        break;
+      case 4:
+        targetOffset = _getOffsetFromGlobalKey(_reviewsKey) ?? 0;
+        break;
     }
-    return -1;
+
+    _isProgrammaticScroll = true;
+    _scrollController
+        .animateTo(
+      targetOffset,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    )
+        .then((_) {
+      Future.delayed(Duration(milliseconds: 300), () {
+        _isProgrammaticScroll = false;
+      });
+    });
+  }
+
+  double? _getOffsetFromGlobalKey(GlobalKey key) {
+    try {
+      final RenderBox? box =
+          key.currentContext?.findRenderObject() as RenderBox?;
+      if (box != null) {
+        double y = box.localToGlobal(Offset.zero).dy;
+        double appBarHeight = kToolbarHeight;
+        double statusBarHeight = MediaQuery.of(context).padding.top;
+        return _scrollController.offset + y - (appBarHeight + statusBarHeight);
+      }
+    } catch (_) {}
+    return null;
   }
 
   Future<void> _launchWhatsApp() async {
@@ -206,29 +210,6 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
     }
   }
 
-  void _scrollToSection(int tabIndex) async {
-    if (tabIndex >= 0 && tabIndex < sectionIndices.length && !_isLoading) {
-      _isProgrammaticScroll = true;
-      _isUserScrolling = false;
-      _lastTabIndex = tabIndex;
-
-      await itemScrollController.scrollTo(
-        index: sectionIndices[tabIndex],
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-        alignment: 0.1,
-      );
-
-      Future.delayed(const Duration(milliseconds: 800), () {
-        if (mounted) {
-          _isProgrammaticScroll = false;
-          _isUserScrolling = true;
-        }
-      });
-    }
-  }
-
-// Or simply:
   Widget _buildLoadingWidget() {
     return AnimatedLoadingScreen(
       message: 'Loading product details...',
@@ -240,6 +221,7 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
   @override
   void dispose() {
     _tabController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -254,70 +236,55 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
           ? _buildLoadingWidget()
           : Stack(
               children: [
-                NotificationListener<ScrollNotification>(
-                  onNotification: (notification) {
-                    if (notification is ScrollStartNotification) {
-                      _isUserScrolling = true;
-                    }
-                    return false;
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 60),
-                    child: ScrollablePositionedList.builder(
-                      itemCount: 7,
-                      itemScrollController: itemScrollController,
-                      itemPositionsListener: itemPositionsListener,
-                      itemBuilder: (context, index) {
-                        switch (index) {
-                          case 0:
-                            return Column(
-                              children: [
-                                const SizedBox(height: 10),
-                                ProductDescriptionScreen(
-                                  product: widget.product,
-                                ),
-                              ],
-                            );
-                          case 1:
-                            return const SizedBox(height: 20);
-                          case 2:
-                            return Benefits(
-                              productId: widget.product.id.toString(),
-                            );
-                          case 3:
-                            return Column(
-                              children: [
-                                HowToUseSection(
-                                  productId: widget.product.id.toString(),
-                                ),
-                                if (widget.product.id == 1)
-                                  ThreeMonthPlan()
-                                else
-                                  const SizedBox.shrink(),
-                                if (widget.product.id == 1)
-                                  FoodsToAvoidSection()
-                                else
-                                  const SizedBox.shrink(),
-                              ],
-                            );
-                          case 4:
-                            return widget.product.id == 1
-                                ? Ingredients()
-                                : const SizedBox.shrink();
-                          case 5:
-                            return Column(
-                              children: [
-                                CustomerReviewSection(
-                                    productId: widget.product.id.toString()),
-                                FAQPage(
-                                  productId: widget.product.id.toString(),
-                                ),
-                              ],
-                            );
-                          default:
-                            return Container();
-                        }
-                      },
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 60),
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          key: _descriptionKey,
+                          child: ProductDescriptionScreen(
+                            product: widget.product,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Container(
+                          key: _benefitsKey,
+                          child: Benefits(
+                            productId: widget.product.id.toString(),
+                          ),
+                        ),
+                        Container(
+                          key: _howToUseKey,
+                          child: HowToUseSection(
+                            productId: widget.product.id.toString(),
+                          ),
+                        ),
+                        //      if (widget.product.id == 1) ThreeMonthPlan(),
+                        if (widget.product.id == 1) FoodsToAvoidSection(),
+                        Container(
+                          key: _ingredientsKey,
+                          child: widget.product.id == 1
+                              ? Ingredients()
+                              : SizedBox.shrink(),
+                        ),
+                        Container(
+                          key: _reviewsKey,
+                          child: Column(
+                            children: [
+                              CustomerReviewSection(
+                                productId: widget.product.id.toString(),
+                              ),
+                              FAQPage(
+                                productId: widget.product.id.toString(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 100),
+                      ],
                     ),
                   ),
                 ),
@@ -373,9 +340,8 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
                   ),
                 ),
 
-                // WhatsApp FAB
                 Positioned(
-                  bottom: 85,
+                  bottom: 110,
                   right: 20,
                   child: FloatingActionButton(
                     onPressed: _launchWhatsApp,

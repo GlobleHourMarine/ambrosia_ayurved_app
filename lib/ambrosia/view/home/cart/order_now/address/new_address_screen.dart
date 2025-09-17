@@ -1,3 +1,5 @@
+import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_loading_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/snackbar.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/address/address_fetch_service.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/address/address_model.dart';
@@ -75,101 +77,108 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'My Address'),
+      appBar: CustomAppBar(
+          leading: const BackButton(color: Colors.black), title: 'My Address'),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? AnimatedLoadingScreen(
+              message: 'Loading your Addresses...',
+              primaryColor: Acolors.primary,
+              animationDuration: Duration(milliseconds: 1000),
+            )
           // : _errorMessage.isNotEmpty
           //     ? Center(child: Text(_errorMessage))
-          : Column(
-              children: [
-                Expanded(
-                  child: _addresses.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.location_off,
-                                size: 48,
-                                color: Colors.grey[400],
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                AppLocalizations.of(context)!.noAddresses,
-                                // 'No addresses found',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
+          : SafeArea(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: _addresses.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.location_off,
+                                  size: 48,
+                                  color: Colors.grey[400],
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                AppLocalizations.of(context)!.addFirstAddress,
-                                //  'Add your first address to continue',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[500],
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              ElevatedButton.icon(
-                                onPressed: _navigateToAddAddress,
-                                icon: const Icon(Icons.add_location_alt),
-                                label: Text(
-                                  AppLocalizations.of(context)!.addAddress,
-                                  //'Add Address'
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green[600],
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                const SizedBox(height: 12),
+                                Text(
+                                  AppLocalizations.of(context)!.noAddresses,
+                                  // 'No addresses found',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 8),
+                                Text(
+                                  AppLocalizations.of(context)!.addFirstAddress,
+                                  //  'Add your first address to continue',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                ElevatedButton.icon(
+                                  onPressed: _navigateToAddAddress,
+                                  icon: const Icon(Icons.add_location_alt),
+                                  label: Text(
+                                    AppLocalizations.of(context)!.addAddress,
+                                    //'Add Address'
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green[600],
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: _addresses.length,
+                            itemBuilder: (context, index) {
+                              final address = _addresses[index];
+                              return AddressCard(
+                                address: address,
+                                onDelete: () => _deleteAddress(address.id),
+                              );
+                            },
                           ),
-                        )
-                      : ListView.builder(
-                          itemCount: _addresses.length,
-                          itemBuilder: (context, index) {
-                            final address = _addresses[index];
-                            return AddressCard(
-                              address: address,
-                              onDelete: () => _deleteAddress(address.id),
-                            );
-                          },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _navigateToAddAddress,
+                        icon: const Icon(Icons.add_location_alt),
+                        label: Text(
+                          AppLocalizations.of(context)!.addNewAddress,
+                          //'Add New Address'
                         ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: _navigateToAddAddress,
-                      icon: const Icon(Icons.add_location_alt),
-                      label: Text(
-                        AppLocalizations.of(context)!.addNewAddress,
-                        //'Add New Address'
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.green[600],
-                        side: BorderSide(color: Colors.green[600]!),
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.green[600],
+                          side: BorderSide(color: Colors.green[600]!),
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
     );
   }

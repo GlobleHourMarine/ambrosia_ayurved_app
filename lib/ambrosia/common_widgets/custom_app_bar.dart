@@ -36,7 +36,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 child: leading,
               ),
             )
-          : null, // No leading widget if not provided
+          : null,
       title: title != null
           ? Text(
               title!,

@@ -49,6 +49,7 @@ class SkincareScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
+        leading: const BackButton(color: Colors.black),
         title: 'Skin care',
       ),
       body: Stack(

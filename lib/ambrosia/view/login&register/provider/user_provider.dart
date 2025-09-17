@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ambrosia_ayurved/widgets/new_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/home_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/models/user_model.dart';
@@ -122,7 +123,7 @@ class UserProvider with ChangeNotifier {
     // Navigate to login screen
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => HomeScreen()),
+      MaterialPageRoute(builder: (context) => MainTabView()),
       (route) => false,
     );
   }

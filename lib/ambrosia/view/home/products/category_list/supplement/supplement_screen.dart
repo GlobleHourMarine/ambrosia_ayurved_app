@@ -7,12 +7,12 @@ import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/cart_provide
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
 import 'package:provider/provider.dart';
 
-class MedicineScreen extends StatefulWidget {
+class SupplementScreen extends StatefulWidget {
   @override
-  State<MedicineScreen> createState() => _MedicineScreenState();
+  State<SupplementScreen> createState() => _SupplementScreenState();
 }
 
-class _MedicineScreenState extends State<MedicineScreen> {
+class _SupplementScreenState extends State<SupplementScreen> {
   @override
   void initState() {
     super.initState();

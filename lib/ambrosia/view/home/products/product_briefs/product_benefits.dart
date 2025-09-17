@@ -96,7 +96,7 @@ class _BenefitsState extends State<Benefits> {
                 ),
               ),
             ),
-            if (widget.productId == '14') ...[
+            if (widget.productId == '1') ...[
               _buildBenefit(
                   t.completelyEliminatesSugar, t.naturallyControlsSugar),
               _buildBenefit(t.boostsInsulinSensitivity, t.helpsProcessGlucose),
@@ -174,6 +174,8 @@ Widget _buildBenefitItem({
           ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Image.network(
+              height: 350,
+              width: double.infinity,
               imagePath,
               fit: BoxFit.contain,
               loadingBuilder: (context, child, progress) {

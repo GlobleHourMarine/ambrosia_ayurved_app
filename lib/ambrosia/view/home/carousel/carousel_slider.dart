@@ -56,7 +56,9 @@ class _CarouselState extends State<Carousel> {
                     //   return Container(); // Keep shimmer visible until the image loads
                     // },
                     errorBuilder: (context, error, stackTrace) {
-                      return Container(); // Keep shimmer visible if image fails
+                      return Container(
+                        child: Icon(Icons.image_not_supported_outlined),
+                      ); // Keep shimmer visible if image fails
                     },
                   ),
                 ],
@@ -65,14 +67,14 @@ class _CarouselState extends State<Carousel> {
           );
         },
         options: CarouselOptions(
-          height: 260.0,
+          height: 280.0,
           autoPlay: true,
           enlargeCenterPage: true,
           aspectRatio: 16 / 9, // Matches standard image aspect ratio
           enableInfiniteScroll: true,
           autoPlayInterval: Duration(seconds: 4),
           autoPlayAnimationDuration: Duration(milliseconds: 1200),
-          viewportFraction: 0.8,
+          viewportFraction: 0.85,
         ),
       ),
     );

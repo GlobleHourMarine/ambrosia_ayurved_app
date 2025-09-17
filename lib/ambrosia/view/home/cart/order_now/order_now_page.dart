@@ -998,229 +998,233 @@ class _OrderNowPageState extends State<OrderNowPage> {
             ),
         ],
       ),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Padding(
-          //   padding: const EdgeInsets.all(12.0),
-          //   child: AddressSelectionWidget(
-          //     title: "Select Delivery Address",
-          //     onAddressSelected: (Address address) {
-          //       setState(() {
-          //         selectedAddress = address;
-          //       });
-          //       print('Selected: ${address.fname} ${address.lname}');
-          //     },
-          //   ),
-          // ),
-          // // Show selected address info
-          // if (selectedAddress != null)
-          //   Container(
-          //     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-          //     child: Text(
-          //       'Delivering to: ${selectedAddress!.fname} ${selectedAddress!.lname}',
-          //       style: TextStyle(fontWeight: FontWeight.bold),
-          //     ),
-          //   ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    backgroundColor: Acolors.primary,
-                    foregroundColor: Acolors.white),
-                onPressed: _isLoading
-                    ? null
-                    : () async {
-                        setState(() => _isLoading = true);
+      bottomNavigationBar: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Padding(
+            //   padding: const EdgeInsets.all(12.0),
+            //   child: AddressSelectionWidget(
+            //     title: "Select Delivery Address",
+            //     onAddressSelected: (Address address) {
+            //       setState(() {
+            //         selectedAddress = address;
+            //       });
+            //       print('Selected: ${address.fname} ${address.lname}');
+            //     },
+            //   ),
+            // ),
+            // // Show selected address info
+            // if (selectedAddress != null)
+            //   Container(
+            //     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+            //     child: Text(
+            //       'Delivering to: ${selectedAddress!.fname} ${selectedAddress!.lname}',
+            //       style: TextStyle(fontWeight: FontWeight.bold),
+            //     ),
+            //   ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      backgroundColor: Acolors.primary,
+                      foregroundColor: Acolors.white),
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          setState(() => _isLoading = true);
 
-                        try {
-                          if (selectedAddress == null) {
-                            SnackbarMessage.showSnackbar(
-                                context, 'Please select a delivery address');
-                            return;
-                          }
+                          try {
+                            if (selectedAddress == null) {
+                              SnackbarMessage.showSnackbar(
+                                  context, 'Please select a delivery address');
+                              return;
+                            }
 
-                          //
-                          final cartProvider =
-                              Provider.of<CartProvider>(context, listen: false);
-                          final grandTotalProvider =
-                              Provider.of<GrandTotalProvider>(context,
-                                  listen: false);
+                            //
+                            final cartProvider = Provider.of<CartProvider>(
+                                context,
+                                listen: false);
+                            final grandTotalProvider =
+                                Provider.of<GrandTotalProvider>(context,
+                                    listen: false);
 
-                          // 1️⃣ Show loader popup immediately
-                          SuccessPopup.show(
-                            context: context,
-                            title: "Processing...",
-                            subtitle:
-                                "Please wait while we complete your payment and order.",
-                            icon: Icons.hourglass_empty,
-                            iconColor: Colors.orange,
-                            autoCloseDuration: 0,
-                            showButtonLoader: true,
-                          );
-
-                          String paymentResult =
-                              await PhonePePaymentService.initiatePayment(
-                            amount: 100, context: context,
-
-                            // (grandTotalProvider.grandTotal * 100)
-                            //     .toInt(), // amount in paisa
-                          );
-                          final merchantOrderId =
-                              GlobalPaymentData.merchantOrderId.toString();
-
-                          final placeOrderProvider =
-                              Provider.of<PlaceOrderProvider>(context,
-                                  listen: false);
-
-                          placeOrderProvider
-                              .setAddressId(selectedAddress!.id.toString());
-                          //
-                          //
-
-                          await placeOrderProvider.placeOrder(context);
-
-                          List<Map<String, dynamic>> orderItems =
-                              cartProvider.cartItems.map((cartItem) {
-                            return {
-                              "name": cartItem.productName,
-                              "sku": "AYUR${cartItem.productId}",
-                              "units": cartItem.quantity,
-                              "selling_price": cartItem.price,
-                              "discount": "",
-                              "tax": "",
-                              "hsn": 123566
-                            };
-                          }).toList();
-                          // final saveResponse =
-                          await saveUserCartData(
-                            orderId: merchantOrderId,
-                            fname: selectedAddress!.fname,
-                            lname: selectedAddress!.lname,
-                            phone: selectedAddress!.mobile,
-                            address: selectedAddress!.address,
-                            city: selectedAddress!.city,
-                            state: selectedAddress!.state,
-                            pincode: selectedAddress!.pincode,
-                            country: selectedAddress!.country,
-                            productData: jsonEncode(orderItems),
-
-                            //  jsonEncode(cartProvider.cartItems
-                            //     .map((item) => {
-                            //           "product_id": item.productId,
-                            //           "product_name": item.productName,
-                            //           "quantity": item.quantity,
-                            //           "price": item.price,
-                            //         })
-                            //     .toList()),
-
-                            subtotal: grandTotalProvider.grandTotal.toString(),
-                          );
-                          Navigator.of(context).pop();
-
-                          // close popup
-                          // if (saveResponse == null ||
-                          //     saveResponse["status"] != true) {
-                          //   Navigator.of(context).pop(); // close popup
-                          //   SuccessPopup.show(
-                          //     context: context,
-                          //     title: "Error",
-                          //     subtitle:
-                          //         "Failed to save cart data before creating order",
-                          //     iconColor: Colors.red,
-                          //     icon: Icons.error,
-                          //     autoCloseDuration: 0,
-                          //     buttonText: "OK",
-                          //   );
-                          //   return;
-                          // }
-
-                          if (paymentResult.contains("FAILURE")) {
+                            // 1️⃣ Show loader popup immediately
                             SuccessPopup.show(
                               context: context,
-                              title: "Payment Failed",
-                              subtitle: "Failed to place order",
-                              //paymentResult,
+                              title: "Processing...",
+                              subtitle:
+                                  "Please wait while we complete your payment and order.",
+                              icon: Icons.hourglass_empty,
+                              iconColor: Colors.orange,
+                              autoCloseDuration: 0,
+                              showButtonLoader: true,
+                            );
+
+                            String paymentResult =
+                                await PhonePePaymentService.initiatePayment(
+                              amount: 100, context: context,
+
+                              // (grandTotalProvider.grandTotal * 100)
+                              //     .toInt(), // amount in paisa
+                            );
+                            final merchantOrderId =
+                                GlobalPaymentData.merchantOrderId.toString();
+
+                            final placeOrderProvider =
+                                Provider.of<PlaceOrderProvider>(context,
+                                    listen: false);
+
+                            placeOrderProvider
+                                .setAddressId(selectedAddress!.id.toString());
+                            //
+                            //
+
+                            await placeOrderProvider.placeOrder(context);
+
+                            List<Map<String, dynamic>> orderItems =
+                                cartProvider.cartItems.map((cartItem) {
+                              return {
+                                "name": cartItem.productName,
+                                "sku": "AYUR${cartItem.productId}",
+                                "units": cartItem.quantity,
+                                "selling_price": cartItem.price,
+                                "discount": "",
+                                "tax": "",
+                                "hsn": 123566
+                              };
+                            }).toList();
+                            // final saveResponse =
+                            await saveUserCartData(
+                              orderId: merchantOrderId,
+                              fname: selectedAddress!.fname,
+                              lname: selectedAddress!.lname,
+                              phone: selectedAddress!.mobile,
+                              address: selectedAddress!.address,
+                              city: selectedAddress!.city,
+                              state: selectedAddress!.state,
+                              pincode: selectedAddress!.pincode,
+                              country: selectedAddress!.country,
+                              productData: jsonEncode(orderItems),
+
+                              //  jsonEncode(cartProvider.cartItems
+                              //     .map((item) => {
+                              //           "product_id": item.productId,
+                              //           "product_name": item.productName,
+                              //           "quantity": item.quantity,
+                              //           "price": item.price,
+                              //         })
+                              //     .toList()),
+
+                              subtotal:
+                                  grandTotalProvider.grandTotal.toString(),
+                            );
+                            Navigator.of(context).pop();
+
+                            // close popup
+                            // if (saveResponse == null ||
+                            //     saveResponse["status"] != true) {
+                            //   Navigator.of(context).pop(); // close popup
+                            //   SuccessPopup.show(
+                            //     context: context,
+                            //     title: "Error",
+                            //     subtitle:
+                            //         "Failed to save cart data before creating order",
+                            //     iconColor: Colors.red,
+                            //     icon: Icons.error,
+                            //     autoCloseDuration: 0,
+                            //     buttonText: "OK",
+                            //   );
+                            //   return;
+                            // }
+
+                            if (paymentResult.contains("FAILURE")) {
+                              SuccessPopup.show(
+                                context: context,
+                                title: "Payment Failed",
+                                subtitle: "Failed to place order",
+                                //paymentResult,
+                                iconColor: Colors.red,
+                                icon: Icons.cancel,
+                                autoCloseDuration: 0,
+                                buttonText: "OK",
+                              );
+                              return;
+                            }
+                            // 3️⃣ If payment success, show "Creating Order..." loader
+                            SuccessPopup.show(
+                              context: context,
+                              title: "Placing Order...",
+                              subtitle: "Please wait we placing the order",
+                              icon: Icons.hourglass_empty,
+                              iconColor: Colors.orange,
+                              autoCloseDuration: 0,
+                              showButtonLoader: true,
+                            );
+                            await createShiprocketOrder(
+                                billingCustomerName: selectedAddress!.fname,
+                                billingLastName: selectedAddress!.lname,
+                                billingAddress: selectedAddress!.address,
+                                billingAddress2: "",
+                                billingCity: selectedAddress!.city,
+                                billingPincode: selectedAddress!.pincode,
+                                billingState: selectedAddress!.state,
+                                billingCountry: selectedAddress!.country,
+                                billingEmail: selectedAddress!.email,
+                                //  billingEmail: userProvider.email,
+                                billingPhone: selectedAddress!.mobile,
+                                orderItems: orderItems,
+                                paymentMethod: "Prepaid",
+                                shippingCharges: 0,
+                                giftwrapCharges: 0,
+                                transactionCharges: 0,
+                                totalDiscount: 0,
+                                subTotal: grandTotalProvider.grandTotal,
+                                length: 2,
+                                breadth: 3,
+                                height: 4,
+                                weight: 0.1,
+                                context: context);
+                          } catch (e) {
+                            print(e);
+                            SuccessPopup.show(
+                              context: context,
+                              title: "Failed",
+                              subtitle: "Failed to place Order",
+                              // e.toString(),
                               iconColor: Colors.red,
-                              icon: Icons.cancel,
+                              icon: Icons.error,
                               autoCloseDuration: 0,
                               buttonText: "OK",
                             );
-                            return;
+                          } finally {
+                            if (mounted) {
+                              setState(() => _isLoading = false);
+                            }
                           }
-                          // 3️⃣ If payment success, show "Creating Order..." loader
-                          SuccessPopup.show(
-                            context: context,
-                            title: "Placing Order...",
-                            subtitle: "Please wait we placing the order",
-                            icon: Icons.hourglass_empty,
-                            iconColor: Colors.orange,
-                            autoCloseDuration: 0,
-                            showButtonLoader: true,
-                          );
-                          await createShiprocketOrder(
-                              billingCustomerName: selectedAddress!.fname,
-                              billingLastName: selectedAddress!.lname,
-                              billingAddress: selectedAddress!.address,
-                              billingAddress2: "",
-                              billingCity: selectedAddress!.city,
-                              billingPincode: selectedAddress!.pincode,
-                              billingState: selectedAddress!.state,
-                              billingCountry: selectedAddress!.country,
-                              billingEmail: selectedAddress!.email,
-                              //  billingEmail: userProvider.email,
-                              billingPhone: selectedAddress!.mobile,
-                              orderItems: orderItems,
-                              paymentMethod: "Prepaid",
-                              shippingCharges: 0,
-                              giftwrapCharges: 0,
-                              transactionCharges: 0,
-                              totalDiscount: 0,
-                              subTotal: grandTotalProvider.grandTotal,
-                              length: 2,
-                              breadth: 3,
-                              height: 4,
-                              weight: 0.1,
-                              context: context);
-                        } catch (e) {
-                          print(e);
-                          SuccessPopup.show(
-                            context: context,
-                            title: "Failed",
-                            subtitle: "Failed to place Order",
-                            // e.toString(),
-                            iconColor: Colors.red,
-                            icon: Icons.error,
-                            autoCloseDuration: 0,
-                            buttonText: "OK",
-                          );
-                        } finally {
-                          if (mounted) {
-                            setState(() => _isLoading = false);
-                          }
-                        }
-                      },
-                child: _isLoading
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : Text("Checkout"),
+                        },
+                  child: _isLoading
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text("Checkout"),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
