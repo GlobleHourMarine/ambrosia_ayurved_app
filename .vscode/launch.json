@@ -1,1 +1,51 @@
-{}
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Flutter (Debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--debug"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "debugConsole",
+            "deviceId": "flutter-tester"
+        },
+        {
+            "name": "Flutter (No Debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "noDebug": true,
+            "args": [
+                "--release"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Flutter (Profile)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--profile"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Flutter (Release)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--release"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "debugConsole"
+        }
+    ]
+}

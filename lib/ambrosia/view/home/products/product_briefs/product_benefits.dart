@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/shimmer_effect/shimmer_effect.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_description_loader.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_models/benefits_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
 class Benefits extends StatefulWidget {
   final String productId;
@@ -56,54 +58,67 @@ class _BenefitsState extends State<Benefits> {
     // if (widget.productId != '14') {
     //   return SizedBox.shrink(); // return nothing
     // }
+    // Get the provider state
+    final shouldShowLoader =
+        Provider.of<ProductLoadingProvider>(context).showIndividualLoaders;
+
+    // Return loader only if individual loaders are enabled AND this widget is loading
+    if (shouldShowLoader && _isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    // If data is empty and not loading, return empty container
+    if (_fetchedBenefits.isEmpty && !_isLoading) {
+      return SizedBox();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _isLoading
-            ? Center(child: CircularProgressIndicator())
-            : _fetchedBenefits.isEmpty
-                ? SizedBox()
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Text(
-                          t.benefits,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ),
-                      if (widget.productId == '14') ...[
-                        _buildBenefit(t.completelyEliminatesSugar,
-                            t.naturallyControlsSugar),
-                        _buildBenefit(
-                            t.boostsInsulinSensitivity, t.helpsProcessGlucose),
-                        _buildBenefit(t.enhancesEnergyLevels, t.reducesFatigue),
-                        _buildBenefit(t.improvesDigestionMetabolism,
-                            t.aidsNutrientAbsorption),
-                        _buildBenefit(t.supportsHeartLiverHealth,
-                            t.helpsCirculationDetox),
-                        _buildBenefit(
-                            t.herbalAndNatural, t.safeAndChemicalFree),
-                        const SizedBox(height: 5),
-                      ],
-                      Column(
-                        children: _fetchedBenefits.map((item) {
-                          return _buildBenefitItem(
-                            imagePath: item.image,
-                            boldText: item.title,
-                            description: item.description,
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
+        // _isLoading
+        //     ? Center(child: CircularProgressIndicator())
+        //     : _fetchedBenefits.isEmpty
+        //         ? SizedBox()
+        //         :
+
+        Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(
+                t.benefits,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+            ),
+            if (widget.productId == '1') ...[
+              _buildBenefit(
+                  t.completelyEliminatesSugar, t.naturallyControlsSugar),
+              _buildBenefit(t.boostsInsulinSensitivity, t.helpsProcessGlucose),
+              _buildBenefit(t.enhancesEnergyLevels, t.reducesFatigue),
+              _buildBenefit(
+                  t.improvesDigestionMetabolism, t.aidsNutrientAbsorption),
+              _buildBenefit(
+                  t.supportsHeartLiverHealth, t.helpsCirculationDetox),
+              _buildBenefit(t.herbalAndNatural, t.safeAndChemicalFree),
+              const SizedBox(height: 5),
+            ],
+            Column(
+              children: _fetchedBenefits.map((item) {
+                return _buildBenefitItem(
+                  imagePath: item.image,
+                  boldText: item.title,
+                  description: item.description,
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -159,6 +174,8 @@ Widget _buildBenefitItem({
           ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Image.network(
+              height: 350,
+              width: double.infinity,
               imagePath,
               fit: BoxFit.contain,
               loadingBuilder: (context, child, progress) {

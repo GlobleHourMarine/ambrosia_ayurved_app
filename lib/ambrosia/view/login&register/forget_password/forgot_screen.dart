@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;

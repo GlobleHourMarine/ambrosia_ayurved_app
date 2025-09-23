@@ -15,14 +15,13 @@ class ContactInfo {
   static const String emailUrl = 'mailto:$emailAddress';
 
   // Location
-  static const String locationUrl =
-      'https://www.google.com/maps?q=3rd+floor+Motia,+MOTIAZ+ROYAL+BUSINESS+PARK,+28-B,+Zirakpur,+Punjab+140603';
+  static const String locationUrl = 'https://maps.app.goo.gl/haohrHdjtLndoE5n6';
   static const String locationAddress =
-      'Ambrosia Ayurved, 28-B, 3rd floor Motia, MOTIAZ ROYAL BUSINESS PARK, Zirakpur, Punjab 140603, India';
+      'Ground Floor, ARK Tower, Plot no. 1230, Sector 82, JLPL Industrial Area, Sahibzada Ajit Singh Nagar, Punjab 140306';
 
   // Social Links
   static const String facebookUrl =
-      'https://www.facebook.com/profile.php?id=61575172705272&sk=photos';
+      'https://www.facebook.com/people/Ambrosia-Ayurved/61575172705272/';
   static const String facebookName = 'facebook.com/Ambrosia ayurved';
 
   static const String instagramUrl =

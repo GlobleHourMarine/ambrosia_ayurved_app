@@ -1,6 +1,9 @@
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_description_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:provider/provider.dart';
 
 class FAQPage extends StatefulWidget {
   final String productId;
@@ -60,6 +63,14 @@ class _FAQPageState extends State<FAQPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get the provider state
+    final shouldShowLoader =
+        Provider.of<ProductLoadingProvider>(context).showIndividualLoaders;
+    if (shouldShowLoader && isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+    // If data is empty and not loading, return empty container
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -90,33 +101,19 @@ class _FAQPageState extends State<FAQPage> {
               ),
             ),
             SizedBox(height: 20),
-            if (isLoading)
-              Center(child: CircularProgressIndicator())
-            // else if (errorMessage.isNotEmpty)
-            /*  Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Error loading FAQs',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                    SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: fetchFAQs,
-                      child: Text('Retry'),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-              */
-            else if (faqs.isEmpty)
+            // if (isLoading)
+            //   Center(child: CircularProgressIndicator())
+
+            // else if (faqs.isEmpty)
+            //   Center(
+            //     child: Text(
+            //       'No FAQs available for this product',
+            //       style: TextStyle(color: Colors.grey),
+            //     ),
+            //   )
+            // else
+
+            if (faqs.isEmpty && !isLoading)
               Center(
                 child: Text(
                   'No FAQs available for this product',
@@ -136,8 +133,6 @@ class _FAQPageState extends State<FAQPage> {
                     isExpanded: expandedIndex == index,
                     onTap: () {
                       setState(() {
-                        // If clicking the already expanded item, close it
-                        // Otherwise, expand the clicked item
                         expandedIndex = expandedIndex == index ? null : index;
                       });
                     },

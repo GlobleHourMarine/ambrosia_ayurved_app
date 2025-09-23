@@ -19,6 +19,7 @@ class AddressProvider with ChangeNotifier {
   String? userid;
   String? fname;
   String? lname;
+  String? email;
   String? district;
   String? address;
   String? city;
@@ -33,6 +34,7 @@ class AddressProvider with ChangeNotifier {
     required String userid,
     required String fname,
     required String lname,
+    required String email,
     required String district,
     required String address,
     required String city,
@@ -66,6 +68,7 @@ class AddressProvider with ChangeNotifier {
         'user_id': userid,
         'fname': fname,
         'lname': lname,
+        'email': email,
         'address': address,
         'city': city,
         'state': state,
@@ -93,6 +96,7 @@ class AddressProvider with ChangeNotifier {
         // Save address details locally
         this.fname = fname;
         this.lname = lname;
+        this.email = email;
         this.address = address;
         this.district = district;
         this.city = city;
@@ -102,20 +106,18 @@ class AddressProvider with ChangeNotifier {
         this.pincode = pincode;
         this.address_type = address_type;
 
-        // Set success message from response or default
         _message = responseData['message'] ?? 'Address saved successfully';
         print("Success message: $_message");
 
-        // Set success and clear loading state
         _isSuccess = true;
         _isLoading = false;
         notifyListeners();
 
-        // Show success message
         SnackbarMessage.showSnackbar(context, _message);
         return true;
       } else {
-        // Handle non-200 status codes
+        print('save address api : ${response.body}');
+
         _message = 'Server error: ${response.statusCode}';
         print("HTTP error: $_message");
         SnackbarMessage.showSnackbar(context, _message);
@@ -125,6 +127,7 @@ class AddressProvider with ChangeNotifier {
       }
     } catch (e) {
       _message = 'Error: $e';
+      print('save address api : ${e}');
       print("Exception caught: $_message");
       SnackbarMessage.showSnackbar(context, _message);
       _isLoading = false;

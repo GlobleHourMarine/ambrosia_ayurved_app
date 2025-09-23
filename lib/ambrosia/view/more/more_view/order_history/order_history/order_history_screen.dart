@@ -1,9 +1,10 @@
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_loading_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/snackbar.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/order_history/order_history/order_model.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/order_history/submit_review/submit_review.dart';
-import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_app_bar.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/phonepe/phonepe_service.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/shiprocket/shiprocket_auth.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/order_history/track_order_history/track_order_screen.dart';
@@ -157,7 +158,6 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
         );
       },
     );
-
     if (shouldCancel == true) {
       await _cancelOrder(order, shiprocketOrderId);
     }
@@ -271,19 +271,19 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: CustomAppBar(
         title: 'Order History',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              setState(() {
-                isLoading = true;
-                error = null;
-              });
-              _animationController.reset();
-              fetchOrders();
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.refresh),
+        //     onPressed: () {
+        //       setState(() {
+        //         isLoading = true;
+        //         error = null;
+        //       });
+        //       _animationController.reset();
+        //       fetchOrders();
+        //     },
+        //   ),
+        // ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -301,23 +301,10 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
 
   Widget _buildBody() {
     if (isLoading) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Acolors.primary),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Loading your orders...',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
+      return AnimatedLoadingScreen(
+        message: 'Loading your orders...',
+        primaryColor: Acolors.primary,
+        animationDuration: Duration(milliseconds: 1000),
       );
     }
 
@@ -753,7 +740,9 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => TrackingScreen1(
-                                              awbCode: order.awbCode),
+                                            orderId: order.orderId,
+                                            //    awbCode: order.awbCode
+                                          ),
                                         ));
                                   } finally {
                                     // Use setModalState instead of setState

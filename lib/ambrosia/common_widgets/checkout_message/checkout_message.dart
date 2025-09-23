@@ -1,3 +1,4 @@
+import 'package:ambrosia_ayurved/widgets/new_bottom_nav_bar.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
@@ -163,7 +164,7 @@ class _CheckoutMessageViewState extends State<CheckoutMessageView>
                             Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => HomeScreen()),
+                                  builder: (context) => MainTabView()),
                               (route) => false,
                             );
                           },

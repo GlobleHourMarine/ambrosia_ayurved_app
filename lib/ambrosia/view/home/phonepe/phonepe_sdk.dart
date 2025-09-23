@@ -11,7 +11,6 @@ class PhonePePaymentSdk {
       'flowId': flowId,
       'enableLogs': enableLogging,
     });
-
     print('init : $result');
     return result;
   }
@@ -23,8 +22,7 @@ class PhonePePaymentSdk {
       'appSchema': 'com.app.ambrosiaayurved'
     };
     Map<dynamic, dynamic>? result =
-        await _channel.invokeMethod('startTransaction', dict);
-
+    await _channel.invokeMethod('startTransaction', dict);
     print('Transaction : $result');
     print('Transaction : $dict ');
     return result;

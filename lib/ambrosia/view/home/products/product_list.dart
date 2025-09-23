@@ -1,4 +1,5 @@
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/highlighted_text.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_description_loader.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_detail_new_page.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
@@ -21,11 +22,13 @@ class _ProductListState extends State<ProductList> {
   @override
   void initState() {
     super.initState();
-    final productNotifier =
-        Provider.of<ProductNotifier>(context, listen: false);
-    if (productNotifier.products.isEmpty && !productNotifier.isLoading) {
-      productNotifier.fetchProducts();
-    }
+    Future.microtask(() {
+      final productNotifier =
+          Provider.of<ProductNotifier>(context, listen: false);
+      if (productNotifier.products.isEmpty && !productNotifier.isLoading) {
+        productNotifier.fetchProducts();
+      }
+    });
   }
 
   Set<String> _loadingProductIds = {};
@@ -47,9 +50,7 @@ class _ProductListState extends State<ProductList> {
   @override
   Widget build(BuildContext context) {
     final productNotifier = Provider.of<ProductNotifier>(context);
-
     final filteredProducts = _getFilteredProducts(productNotifier.products);
-
     return productNotifier.isLoading
         ? GridView.builder(
             shrinkWrap: true,
@@ -90,10 +91,8 @@ class _ProductListState extends State<ProductList> {
             ? _buildNoResultsWidget()
             : LayoutBuilder(
                 builder: (context, constraints) {
-                  // Calculate responsive dimensions
                   final screenWidth = MediaQuery.of(context).size.width;
                   final screenHeight = MediaQuery.of(context).size.height;
-
                   // Determine cross axis count based on screen width
                   int crossAxisCount = 2;
                   if (screenWidth > 600) {
@@ -124,17 +123,25 @@ class _ProductListState extends State<ProductList> {
 
                       return GestureDetector(
                         onTap: () {
-                          // Clear search when navigating to product detail
                           if (widget.onProductTapped != null) {
                             widget.onProductTapped!();
                           }
 
                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    ProductDetailNewPage(product: product),
-                              ));
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChangeNotifierProvider(
+                                create: (context) => ProductLoadingProvider(),
+                                child: ProductDetailNewPage(product: product),
+                              ),
+                            ),
+                          );
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //       builder: (context) =>
+                          //           ProductDetailNewPage(product: product),
+                          //     ));
                         },
                         child: Card(
                           elevation: 5,
@@ -168,9 +175,10 @@ class _ProductListState extends State<ProductList> {
                                         },
                                         errorBuilder:
                                             (context, error, stackTrace) {
-                                          return const ShimmerEffect(
-                                              width: double.infinity,
-                                              height: double.infinity);
+                                          return const Icon(
+                                              Icons.image_not_supported,
+                                              color: Colors.grey,
+                                              size: 150);
                                         },
                                       ),
                                     ),

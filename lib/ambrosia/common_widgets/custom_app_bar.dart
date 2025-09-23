@@ -27,27 +27,28 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
-      leading: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: Material(
-          color: Colors.black.withOpacity(0.21),
-          borderRadius: BorderRadius.circular(12),
-          child: const BackButton(
-            color: Colors.black,
-          ),
-        ),
-      ), // Optional leading widget
+      leading: leading != null
+          ? Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: Material(
+                color: Colors.black.withOpacity(0.21),
+                borderRadius: BorderRadius.circular(12),
+                child: leading,
+              ),
+            )
+          : null,
       title: title != null
           ? Text(
               title!,
               style: const TextStyle(
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: 0.8,
-                  fontSize: 24),
+                fontWeight: FontWeight.w500,
+                //  letterSpacing: 0.8,
+                fontSize: 20,
+              ),
             )
-          : null, // Only show if title is provided
+          : null,
       centerTitle: true,
-      actions: actions, // Optional actions
+      actions: actions,
     );
   }
 

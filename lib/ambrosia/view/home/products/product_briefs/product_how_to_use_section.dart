@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_description_loader.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_models/how_to_use_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
 class HowToUseSection extends StatefulWidget {
   final String productId;
@@ -28,7 +30,6 @@ class _HowToUseSectionState extends State<HowToUseSection> {
       Uri.parse(
           'https://ambrosiaayurved.in/api/how_to_use?product_id=${widget.productId}'),
     );
-
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       if (jsonData['status'] == true) {
@@ -39,7 +40,6 @@ class _HowToUseSectionState extends State<HowToUseSection> {
           _isLoading = false;
         });
       } else {
-        // status is false
         setState(() {
           _steps = [];
           _isLoading = false;
@@ -56,6 +56,16 @@ class _HowToUseSectionState extends State<HowToUseSection> {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
 
+    // Get the provider state
+    // final shouldShowLoader =
+    //     Provider.of<ProductLoadingProvider>(context).showIndividualLoaders;
+    // if (shouldShowLoader && _isLoading) {
+    //   return Center(child: CircularProgressIndicator());
+    // }
+    // // If data is empty and not loading, return empty container
+    // if (_steps.isEmpty && !_isLoading) {
+    //   return SizedBox();
+    // }
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Column(
@@ -120,7 +130,11 @@ class _HowToUseSectionState extends State<HowToUseSection> {
               imageUrl,
               width: 120,
               height: 120,
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.image_not_supported,
+                    color: Colors.grey, size: 110);
+              },
             ),
           ),
           const SizedBox(width: 12),

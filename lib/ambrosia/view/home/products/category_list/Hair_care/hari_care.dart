@@ -6,10 +6,10 @@ class ClothesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Clothes")),
+      appBar: AppBar(title: Text("Hair Care")),
       body: Stack(
         children: [
-          Center(child: Text("Clothes")),
+          Center(child: Text("Hair Care")),
           // Blur Overlay with "Coming Soon" Text
           Positioned.fill(
             child: ClipRRect(

@@ -1,7 +1,9 @@
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_description_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/review_section/review_model.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/review_section/review_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 class CustomerReviewSection extends StatefulWidget {
@@ -286,6 +288,14 @@ class _CustomerReviewSectionState extends State<CustomerReviewSection> {
   @override
   Widget build(BuildContext context) {
     int reviewsToShow = visibleReviewCount.clamp(0, reviews.length);
+    // Get the provider state
+    final shouldShowLoader =
+        Provider.of<ProductLoadingProvider>(context).showIndividualLoaders;
+
+    // Return loader only if individual loaders are enabled AND this widget is loading
+    if (shouldShowLoader && isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
 
     return Padding(
       padding: const EdgeInsets.all(12.0),
@@ -330,118 +340,112 @@ class _CustomerReviewSectionState extends State<CustomerReviewSection> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : reviews.isEmpty
-                        ? Padding(
-                            padding: EdgeInsets.all(10.0),
-                            child: Text(
-                                '${AppLocalizations.of(context)!.noReviewsYet}',
-                                style: TextStyle(fontSize: 16)),
-                          )
-                        : Column(
-                            children: [
-                              ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: reviewsToShow,
-                                itemBuilder: (context, index) {
-                                  final review = reviews[index];
-                                  return Padding(
-                                    padding: const EdgeInsets.all(10),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.green),
-                                        borderRadius: BorderRadius.circular(5),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            review.fname,
-                                            style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          const SizedBox(height: 5),
-                                          Text(
-                                            review.date,
-                                            style: const TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 16),
-                                          ),
-                                          const SizedBox(height: 5),
-                                          // Media files display - UPDATED PART
-                                          if (review.filePath.isNotEmpty) ...[
-                                            SingleChildScrollView(
-                                              scrollDirection: Axis.horizontal,
-                                              child: Row(
-                                                children: review.filePath
-                                                    .map<Widget>(
-                                                      (path) => Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(
-                                                                right: 8.0),
-                                                        child:
-                                                            _buildMediaWidget(
-                                                                path,
-                                                                context,
-                                                                review
-                                                                    .filePath),
-                                                        //_buildMediaWidget(
-                                                        //  path, context),
-                                                      ),
-                                                    )
-                                                    .toList(),
+                // isLoading
+                //     ? const Center(child: CircularProgressIndicator())
+                //     : reviews.isEmpty
+                //         ? Padding(
+                //             padding: EdgeInsets.all(10.0),
+                //             child: Text(
+                //                 '${AppLocalizations.of(context)!.noReviewsYet}',
+                //                 style: TextStyle(fontSize: 16)),
+                //           )
+                //         :
+                // If data is empty and not loading, return empty container
+                if (reviews.isEmpty && !isLoading)
+                  Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Text('${AppLocalizations.of(context)!.noReviewsYet}',
+                        style: TextStyle(fontSize: 16)),
+                  )
+                else
+                  Column(
+                    children: [
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: reviewsToShow,
+                        itemBuilder: (context, index) {
+                          final review = reviews[index];
+                          return Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.green),
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    review.fname,
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    review.date,
+                                    style: const TextStyle(
+                                        color: Colors.grey, fontSize: 16),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  // Media files display - UPDATED PART
+                                  if (review.filePath.isNotEmpty) ...[
+                                    SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: review.filePath
+                                            .map<Widget>(
+                                              (path) => Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 8.0),
+                                                child: _buildMediaWidget(path,
+                                                    context, review.filePath),
+                                                //_buildMediaWidget(
+                                                //  path, context),
                                               ),
-                                            ),
-                                            const SizedBox(height: 5),
-                                          ],
-                                          buildStarRating(
-                                              int.parse(review.rating)),
-                                          const SizedBox(height: 5),
-                                          Text(
-                                            review.message,
-                                            style:
-                                                const TextStyle(fontSize: 16),
-                                          ),
-                                        ],
+                                            )
+                                            .toList(),
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
-                              if (reviews.length > 4)
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      if (visibleReviewCount + 4 <
-                                          reviews.length) {
-                                        visibleReviewCount += 4;
-                                      } else if (visibleReviewCount <
-                                          reviews.length) {
-                                        visibleReviewCount =
-                                            reviews.length; // show all
-                                      } else {
-                                        visibleReviewCount =
-                                            4; // reset to initial
-                                      }
-                                    });
-                                  },
-                                  child: Text(
-                                    visibleReviewCount >= reviews.length
-                                        ? '${AppLocalizations.of(context)!.showLess}'
-                                        : '${AppLocalizations.of(context)!.readMore}',
-                                    style: TextStyle(
-                                        fontSize: 16, color: Colors.green),
+                                    const SizedBox(height: 5),
+                                  ],
+                                  buildStarRating(int.parse(review.rating)),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    review.message,
+                                    style: const TextStyle(fontSize: 16),
                                   ),
-                                ),
-                              const SizedBox(height: 10),
-                            ],
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      if (reviews.length > 4)
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              if (visibleReviewCount + 4 < reviews.length) {
+                                visibleReviewCount += 4;
+                              } else if (visibleReviewCount < reviews.length) {
+                                visibleReviewCount = reviews.length; // show all
+                              } else {
+                                visibleReviewCount = 4; // reset to initial
+                              }
+                            });
+                          },
+                          child: Text(
+                            visibleReviewCount >= reviews.length
+                                ? '${AppLocalizations.of(context)!.showLess}'
+                                : '${AppLocalizations.of(context)!.readMore}',
+                            style: TextStyle(fontSize: 16, color: Colors.green),
                           ),
+                        ),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
               ],
             ),
           ),

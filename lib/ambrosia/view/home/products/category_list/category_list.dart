@@ -1,12 +1,15 @@
-import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/mediciene/medicine_screen.dart';
-import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/pharama/pharma_screen.dart';
-import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/ship/ship_screen.dart';
-import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/skincare/skincare_screen.dart';
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/shimmer_effect/shimmer_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/rounded_textfield.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/cart_provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/cart_page.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/filter_category/filter_category.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/supplement/supplement_screen.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/cosmetics/cosmetics.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/Hair_care/hari_care.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/skincare/skincare_screen.dart';
+
 import 'package:provider/provider.dart';
 
 class CategoryList extends StatefulWidget {
@@ -20,26 +23,22 @@ class _CategoryListState extends State<CategoryList> {
   List category = [
     {
       "name": "SkinCare",
-      "imageurl":
-          "https://cdn.pixabay.com/photo/2016/04/13/22/26/cream-1327847_1280.jpg",
+      "image_asset": "assets/images/category_skin_care.jpg",
       "items_count": "0",
     },
     {
-      "name": "Medicene",
-      "imageurl":
-          "https://cdn.pixabay.com/photo/2017/05/23/21/01/jar-2338584_1280.jpg",
+      "name": "Supplements",
+      "image_asset": "assets/images/category_supplements.png",
       "items_count": "1",
     },
     {
       "name": "Cosmetics",
-      "imageurl":
-          "https://cdn.pixabay.com/photo/2014/03/25/16/24/medicine-296966_1280.png",
+      "image_asset": "assets/images/category_makeup.png",
       "items_count": "0",
     },
     {
-      "name": "Clothes",
-      "imageurl":
-          "https://cdn.pixabay.com/photo/2016/04/19/13/39/store-1338629_1280.jpg",
+      "name": "Hair Care",
+      "image_asset": "assets/images/category_hair_care.jpg",
       "items_count": "0",
     },
   ];
@@ -52,9 +51,9 @@ class _CategoryListState extends State<CategoryList> {
         body: Stack(
           children: [
             Container(
-              margin: const EdgeInsets.only(top: 180),
+              margin: const EdgeInsets.only(top: 130),
               width: media.width * 0.27,
-              height: 486,
+              height: 492,
               decoration: const BoxDecoration(
                 color: Acolors.primary,
                 borderRadius: BorderRadius.only(
@@ -114,14 +113,14 @@ class _CategoryListState extends State<CategoryList> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      const RoundedTextfield(
-                        hinttext: 'Search',
-                        suffixIcon: Icon(
-                          Icons.search,
-                          size: 30,
-                          color: Acolors.primary,
-                        ),
-                      ),
+                      // const RoundedTextfield(
+                      //   hinttext: 'Search',
+                      //   suffixIcon: Icon(
+                      //     Icons.search,
+                      //     size: 30,
+                      //     color: Acolors.primary,
+                      //   ),
+                      // ),
                       //  SizedBox(height: 50),
                       const SizedBox(height: 30),
                       ListView.builder(
@@ -143,13 +142,13 @@ class _CategoryListState extends State<CategoryList> {
                                 case "SkinCare":
                                   nextScreen = SkincareScreen();
                                   break;
-                                case "Medicene":
-                                  nextScreen = MedicineScreen();
+                                case "Supplements":
+                                  nextScreen = SupplementScreen();
                                   break;
                                 case "Cosmetics":
                                   nextScreen = CosmeticsScreen();
                                   break;
-                                case "Clothes":
+                                case "Hair Care":
                                   nextScreen = ClothesScreen();
                                   break;
                                 default:
@@ -204,14 +203,23 @@ class _CategoryListState extends State<CategoryList> {
                                 Row(
                                   children: [
                                     ClipOval(
-                                      child: Image.network(
-                                        category[index]['imageurl'],
+                                      child: Image.asset(
+                                        category[index]['image_asset'],
                                         width: 80,
                                         height: 80,
                                         fit: BoxFit.fill,
+
+                                        // loadingBuilder:
+                                        //     (context, child, progress) {
+                                        //   if (progress == null) return child;
+                                        //   return const ShimmerEffect(
+                                        //       width: 50, height: 50);
+                                        // },
                                         errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                CircularProgressIndicator(),
+                                            (context, error, stackTrace) {
+                                          return const ShimmerEffect(
+                                              width: 80, height: 80);
+                                        },
                                       ),
                                     ),
                                     const SizedBox(width: 20),

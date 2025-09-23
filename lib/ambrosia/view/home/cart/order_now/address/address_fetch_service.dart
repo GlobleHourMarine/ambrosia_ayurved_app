@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/snackbar.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/address/address_model.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
@@ -23,7 +24,6 @@ class AddressFetchService {
           'Content-Type': 'application/json',
         },
       );
-
       print('Request sent to: ${url.toString()}');
       print('Request body: ${jsonEncode({'user_id': userid})}');
       print('Response status: ${response.statusCode}');
@@ -79,23 +79,485 @@ class AddressFetchService {
   }
 }
 
-class AddressSelectionWidget extends StatefulWidget {
-  final Function(Address) onAddressSelected;
-  final String? title;
-  final double? height;
+// class AddressSelectionWidget extends StatefulWidget {
+//   final Function(Address) onAddressSelected;
+//   final String? title;
+//   final double? height;
 
-  const AddressSelectionWidget({
+//   const AddressSelectionWidget({
+//     Key? key,
+//     required this.onAddressSelected,
+//     this.title,
+//     this.height,
+//   }) : super(key: key);
+
+//   @override
+//   State<AddressSelectionWidget> createState() => _AddressSelectionWidgetState();
+// }
+
+// class _AddressSelectionWidgetState extends State<AddressSelectionWidget> {
+//   List<Address> addresses = [];
+//   String? selectedAddressId;
+//   bool isLoading = true;
+//   String? errorMessage;
+//   bool showAllAddresses = false;
+//   static const int maxVisibleAddresses = 2;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     fetchAddresses();
+//   }
+
+//   Future<void> fetchAddresses() async {
+//     final userProvider = Provider.of<UserProvider>(context, listen: false);
+//     final userid = userProvider.id;
+//     try {
+//       setState(() {
+//         isLoading = true;
+//         errorMessage = null;
+//       });
+
+//       final response = await http.get(
+//         Uri.parse(
+//             'https://ambrosiaayurved.in/api/fetch_all_address?user_id=$userid'),
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//       );
+
+//       if (response.statusCode == 200) {
+//         final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+//         if (jsonResponse['status'] == true) {
+//           final List<dynamic> addressData = jsonResponse['data'];
+//           setState(() {
+//             addresses =
+//                 addressData.map((item) => Address.fromJson(item)).toList();
+
+//             // Sort addresses by ID in descending order (latest first)
+//             addresses.sort((a, b) => b.id.compareTo(a.id));
+
+//             isLoading = false;
+//           });
+//         } else {
+//           setState(() {
+//             errorMessage =
+//                 jsonResponse['message'] ?? 'Failed to fetch addresses';
+//             isLoading = false;
+//           });
+//         }
+//       } else {
+//         setState(() {
+//           errorMessage = 'Server error: ${response.statusCode}';
+//           isLoading = false;
+//         });
+//       }
+//     } catch (e) {
+//       setState(() {
+//         errorMessage = 'Network error: $e';
+//         isLoading = false;
+//       });
+//     }
+//   }
+
+//   void _showDeleteDialog(String addressId) {
+//     showDialog(
+//       context: context,
+//       builder: (BuildContext context) {
+//         return AlertDialog(
+//           title: Text(
+//             AppLocalizations.of(context)!.deleteAddress,
+//             // 'Delete Address'
+//           ),
+//           content: Text(AppLocalizations.of(context)!.confirmDeleteAddress
+//               //  'Are you sure you want to delete this address?'
+//               ),
+//           actions: [
+//             TextButton(
+//               onPressed: () => Navigator.of(context).pop(),
+//               child: Text(AppLocalizations.of(context)!.cancel
+//                   //'Cancel'
+//                   ),
+//             ),
+//             TextButton(
+//               onPressed: () async {
+//                 Navigator.of(context).pop();
+//                 try {
+//                   await AddressFetchService.deleteAddress(context, addressId);
+//                   // Update the state immediately
+//                   setState(() {
+//                     addresses.removeWhere((address) => address.id == addressId);
+//                   });
+
+//                   // Show success message
+//                   SnackbarMessage.showSnackbar(
+//                     context,
+//                     AppLocalizations.of(context)!.addressDeleted,
+//                     // 'Address deleted successfully'
+//                   );
+//                 } catch (e) {
+//                   SnackbarMessage.showSnackbar(
+//                       context, AppLocalizations.of(context)!.serverErrorDelete
+//                       // 'Server Error : Failed to delete address'
+//                       );
+//                 }
+//               },
+//               child: Text(AppLocalizations.of(context)!.delete,
+//                   //  'Delete',
+//                   style: TextStyle(color: Colors.red)),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
+
+//   void _navigateToAddressSection() {
+//     Navigator.push(
+//         context,
+//         MaterialPageRoute(
+//           builder: (context) => AddressSection(),
+//         )).then((_) {
+//       // Refresh addresses when returning from add address screen
+//       fetchAddresses();
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return SingleChildScrollView(
+//       child: Container(
+//         height: widget.height ?? 300,
+//         decoration: BoxDecoration(
+//           color: Colors.white,
+//           borderRadius: BorderRadius.circular(12),
+//           boxShadow: [
+//             BoxShadow(
+//               color: Colors.grey.withOpacity(0.1),
+//               blurRadius: 8,
+//               offset: const Offset(0, 2),
+//             ),
+//           ],
+//         ),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             if (widget.title != null)
+//               Padding(
+//                 padding: const EdgeInsets.only(left: 16, top: 8),
+//                 child: Text(
+//                   widget.title!,
+//                   style: const TextStyle(
+//                     fontSize: 18,
+//                     fontWeight: FontWeight.bold,
+//                   ),
+//                 ),
+//               ),
+//             Expanded(
+//               child: _buildBody(),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildBody() {
+//     if (isLoading) {
+//       return const Center(
+//         child: CircularProgressIndicator(),
+//       );
+//     }
+
+//     if (addresses.isEmpty) {
+//       return Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Icon(
+//               Icons.location_off,
+//               size: 48,
+//               color: Colors.grey[400],
+//             ),
+//             const SizedBox(height: 12),
+//             Text(
+//               AppLocalizations.of(context)!.noAddresses,
+//               // 'No addresses found',
+//               style: TextStyle(
+//                 fontSize: 16,
+//                 color: Colors.grey[600],
+//                 fontWeight: FontWeight.w500,
+//               ),
+//             ),
+//             const SizedBox(height: 8),
+//             Text(
+//               AppLocalizations.of(context)!.addFirstAddress,
+//               //  'Add your first address to continue',
+//               style: TextStyle(
+//                 fontSize: 14,
+//                 color: Colors.grey[500],
+//               ),
+//             ),
+//             const SizedBox(height: 20),
+//             ElevatedButton.icon(
+//               onPressed: () {
+//                 Navigator.pushReplacement(
+//                     context,
+//                     MaterialPageRoute(
+//                       builder: (context) => AddressSection(),
+//                     ));
+//               },
+//               icon: const Icon(Icons.add_location_alt),
+//               label: Text(
+//                 AppLocalizations.of(context)!.addAddress,
+//                 //'Add Address'
+//               ),
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: Colors.green[600],
+//                 foregroundColor: Colors.white,
+//                 padding: const EdgeInsets.symmetric(
+//                   horizontal: 24,
+//                   vertical: 12,
+//                 ),
+//                 shape: RoundedRectangleBorder(
+//                   borderRadius: BorderRadius.circular(8),
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       );
+//     }
+
+//     return RefreshIndicator(
+//       onRefresh: fetchAddresses,
+//       child: Column(
+//         children: [
+//           Expanded(
+//             child: ListView.builder(
+//               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+//               itemCount: _getDisplayItemCount(),
+//               itemBuilder: (context, index) {
+//                 if (index < _getVisibleAddressCount()) {
+//                   final address = addresses[index];
+//                   return _buildAddressCard(address);
+//                 } else {
+//                   return _buildShowMoreButton();
+//                 }
+//               },
+//             ),
+//           ),
+//           if (addresses.isNotEmpty)
+//             Padding(
+//               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+//               child: SizedBox(
+//                 width: double.infinity,
+//                 child: OutlinedButton.icon(
+//                   onPressed: _navigateToAddressSection,
+//                   icon: const Icon(Icons.add),
+//                   label: Text(
+//                     AppLocalizations.of(context)!.addNewAddress,
+//                     //'Add New Address'
+//                   ),
+//                   style: OutlinedButton.styleFrom(
+//                     foregroundColor: Colors.green[600],
+//                     side: BorderSide(color: Colors.green[600]!),
+//                     padding: const EdgeInsets.symmetric(vertical: 8),
+//                     shape: RoundedRectangleBorder(
+//                       borderRadius: BorderRadius.circular(8),
+//                     ),
+//                   ),
+//                 ),
+//               ),
+//             ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   int _getVisibleAddressCount() {
+//     if (showAllAddresses || addresses.length <= maxVisibleAddresses) {
+//       return addresses.length;
+//     }
+//     return maxVisibleAddresses;
+//   }
+
+//   int _getDisplayItemCount() {
+//     final visibleCount = _getVisibleAddressCount();
+//     if (addresses.length > maxVisibleAddresses && !showAllAddresses) {
+//       return visibleCount + 1; // +1 for show more button
+//     }
+//     return visibleCount;
+//   }
+
+//   Widget _buildShowMoreButton() {
+//     final remainingCount = addresses.length - maxVisibleAddresses;
+
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 8),
+//       child: TextButton.icon(
+//         onPressed: () {
+//           setState(() {
+//             showAllAddresses = !showAllAddresses;
+//           });
+//         },
+//         icon: Icon(
+//           showAllAddresses ? Icons.expand_less : Icons.expand_more,
+//           color: Colors.green[600],
+//         ),
+//         label: Text(
+//           showAllAddresses
+//               ? AppLocalizations.of(context)!.showLess
+//               //   'Show Less'
+//               : '${AppLocalizations.of(context)!.show} $remainingCount ${AppLocalizations.of(context)!.moreAddress} ', // ${remainingCount > 1}
+//           style: TextStyle(
+//             color: Colors.green[600],
+//             fontWeight: FontWeight.w500,
+//           ),
+//         ),
+//         style: TextButton.styleFrom(
+//           backgroundColor: Colors.green[50],
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(8),
+//           ),
+//           padding: const EdgeInsets.symmetric(
+//             horizontal: 16,
+//             vertical: 12,
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildAddressCard(Address address) {
+//     final isSelected = selectedAddressId == address.id;
+
+//     return Card(
+//       margin: const EdgeInsets.only(bottom: 8),
+//       elevation: 1,
+//       shape: RoundedRectangleBorder(
+//         borderRadius: BorderRadius.circular(8),
+//         side: BorderSide(
+//           color: isSelected ? Colors.green : Colors.transparent,
+//           width: 2,
+//         ),
+//       ),
+//       child: InkWell(
+//         onTap: () {
+//           setState(() {
+//             selectedAddressId = address.id;
+//           });
+//           widget.onAddressSelected(address);
+//         },
+//         borderRadius: BorderRadius.circular(8),
+//         child: Padding(
+//           padding: const EdgeInsets.all(6),
+//           child: Row(
+//             crossAxisAlignment: CrossAxisAlignment.center,
+//             children: [
+//               Transform.scale(
+//                 scale: 0.8,
+//                 child: Radio<String>(
+//                   value: address.id,
+//                   groupValue: selectedAddressId,
+//                   onChanged: (String? value) {
+//                     setState(() {
+//                       selectedAddressId = value;
+//                     });
+//                     widget.onAddressSelected(address);
+//                   },
+//                   activeColor: Colors.green[600],
+//                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+//                 ),
+//               ),
+//               const SizedBox(width: 8),
+//               Expanded(
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     const SizedBox(height: 4),
+//                     Row(
+//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                       children: [
+//                         Text(
+//                           '${address.fname} ${address.lname}',
+//                           style: const TextStyle(
+//                             fontSize: 14,
+//                             fontWeight: FontWeight.bold,
+//                           ),
+//                         ),
+//                         Container(
+//                           padding: const EdgeInsets.symmetric(
+//                             horizontal: 6,
+//                             vertical: 2,
+//                           ),
+//                           decoration: BoxDecoration(
+//                             color: Colors.green[100],
+//                             borderRadius: BorderRadius.circular(3),
+//                           ),
+//                           child: Text(
+//                             address.addressType,
+//                             style: TextStyle(
+//                               fontSize: 10,
+//                               fontWeight: FontWeight.bold,
+//                               color: Colors.green[700],
+//                             ),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                     const SizedBox(height: 2),
+//                     Text(
+//                       address.mobile,
+//                       style: TextStyle(
+//                         fontSize: 12,
+//                         color: Colors.grey[600],
+//                       ),
+//                     ),
+//                     const SizedBox(height: 2),
+//                     Text(
+//                       '${address.address},${address.city}, ${address.district}, ${address.state}, ${address.country} - ${address.pincode}',
+//                       style: TextStyle(
+//                         fontSize: 12,
+//                         color: Colors.grey[700],
+//                       ),
+//                       maxLines: 2,
+//                       overflow: TextOverflow.ellipsis,
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//               IconButton(
+//                 onPressed: () => _showDeleteDialog(address.id),
+//                 icon: Icon(Icons.delete_outline_rounded),
+//                 color: Colors.red[400],
+//               )
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// Create this new widget class - AddressSelectionContent
+// Add this to your address selection widget file
+
+class AddressSelectionContent extends StatefulWidget {
+  final Function(Address) onAddressSelected;
+
+  const AddressSelectionContent({
     Key? key,
     required this.onAddressSelected,
-    this.title,
-    this.height,
   }) : super(key: key);
 
   @override
-  State<AddressSelectionWidget> createState() => _AddressSelectionWidgetState();
+  State<AddressSelectionContent> createState() =>
+      _AddressSelectionContentState();
 }
 
-class _AddressSelectionWidgetState extends State<AddressSelectionWidget> {
+class _AddressSelectionContentState extends State<AddressSelectionContent> {
   List<Address> addresses = [];
   String? selectedAddressId;
   bool isLoading = true;
@@ -168,43 +630,32 @@ class _AddressSelectionWidgetState extends State<AddressSelectionWidget> {
         return AlertDialog(
           title: Text(
             AppLocalizations.of(context)!.deleteAddress,
-            // 'Delete Address'
           ),
-          content: Text(AppLocalizations.of(context)!.confirmDeleteAddress
-              //  'Are you sure you want to delete this address?'
-              ),
+          content: Text(AppLocalizations.of(context)!.confirmDeleteAddress),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(AppLocalizations.of(context)!.cancel
-                  //'Cancel'
-                  ),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
                 try {
                   await AddressFetchService.deleteAddress(context, addressId);
-                  // Update the state immediately
                   setState(() {
                     addresses.removeWhere((address) => address.id == addressId);
                   });
 
-                  // Show success message
                   SnackbarMessage.showSnackbar(
                     context,
                     AppLocalizations.of(context)!.addressDeleted,
-                    // 'Address deleted successfully'
                   );
                 } catch (e) {
                   SnackbarMessage.showSnackbar(
-                      context, AppLocalizations.of(context)!.serverErrorDelete
-                      // 'Server Error : Failed to delete address'
-                      );
+                      context, AppLocalizations.of(context)!.serverErrorDelete);
                 }
               },
               child: Text(AppLocalizations.of(context)!.delete,
-                  //  'Delete',
                   style: TextStyle(color: Colors.red)),
             ),
           ],
@@ -219,160 +670,126 @@ class _AddressSelectionWidgetState extends State<AddressSelectionWidget> {
         MaterialPageRoute(
           builder: (context) => AddressSection(),
         )).then((_) {
-      // Refresh addresses when returning from add address screen
       fetchAddresses();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        height: widget.height ?? 300,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (widget.title != null)
-              Padding(
-                padding: const EdgeInsets.only(left: 16, top: 8),
-                child: Text(
-                  widget.title!,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            Expanded(
-              child: _buildBody(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBody() {
     if (isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
+      return Container(
+        height: 100,
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Acolors.primary),
+          ),
+        ),
       );
     }
 
     if (addresses.isEmpty) {
-      return Center(
-        child: Column(
+      return Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey[300]!),
+        ),
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.location_off,
-              size: 48,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              AppLocalizations.of(context)!.noAddresses,
-              // 'No addresses found',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              AppLocalizations.of(context)!.addFirstAddress,
-              //  'Add your first address to continue',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddressSection(),
-                    ));
-              },
-              icon: const Icon(Icons.add_location_alt),
-              label: Text(
-                AppLocalizations.of(context)!.addAddress,
-                //'Add Address'
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green[600],
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
+            Column(
+              children: [
+                SizedBox(height: 10),
+                Icon(
+                  Icons.location_off,
+                  size: 48,
+                  color: Colors.grey[400],
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: fetchAddresses,
-      child: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
-              itemCount: _getDisplayItemCount(),
-              itemBuilder: (context, index) {
-                if (index < _getVisibleAddressCount()) {
-                  final address = addresses[index];
-                  return _buildAddressCard(address);
-                } else {
-                  return _buildShowMoreButton();
-                }
-              },
-            ),
-          ),
-          if (addresses.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _navigateToAddressSection,
-                  icon: const Icon(Icons.add),
-                  label: Text(
-                    AppLocalizations.of(context)!.addNewAddress,
-                    //'Add New Address'
+                const SizedBox(height: 12),
+                Text(
+                  AppLocalizations.of(context)!.noAddresses,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
                   ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.green[600],
-                    side: BorderSide(color: Colors.green[600]!),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  AppLocalizations.of(context)!.addFirstAddress,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[500],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddressSection(),
+                        )).then((_) => fetchAddresses());
+                  },
+                  icon: const Icon(Icons.add_location_alt),
+                  label: Text(AppLocalizations.of(context)!.addAddress),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Acolors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                 ),
+                SizedBox(height: 10),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: _getDisplayItemCount(),
+          itemBuilder: (context, index) {
+            if (index < _getVisibleAddressCount()) {
+              final address = addresses[index];
+              return _buildAddressCard(address);
+            } else {
+              return _buildShowMoreButton();
+            }
+          },
+        ),
+        if (addresses.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _navigateToAddressSection,
+                icon: const Icon(Icons.add),
+                label: Text(AppLocalizations.of(context)!.addNewAddress),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Acolors.primary,
+                  side: BorderSide(color: Acolors.primary),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
               ),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 
@@ -393,37 +810,38 @@ class _AddressSelectionWidgetState extends State<AddressSelectionWidget> {
 
   Widget _buildShowMoreButton() {
     final remainingCount = addresses.length - maxVisibleAddresses;
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: TextButton.icon(
-        onPressed: () {
-          setState(() {
-            showAllAddresses = !showAllAddresses;
-          });
-        },
-        icon: Icon(
-          showAllAddresses ? Icons.expand_less : Icons.expand_more,
-          color: Colors.green[600],
-        ),
-        label: Text(
-          showAllAddresses
-              ? AppLocalizations.of(context)!.showLess
-              //   'Show Less'
-              : '${AppLocalizations.of(context)!.show} $remainingCount ${AppLocalizations.of(context)!.moreAddress} ', // ${remainingCount > 1}
-          style: TextStyle(
-            color: Colors.green[600],
-            fontWeight: FontWeight.w500,
+      child: SizedBox(
+        width: double.infinity,
+        child: TextButton.icon(
+          onPressed: () {
+            setState(() {
+              showAllAddresses = !showAllAddresses;
+            });
+          },
+          icon: Icon(
+            showAllAddresses ? Icons.expand_less : Icons.expand_more,
+            color: Acolors.primary,
           ),
-        ),
-        style: TextButton.styleFrom(
-          backgroundColor: Colors.green[50],
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+          label: Text(
+            showAllAddresses
+                ? AppLocalizations.of(context)!.showLess
+                : '${AppLocalizations.of(context)!.show} $remainingCount ${AppLocalizations.of(context)!.moreAddress}',
+            style: TextStyle(
+              color: Acolors.primary,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
+          style: TextButton.styleFrom(
+            backgroundColor: Acolors.primary.withOpacity(0.1),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
           ),
         ),
       ),
@@ -432,7 +850,6 @@ class _AddressSelectionWidgetState extends State<AddressSelectionWidget> {
 
   Widget _buildAddressCard(Address address) {
     final isSelected = selectedAddressId == address.id;
-
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 1,
@@ -517,12 +934,12 @@ class _AddressSelectionWidgetState extends State<AddressSelectionWidget> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${address.address},${address.city}, ${address.district}, ${address.state}, ${address.country} - ${address.pincode}',
+                      '${address.address}, ${address.city}, ${address.district}, ${address.state}, ${address.country} - ${address.pincode}',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[700],
                       ),
-                      maxLines: 1,
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],

@@ -1,3 +1,5 @@
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_loading_screen.dart';
+import 'package:ambrosia_ayurved/widgets/new_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
@@ -5,7 +7,7 @@ import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/cart_provide
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/order_now_page.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/home_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
-import 'package:ambrosia_ayurved/widgets/custom_app_bar.dart';
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/shimmer_effect/shimmer_effect.dart';
 
@@ -34,6 +36,7 @@ class _CartPageState extends State<CartPage> {
 
     return Scaffold(
       appBar: CustomAppBar(
+        // leading: BackButton(color: Colors.black),
         title: AppLocalizations.of(context)!.cart,
       ),
       body: SafeArea(
@@ -42,16 +45,20 @@ class _CartPageState extends State<CartPage> {
             const SizedBox(height: 10),
             Expanded(
               child: cartProvider.isLoading
-                  //  _isLoading
-                  ? ListView.builder(
-                      itemCount: 5,
-                      itemBuilder: (context, index) => const Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        child:
-                            ShimmerEffect(width: double.infinity, height: 80),
-                      ),
+                  ? AnimatedLoadingScreen(
+                      message: 'Loading your cart...',
+                      primaryColor: Acolors.primary,
+                      animationDuration: Duration(milliseconds: 1000),
                     )
+                  // ListView.builder(
+                  //     itemCount: 5,
+                  //     itemBuilder: (context, index) => const Padding(
+                  //       padding:
+                  //           EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  //       child:
+                  //           ShimmerEffect(width: double.infinity, height: 80),
+                  //     ),
+                  //   )
                   : cartItems.isEmpty
                       //_cartItems.isEmpty
                       ? Center(
@@ -64,11 +71,13 @@ class _CartPageState extends State<CartPage> {
                                 child: Container(
                                   child: InkWell(
                                     onTap: () {
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  HomeScreen()));
+                                      Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                MainTabView()),
+                                        (route) => false,
+                                      );
                                     },
                                     child: Image.asset(
                                       'assets/images/cart_empty_1.png',
@@ -101,7 +110,6 @@ class _CartPageState extends State<CartPage> {
                           itemCount: cartItems.length,
                           itemBuilder: (context, index) {
                             final cartItem = cartItems[index];
-
                             return Card(
                               elevation: 3,
                               child: Column(
@@ -110,12 +118,13 @@ class _CartPageState extends State<CartPage> {
                                     padding: EdgeInsets.all(8.0),
                                     child: InkWell(
                                       onTap: () {
-                                        Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
                                               builder: (context) =>
-                                                  HomeScreen(),
-                                            ));
+                                                  MainTabView()),
+                                          (route) => false,
+                                        );
                                       },
                                       child: Row(
                                         crossAxisAlignment:
@@ -124,7 +133,6 @@ class _CartPageState extends State<CartPage> {
                                           Container(
                                             width: 120, // Adjust as needed
                                             height: 140, // Adjust as needed
-
                                             child: ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(20),
@@ -236,7 +244,7 @@ class _CartPageState extends State<CartPage> {
                                         ),
                                       ),
                                       SizedBox(width: 80),
-                                      // Decrement Button
+
                                       InkWell(
                                         onTap: cartProvider.isQuantityLoading
                                             ? null
@@ -417,7 +425,7 @@ class _CartPageState extends State<CartPage> {
                   ),
                 ),
               ),
-            // SizedBox(height: 5),
+            SizedBox(height: 20),
           ],
         ),
       ),

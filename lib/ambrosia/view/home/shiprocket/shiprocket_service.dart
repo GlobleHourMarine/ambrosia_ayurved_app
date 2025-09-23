@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_message.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/checkout_message/checkout_message.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/place_order/place_order_provider.dart';
@@ -60,7 +59,7 @@ Future<void> createShiprocketOrder({
     // ✅ Get Shiprocket token
     String? bearerToken = await ShiprocketAuth.getToken();
     if (bearerToken == null) {
-      showError("Failed", "Failed to authenticate with Shiprocket");
+      showError("Failed", "Failed to place order");
       return;
     }
 
@@ -127,7 +126,7 @@ Future<void> createShiprocketOrder({
     final responseData = json.decode(responseString);
 
     if (response.statusCode != 200) {
-      showError("Failed", "Error creating order: ${response.reasonPhrase}");
+      showError("Failed", "Failed to place order");
       return;
     }
 
@@ -141,7 +140,6 @@ Future<void> createShiprocketOrder({
       shipmentIds: [shipmentId as int],
     );
 
-// Check based on actual API contract
     final awbAssignStatus = awbResult['data']?['awb_assign_status'];
     final awbData = awbResult['data']?['response']?['data'];
     final assignedAwbCode = awbData?['awb_code'];
@@ -150,7 +148,7 @@ Future<void> createShiprocketOrder({
         assignedAwbCode == null ||
         assignedAwbCode.isEmpty) {
       print('AWB code result : ${awbResult.toString()}');
-      showError("Failed", "Error while placing order");
+      showError("Failed", "Failed to place order");
       return;
     }
 
@@ -182,15 +180,12 @@ Future<void> createShiprocketOrder({
 
     /// 3️⃣ Save Tracking Data
     final trackingData = await fetchTrackingInfo(assignedAwbCode, bearerToken);
-
-// Extract values safely:
+    // Extract values safely:
     final trackStatus = trackingData['tracking_data']?['track_status'];
     final shipmentTrackList =
         trackingData['tracking_data']?['shipment_track'] as List<dynamic>?;
-
     String? currentStatus;
     String? edd;
-
     if (shipmentTrackList != null && shipmentTrackList.isNotEmpty) {
       final firstTrack = shipmentTrackList[0];
       currentStatus = firstTrack['current_status'];
@@ -218,9 +213,9 @@ Future<void> createShiprocketOrder({
 
     /// 4️⃣ Place Order
     ///
-    final placeOrderProvider =
-        Provider.of<PlaceOrderProvider>(context, listen: false);
-    await placeOrderProvider.placeOrder(context);
+    // final placeOrderProvider =
+    //     Provider.of<PlaceOrderProvider>(context, listen: false);
+    // await placeOrderProvider.placeOrder(context);
 
     /// 5️⃣ Success Popup - Dismiss "Creating Order..." popup first
     Navigator.of(context, rootNavigator: true).pop();
@@ -236,7 +231,7 @@ Future<void> createShiprocketOrder({
     );
   } catch (e) {
     print('Error : $e');
-    showError("Failed", "Error while placing order: $e");
+    showError("Failed", "Failed to place order");
   }
 }
 
@@ -292,6 +287,7 @@ Future<Map<String, dynamic>> assignAwbToShipment({
 
 //
 //generate pickup
+//
 
 Future<Map<String, dynamic>> generatePickupRequest({
   required String token,
@@ -318,7 +314,6 @@ Future<Map<String, dynamic>> generatePickupRequest({
     final response = await request.send();
     final responseBody = await response.stream.bytesToString();
     final responseData = json.decode(responseBody);
-
     if (response.statusCode == 200) {
       return {
         'success': true,
@@ -392,6 +387,7 @@ Future<Map<String, dynamic>> fetchTrackingInfo(
     String awbNumber, String token) async {
   final url = Uri.parse(
       'https://apiv2.shiprocket.in/v1/external/courier/track/awb/$awbNumber');
+
   final response = await http.get(
     url,
     headers: {

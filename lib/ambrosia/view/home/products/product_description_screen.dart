@@ -133,7 +133,6 @@ class _ProductDescriptionScreenState extends State<ProductDescriptionScreen>
             ),
           ),
           const SizedBox(height: 10),
-          // Dots Indicator for Images
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(imageList.length, (index) {

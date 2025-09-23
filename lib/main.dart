@@ -1,7 +1,11 @@
 import 'package:ambrosia_ayurved/ambrosia/common/contact_info.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_description_loader.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_detail_new_page.dart';
+import 'package:ambrosia_ayurved/firebase_options.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/firebase_notification/notification_service.dart';
 import 'package:ambrosia_ayurved/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
@@ -18,13 +22,22 @@ import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/cart_provide
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+// @pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print('📬 Background Message: ${message.notification?.title}');
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   await NotificationService().initialize();
+
   final userProvider = UserProvider();
   await userProvider.loadUserFromPrefs();
 
@@ -35,7 +48,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: userProvider),
-        //   ChangeNotifierProvider(create: (context) => UserProvider()),
+        //  ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider.value(value: languageProvider),
         // ChangeNotifierProvider(create: (context) => TranslationProvider()),
         //  ChangeNotifierProvider(create: (context) => Address()),
