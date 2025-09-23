@@ -1,15 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
-import 'package:ambrosia_ayurved/ambrosia/common_widgets/rounded_textfield.dart';
-import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/cart_provider.dart';
-// import 'package:ambrosia_ayurved/cosmetics/view/home/cart/cart_provider.dart';
-import 'package:ambrosia_ayurved/ambrosia/view/home/cart/cart_page.dart';
-import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/filter_category/filter_category.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/mediciene/medicine_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/pharama/pharma_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/ship/ship_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/category_list/skincare/skincare_screen.dart';
-
+import 'package:flutter/material.dart';
+import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/rounded_textfield.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/cart_provider.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/cart/cart_page.dart';
 import 'package:provider/provider.dart';
 
 class CategoryList extends StatefulWidget {

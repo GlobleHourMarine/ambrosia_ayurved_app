@@ -1,6 +1,6 @@
 import 'package:ambrosia_ayurved/ambrosia/common/contact_info.dart';
-import 'package:ambrosia_ayurved/firebase_options.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/firebase_notification/notification_service.dart';
+import 'package:ambrosia_ayurved/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -37,12 +37,19 @@ void main() async {
         ChangeNotifierProvider.value(value: userProvider),
         //   ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider.value(value: languageProvider),
+        // ChangeNotifierProvider(create: (context) => TranslationProvider()),
+        //  ChangeNotifierProvider(create: (context) => Address()),
+        // ChangeNotifierProvider(create: (context) => AwbData()),
         ChangeNotifierProvider(create: (context) => ProductNotifier()),
         ChangeNotifierProvider(create: (context) => CartProvider()),
+        //  ChangeNotifierProvider(create: (context) => PaymentProvider()),
+        //  ChangeNotifierProvider(create: (context) => PaymentDetailsProvider()),
+        // ChangeNotifierProvider(create: (context) => OrderProvider()),
         ChangeNotifierProvider(create: (context) => GrandTotalProvider()),
         ChangeNotifierProvider(create: (context) => AddressProvider()),
         ChangeNotifierProvider(create: (context) => PlaceOrderProvider()),
         ChangeNotifierProvider(create: (context) => ItemTotalPriceProvider()),
+        // ChangeNotifierProvider(create: (context) => ReviewProvider()),
         // Add more providers here if needed
       ],
       child: const MyApp(),
@@ -83,7 +90,8 @@ class _MyAppState extends State<MyApp> {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-
+          //
+          //
           title: ContactInfo.appName,
 
           theme: ThemeData(

@@ -28,16 +28,10 @@ class SuccessPopup {
             }
             if (navigateToScreen != null && rootContext.mounted) {
               Navigator.pushReplacement(
-<<<<<<< HEAD
-                rootContext,
-                MaterialPageRoute(builder: (context) => navigateToScreen),
-              );
-=======
                   context,
                   MaterialPageRoute(
                     builder: (context) => navigateToScreen,
                   ));
->>>>>>> f5ca9adc0b17953edd64d3a2a75f73f16afe71ff
             }
             onClose?.call();
           });
@@ -103,29 +97,6 @@ class SuccessPopup {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-<<<<<<< HEAD
-                              onPressed: () {
-                                Navigator.of(dialogContext).pop();
-                                if (navigateToScreen != null &&
-                                    rootContext.mounted) {
-                                  Navigator.pushReplacement(
-                                    rootContext,
-                                    MaterialPageRoute(
-                                        builder: (context) => navigateToScreen),
-                                  );
-                                }
-                                onClose?.call();
-                              },
-                              child: Text(
-                                buttonText,
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            )
-                    else
-                      const CircularProgressIndicator(),
-                  ],
-                ),
-=======
                             ),
                             onPressed: () {
                               Navigator.of(context).pop();
@@ -146,7 +117,6 @@ class SuccessPopup {
                   else
                     const CircularProgressIndicator(),
                 ],
->>>>>>> f5ca9adc0b17953edd64d3a2a75f73f16afe71ff
               ),
             ),
           ),
