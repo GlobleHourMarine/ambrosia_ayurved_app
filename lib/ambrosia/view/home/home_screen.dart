@@ -395,6 +395,7 @@ import 'package:ambrosia_ayurved/ambrosia/view/home/cart/cart_page.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/cart_provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/user_register.dart';
+import 'package:ambrosia_ayurved/widgets/chatbot/chatbot.dart';
 import 'package:ambrosia_ayurved/widgets/translation/translation_provider_local.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -722,6 +723,21 @@ class _HomeScreenState extends State<HomeScreen>
                 ],
               ],
             ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            heroTag: "chat_fab",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChatScreen()),
+              );
+            },
+            //  backgroundColor: Colors.green,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.asset('assets/images/chatbot.png'),
+            ),
+            // const Icon(Icons.chat, color: Colors.white),
           ),
         );
       },

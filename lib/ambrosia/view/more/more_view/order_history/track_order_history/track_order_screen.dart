@@ -308,10 +308,7 @@ class _TrackingScreen1State extends State<TrackingScreen1>
       backgroundColor: Colors.grey[50],
       appBar: CustomAppBar(
         title: "Track Order",
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: BackButton(color: Colors.black),
         // actions: [
         //   IconButton(
         //     icon: Icon(Icons.refresh, color: Colors.black),
@@ -326,11 +323,13 @@ class _TrackingScreen1State extends State<TrackingScreen1>
         //   ),
         // ],
       ),
-      body: _isLoading
-          ? _buildLoadingScreen()
-          : _error != null
-              ? _buildErrorScreen()
-              : _buildTrackingContent(),
+      body: SafeArea(
+        child: _isLoading
+            ? _buildLoadingScreen()
+            : _error != null
+                ? _buildErrorScreen()
+                : _buildTrackingContent(),
+      ),
     );
   }
 
@@ -438,18 +437,21 @@ class _TrackingScreen1State extends State<TrackingScreen1>
         _trackingData!['data'][0]; // Get first order from data array
     return FadeTransition(
       opacity: _fadeAnimation,
-      child: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildOrderHeader(orderData),
-            SizedBox(height: 20),
-            _buildTrackingProgress(orderData['current_status'] ?? 'Processing'),
-            SizedBox(height: 20),
-            _buildOrderDetails(orderData),
-            SizedBox(height: 20),
-            _buildTrackingTimeline(),
-          ],
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            children: [
+              _buildOrderHeader(orderData),
+              SizedBox(height: 20),
+              _buildTrackingProgress(
+                  orderData['current_status'] ?? 'Processing'),
+              SizedBox(height: 20),
+              _buildOrderDetails(orderData),
+              SizedBox(height: 20),
+              _buildTrackingTimeline(),
+            ],
+          ),
         ),
       ),
     );

@@ -50,6 +50,7 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
     super.dispose();
   }
 
+/*
   Future<bool> _checkAndRequestPermissions() async {
     try {
       if (Platform.isAndroid) {
@@ -277,6 +278,48 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
       }
     }
   }
+*/
+
+  Future<void> _pickImages() async {
+    try {
+      // For gallery: Photo Picker (no storage permission needed)
+      final List<XFile>? images = await _picker.pickMultiImage();
+      if (images != null && images.isNotEmpty) {
+        setState(() {
+          for (var image in images) {
+            if (_imageFiles.length < 5) {
+              _imageFiles.add(File(image.path));
+            }
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackbarMessage.showSnackbar(context, 'Error occurred: $e');
+      }
+    }
+  }
+
+  Future<void> _takePicture() async {
+    try {
+      final cameraStatus = await Permission.camera.request();
+      if (!cameraStatus.isGranted) {
+        SnackbarMessage.showSnackbar(context, 'Camera permission denied.');
+        return;
+      }
+
+      final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+      if (photo != null && _imageFiles.length < 5) {
+        setState(() {
+          _imageFiles.add(File(photo.path));
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackbarMessage.showSnackbar(context, 'Error occurred: $e');
+      }
+    }
+  }
 
   void _removeImage(int index) {
     setState(() {
@@ -418,7 +461,10 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
 
     return Scaffold(
       backgroundColor: const Color.fromRGBO(250, 250, 250, 1),
-      appBar: CustomAppBar(title: appLocalizations.writeAReview),
+      appBar: CustomAppBar(
+        title: appLocalizations.writeAReview,
+        leading: BackButton(color: Colors.black),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

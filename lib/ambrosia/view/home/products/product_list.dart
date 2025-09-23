@@ -22,11 +22,13 @@ class _ProductListState extends State<ProductList> {
   @override
   void initState() {
     super.initState();
-    final productNotifier =
-        Provider.of<ProductNotifier>(context, listen: false);
-    if (productNotifier.products.isEmpty && !productNotifier.isLoading) {
-      productNotifier.fetchProducts();
-    }
+    Future.microtask(() {
+      final productNotifier =
+          Provider.of<ProductNotifier>(context, listen: false);
+      if (productNotifier.products.isEmpty && !productNotifier.isLoading) {
+        productNotifier.fetchProducts();
+      }
+    });
   }
 
   Set<String> _loadingProductIds = {};

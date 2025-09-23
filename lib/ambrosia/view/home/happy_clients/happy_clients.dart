@@ -125,12 +125,15 @@ class _AnimatedCountersScreenState extends State<AnimatedCountersScreen>
       // "Deliver Result"
     ];
 
-    final productNotifier = Provider.of<ProductNotifier>(context);
+    // final productNotifier = Provider.of<ProductNotifier>(context);
 
-    if (productNotifier.isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
-    final productId = productNotifier.products.first.id;
+    // if (productNotifier.isLoading) {
+    //   return Center(child: CircularProgressIndicator());
+    // }
+
+    // final productId = productNotifier.products.isNotEmpty
+    //     ? productNotifier.products.first.id
+    //     : null;
 
     return VisibilityDetector(
       key: _visibilityKey,

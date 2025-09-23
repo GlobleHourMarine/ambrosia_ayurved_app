@@ -154,9 +154,12 @@ class _AddressSectionState extends State<AddressSection> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: AppLocalizations.of(context)!.addAddress
-          //'Add Address',
-          ),
+      appBar: CustomAppBar(
+        leading: BackButton(color: Colors.black),
+        title: AppLocalizations.of(context)!.addAddress,
+
+        //'Add Address',
+      ),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
