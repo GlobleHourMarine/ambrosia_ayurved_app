@@ -439,7 +439,10 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
             ),
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
-              onTap: () => _showOrderDetails(order),
+              onTap: () async {
+                await updateTrackingStatus(context);
+                _showOrderDetails(order);
+              },
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -928,6 +931,7 @@ Future<void> updateTrackingStatus(BuildContext context) async {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'user_id': userId}), // Now userId is a string
     );
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       print('update tracking response : ${data}');

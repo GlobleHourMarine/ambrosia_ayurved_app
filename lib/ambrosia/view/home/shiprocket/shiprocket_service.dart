@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_message.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/checkout_message/checkout_message.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/order_now_page.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/place_order/place_order_provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/phonepe/phonepe_service.dart';
@@ -35,22 +36,34 @@ Future<void> createShiprocketOrder({
   required BuildContext context,
 }) async {
   /// 🔹 Helper to show error popup + snackbar
-  void showError(String title, String message) {
-    // FIRST: Dismiss the "Creating Order..." popup
+  void showError(String title, String message) async {
+    final merchantOrderId = GlobalPaymentData.merchantOrderId.toString();
+    try {
+      await updateOrderStatus(merchantOrderId, message);
+    } catch (apiError) {
+      print("Failed to update order status: $apiError");
+    }
     Navigator.of(context, rootNavigator: true).pop();
 
-    // THEN: Show the error popup after a small delay
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(Duration(milliseconds: 300), () {
         SuccessPopup.show(
           context: context,
-          title: title,
-          subtitle: message,
-          iconColor: Colors.red,
-          icon: Icons.cancel,
-          autoCloseDuration: 0,
-          buttonText: "OK",
+          title: "Order Placed",
+          subtitle: "Your order has been placed successfully!",
+          iconColor: Colors.green,
+          icon: Icons.check_circle,
+          navigateToScreen: CheckoutMessageView(),
         );
+        // SuccessPopup.show(
+        //   context: context,
+        //   title: title,
+        //   subtitle: message,
+        //   iconColor: Colors.red,
+        //   icon: Icons.cancel,
+        //   autoCloseDuration: 0,
+        //   buttonText: "OK",
+        // );
       });
     });
   }
@@ -75,7 +88,7 @@ Future<void> createShiprocketOrder({
     var requestBody = {
       "order_id": merchantOrderId,
       "order_date": orderDate,
-      "pickup_location": "warehouse",
+      "pickup_location": "warehouse-1",
       "comment": "Ambrosia",
       "reseller_name": "Ambrosia Ayurved",
       "company_name": "Ambrosia Ayurved",
@@ -148,7 +161,7 @@ Future<void> createShiprocketOrder({
         assignedAwbCode == null ||
         assignedAwbCode.isEmpty) {
       print('AWB code result : ${awbResult.toString()}');
-      showError("Failed", "Failed to place order");
+      showError("Failed", "${awbResult.toString()}");
       return;
     }
 
@@ -171,7 +184,7 @@ Future<void> createShiprocketOrder({
 
     if (pickupStatus != 1) {
       print('Generata Pickup : ${pickupResult}');
-      showError("Failed", "Error while placing order.");
+      showError("Failed", "${pickupResult}");
       return;
     }
 
@@ -222,16 +235,17 @@ Future<void> createShiprocketOrder({
     await Future.delayed(Duration(milliseconds: 300));
     SuccessPopup.show(
       context: context,
-      title: "Order Created",
-      subtitle:
-          "Your order has been placed successfully! AWB: $assignedAwbCode",
+      title: "Order Placed",
+      subtitle: "Your order has been placed successfully ! ",
+      //  AWB: $assignedAwbCode",
+
       iconColor: Colors.green,
       icon: Icons.check_circle,
       navigateToScreen: CheckoutMessageView(),
     );
   } catch (e) {
     print('Error : $e');
-    showError("Failed", "Failed to place order");
+    showError("Failed", "${e}");
   }
 }
 
@@ -401,6 +415,8 @@ Future<Map<String, dynamic>> fetchTrackingInfo(
     print('Tracking Data: $data'); // <-- Print the response data here
     return data;
   } else {
-    throw Exception('Failed to load tracking information');
+    throw Exception(
+        //'${response.body}'
+        'Failed to load tracking information');
   }
 }

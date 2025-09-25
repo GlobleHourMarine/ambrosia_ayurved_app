@@ -93,11 +93,14 @@ class CartProvider with ChangeNotifier {
 
         // Update on the server
         bool success = await _cartService.updateQuantity(
-            _cartItems[existingIndex].cartId, updatedQuantity, userId);
+            _cartItems[existingIndex].productId, updatedQuantity, userId);
 
         if (success) {
           _cartItems[existingIndex].quantity =
               updatedQuantity.toString(); // Update locally
+
+          SnackbarMessage.showSnackbar(context,
+              '$productName is already in cart. We have updated Quantity.');
         }
       } else {
         // Product does not exist, add a new item
@@ -107,42 +110,17 @@ class CartProvider with ChangeNotifier {
         if (newCartItem != null) {
           _cartItems.add(newCartItem);
         }
+        SnackbarMessage.showSnackbar(context, '$productName added to the cart');
       }
 
       notifyListeners();
 
       // Show success message
-      SnackbarMessage.showSnackbar(context, '$productName added to the cart');
     } catch (e) {
       print("Error adding to cart: $e"); // Debugging message
 
       SnackbarMessage.showSnackbar(
           context, 'Failed to add $productName to cart');
-      // RegisterService().showRegistrationDialog(context);
-      //   return;
-      // Handle error and show failure message
-      // showDialog(
-      //   context: context,
-      //   builder: (BuildContext context) {
-      //     return AlertDialog(
-      //       title: Text('Login Required'),
-      //       content: Text('Please log in to add products to the cart.'),
-      //       actions: [
-      //         ElevatedButton(
-      //           onPressed: () {
-      //             Navigator.pop(context);
-      //             Navigator.pushReplacement(
-      //                 context,
-      //                 MaterialPageRoute(
-      //                   builder: (context) => SignInScreen(),
-      //                 ));
-      //           },
-      //           child: Text('OK'),
-      //         ),
-      //       ],
-      //     );
-      //   },
-      // );
     }
   }
 

@@ -8,7 +8,7 @@ class ProductService {
   Future<List<Product>> fetchProducts() async {
     try {
       final response = await http.get(Uri.parse(apiUrl));
-      //  print('response');
+      print('Product api response : ${response}');
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonData = json.decode(response.body);
         if (jsonData["status"] == true && jsonData["data"] is List) {

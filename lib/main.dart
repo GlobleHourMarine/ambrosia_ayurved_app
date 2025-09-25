@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:ambrosia_ayurved/ambrosia/common/contact_info.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_description_loader.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_detail_new_page.dart';
@@ -78,6 +79,45 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  // StreamSubscription? _linkSubscription;
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _handleIncomingLinks();
+  // }
+
+  // void _handleIncomingLinks() async {
+  //   // Handle initial link when app opens via deep link
+  //   try {
+  //     final initialLink = await getInitialLink();
+  //     if (initialLink != null) {
+  //       _handleDeepLink(initialLink);
+  //     }
+  //   } catch (e) {
+  //     print('Initial link error: $e');
+  //   }
+
+  //   // Handle links when app is already running
+  //   _linkSubscription = linkStream.listen((String link) {
+  //     _handleDeepLink(link);
+  //   }, onError: (err) {
+  //     print('Link stream error: $err');
+  //   });
+  // }
+
+//   void _handleDeepLink(String link) {
+//     print('Received payment callback: $link');
+//     // Handle payment result here
+//     // Navigate to appropriate screen based on payment status
+//   }
+
+//   @override
+//   void dispose() {
+//     _linkSubscription?.cancel();
+//     super.dispose();
+//   }
+// }
   @override
   Widget build(BuildContext context) {
     return Consumer<LanguageProvider>(

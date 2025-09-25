@@ -19,10 +19,11 @@ class PhonePePaymentSdk {
       String request, String appSchema) async {
     var dict = <String, dynamic>{
       'request': request,
-      'appSchema': 'com.app.ambrosiaayurved'
+      'appSchema': 'com.app.ambrosiaayurved://payment',
     };
+
     Map<dynamic, dynamic>? result =
-    await _channel.invokeMethod('startTransaction', dict);
+        await _channel.invokeMethod('startTransaction', dict);
     print('Transaction : $result');
     print('Transaction : $dict ');
     return result;

@@ -533,103 +533,111 @@ class _AddressSectionState extends State<AddressSection> {
         ),
       ),
       bottomNavigationBar: // Save Button
-          Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: SizedBox(
-          child: OutlinedButton(
-            onPressed: _isLoading
-                ? null
-                : () async {
-                    if (_formKey.currentState!.validate()) {
-                      setState(() {
-                        _isLoading = true;
-                      });
+          SafeArea(
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 8,
+            // ✅ pushes button above keyboard
+          ),
+          child: SizedBox(
+            child: OutlinedButton(
+              onPressed: _isLoading
+                  ? null
+                  : () async {
+                      if (_formKey.currentState!.validate()) {
+                        setState(() {
+                          _isLoading = true;
+                        });
 
-                      final userProvider =
-                          Provider.of<UserProvider>(context, listen: false);
-                      final userId = userProvider.id;
+                        final userProvider =
+                            Provider.of<UserProvider>(context, listen: false);
+                        final userId = userProvider.id;
 
-                      final addressProvider =
-                          Provider.of<AddressProvider>(context, listen: false);
-
-                      bool success =
-                          await addressProvider.saveCheckoutInformation(
-                        address_type: _addressType.toString(),
-                        district: _districtController.text,
-                        userid: userId,
-                        fname: _fnameController.text,
-                        lname: _lnameController.text,
-                        email: _emailController.text,
-                        address: _addressController.text,
-                        city: _cityController.text,
-                        state: _stateController.text,
-                        mobile: _mobileController.text,
-                        country: _countryController.text,
-                        pincode: _pincodeController.text,
-                        context: context,
-                      );
-
-                      setState(() {
-                        _isLoading = false;
-                      });
-
-                      if (success) {
-                        // FIXED: Navigate based on where this screen was opened from
-                        if (widget.isFromManageAddress) {
-                          // If opened from manage address screen, go back
-                          Navigator.pop(context);
-                        } else {
-                          // If opened from checkout/order flow, go to order page
-                          Navigator.pushReplacement(
+                        final addressProvider = Provider.of<AddressProvider>(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => OrderNowPage()),
-                          );
+                            listen: false);
+
+                        bool success =
+                            await addressProvider.saveCheckoutInformation(
+                          address_type: _addressType.toString(),
+                          district: _districtController.text,
+                          userid: userId,
+                          fname: _fnameController.text,
+                          lname: _lnameController.text,
+                          email: _emailController.text,
+                          address: _addressController.text,
+                          city: _cityController.text,
+                          state: _stateController.text,
+                          mobile: _mobileController.text,
+                          country: _countryController.text,
+                          pincode: _pincodeController.text,
+                          context: context,
+                        );
+
+                        setState(() {
+                          _isLoading = false;
+                        });
+
+                        if (success) {
+                          // FIXED: Navigate based on where this screen was opened from
+                          if (widget.isFromManageAddress) {
+                            // If opened from manage address screen, go back
+                            Navigator.pop(context);
+                          } else {
+                            // If opened from checkout/order flow, go to order page
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => OrderNowPage()),
+                            );
+                          }
                         }
                       }
-                    }
-                  },
+                    },
 
-            // if (success) {
-            //  _openRazorpayCheckout(grandTotalProvider.grandTotal);
-            // _startPhonePePayment(grandTotalProvider.grandTotal);
-            // Navigator.pushReplacement(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => OrderNowPage(),
-            //   ),
-            // );
-            //     }
-            // setState(() {
-            //   _isLoading = false;
-            // });
+              // if (success) {
+              //  _openRazorpayCheckout(grandTotalProvider.grandTotal);
+              // _startPhonePePayment(grandTotalProvider.grandTotal);
+              // Navigator.pushReplacement(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => OrderNowPage(),
+              //   ),
+              // );
+              //     }
+              // setState(() {
+              //   _isLoading = false;
+              // });
 
-            style: OutlinedButton.styleFrom(
-              // backgroundColor: Colors.blue[600],
-              foregroundColor: Acolors.primary,
-              side: BorderSide(color: Acolors.primary, width: 1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
+              style: OutlinedButton.styleFrom(
+                // backgroundColor: Colors.blue[600],
+                foregroundColor: Acolors.primary,
+                side: BorderSide(color: Acolors.primary, width: 1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                padding: EdgeInsets.zero,
               ),
-              padding: EdgeInsets.zero,
-            ),
-            child: _isLoading
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Acolors.primary),
+              child: _isLoading
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Acolors.primary),
+                        ),
                       ),
+                    )
+                  : Text(
+                      AppLocalizations.of(context)!.saveAddress,
+                      //"Save Address"
                     ),
-                  )
-                : Text(
-                    AppLocalizations.of(context)!.saveAddress,
-                    //"Save Address"
-                  ),
+            ),
           ),
         ),
       ),
