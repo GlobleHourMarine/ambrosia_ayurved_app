@@ -131,8 +131,8 @@ class _CartPageState extends State<CartPage> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Container(
-                                            width: 120, // Adjust as needed
-                                            height: 140, // Adjust as needed
+                                            width: 120,
+                                            height: 140,
                                             child: ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(20),

@@ -6,6 +6,7 @@ import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/place_order/p
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/phonepe/phonepe_service.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/shiprocket/shiprocket_auth.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/order_history/order_history/order_history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -55,6 +56,7 @@ Future<void> createShiprocketOrder({
           icon: Icons.check_circle,
           navigateToScreen: CheckoutMessageView(),
         );
+
         // SuccessPopup.show(
         //   context: context,
         //   title: title,
@@ -139,7 +141,7 @@ Future<void> createShiprocketOrder({
     final responseData = json.decode(responseString);
 
     if (response.statusCode != 200) {
-      showError("Failed", "Failed to place order");
+      showError("Failed", "${responseData}");
       return;
     }
 
@@ -168,32 +170,32 @@ Future<void> createShiprocketOrder({
     final int shipmentIdFromAwb = awbData['shipment_id'];
     final int shiprocketOrderId = awbData['order_id'];
     final String courierName = awbData['courier_name'];
+
 // ✅ AWB assigned successfully
     print("AWB Assigned: $assignedAwbCode");
     print("Shipment ID: $shipmentIdFromAwb");
     print("Order ID: $shiprocketOrderId");
     print("Courier Name: $courierName");
 
-    /// 2️⃣ Generate Pickup
-    final pickupResult = await generatePickupRequest(
-      token: bearerToken,
-      shipmentIds: [shipmentId],
-    );
-    final pickupStatus = pickupResult['data']?['pickup_status'];
-    final pickupMessage = pickupResult['data']?['response']?['data'] ?? '';
+    // / 2️⃣ Generate Pickup
+    // final pickupResult = await generatePickupRequest(
+    //   token: bearerToken,
+    //   shipmentIds: [shipmentId],
+    // );
 
-    if (pickupStatus != 1) {
-      print('Generata Pickup : ${pickupResult}');
-      showError("Failed", "${pickupResult}");
-      return;
-    }
+    // final pickupStatus = pickupResult['data']?['pickup_status'];
+    // final pickupMessage = pickupResult['data']?['response']?['data'] ?? '';
 
-// ✅ Pickup generated successfully
-    print("Pickup Generated: $pickupMessage");
+    // if (pickupStatus != 1) {
+    //   print('Generata Pickup : ${pickupResult}');
+    //   showError("Failed", "${pickupResult}");
+    //   return;
+    // }
 
-    /// 3️⃣ Save Tracking Data
+    // print("Pickup Generated: $pickupMessage");
+
     final trackingData = await fetchTrackingInfo(assignedAwbCode, bearerToken);
-    // Extract values safely:
+
     final trackStatus = trackingData['tracking_data']?['track_status'];
     final shipmentTrackList =
         trackingData['tracking_data']?['shipment_track'] as List<dynamic>?;
@@ -208,6 +210,26 @@ Future<void> createShiprocketOrder({
     print('Track Status: $trackStatus');
     print('Current Status: $currentStatus');
     print('Expected Delivery Date (EDD): $edd');
+
+    if (currentStatus == "AWB Assigned") {
+      // 2️⃣ Generate Pickup
+      final pickupResult = await generatePickupRequest(
+        token: bearerToken,
+        shipmentIds: [shipmentId],
+      );
+
+      final pickupStatus = pickupResult['data']?['pickup_status'];
+      final pickupMessage = pickupResult['data']?['response']?['data'] ?? '';
+
+      if (pickupStatus != 1) {
+        print('Generate Pickup Failed: ${pickupResult}');
+        showError("Failed", "${pickupResult}");
+        return;
+      }
+      print("Pickup Generated: $pickupMessage");
+    } else {
+      print("Pickup not generated - Current status is: $currentStatus");
+    }
 
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final String userId = userProvider.id;
@@ -229,8 +251,10 @@ Future<void> createShiprocketOrder({
     // final placeOrderProvider =
     //     Provider.of<PlaceOrderProvider>(context, listen: false);
     // await placeOrderProvider.placeOrder(context);
-
     /// 5️⃣ Success Popup - Dismiss "Creating Order..." popup first
+    ///
+    ///
+    await updateTrackingStatus(context);
     Navigator.of(context, rootNavigator: true).pop();
     await Future.delayed(Duration(milliseconds: 300));
     SuccessPopup.show(
@@ -250,6 +274,7 @@ Future<void> createShiprocketOrder({
 }
 
 // assgin awb
+
 Future<Map<String, dynamic>> assignAwbToShipment({
   required String token,
   required List<int> shipmentIds,
@@ -274,6 +299,7 @@ Future<Map<String, dynamic>> assignAwbToShipment({
     final response = await request.send();
     final responseBody = await response.stream.bytesToString();
     final responseData = json.decode(responseBody);
+    print('assigned awb data : ${responseData}');
     final awbCode = responseData['response']?['data']?['awb_code']?.toString();
 
     if (response.statusCode == 200 &&
@@ -328,6 +354,7 @@ Future<Map<String, dynamic>> generatePickupRequest({
     final response = await request.send();
     final responseBody = await response.stream.bytesToString();
     final responseData = json.decode(responseBody);
+    print('Generate pickup Request : $responseData');
     if (response.statusCode == 200) {
       return {
         'success': true,

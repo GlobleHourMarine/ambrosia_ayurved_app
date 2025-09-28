@@ -1,3 +1,4 @@
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_cached_image.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/highlighted_text.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_description_loader.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_detail_new_page.dart';
@@ -93,24 +94,21 @@ class _ProductListState extends State<ProductList> {
                 builder: (context, constraints) {
                   final screenWidth = MediaQuery.of(context).size.width;
                   final screenHeight = MediaQuery.of(context).size.height;
-                  // Determine cross axis count based on screen width
+
                   int crossAxisCount = 2;
                   if (screenWidth > 600) {
                     crossAxisCount = 3;
                   } else if (screenWidth > 900) {
                     crossAxisCount = 4;
                   }
-
-                  // Calculate card width and height dynamically
                   final cardWidth =
                       (screenWidth - 32) / crossAxisCount; // 32 for padding
                   final cardHeight =
                       screenHeight * 0.40; // 55% of screen height
-
                   return GridView.builder(
                     shrinkWrap: true,
                     itemCount: filteredProducts.length,
-                    physics: const NeverScrollableScrollPhysics(),
+                    physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.all(8),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
@@ -123,10 +121,14 @@ class _ProductListState extends State<ProductList> {
 
                       return GestureDetector(
                         onTap: () {
+                          precacheImage(
+                            NetworkImage(
+                                'https://ambrosiaayurved.in/${product.imageUrl.first}'),
+                            context,
+                          );
                           if (widget.onProductTapped != null) {
                             widget.onProductTapped!();
                           }
-
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -161,26 +163,38 @@ class _ProductListState extends State<ProductList> {
                                     margin: const EdgeInsets.only(bottom: 10),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(15),
-                                      child: Image.network(
-                                        product.imageUrl.isNotEmpty
+                                      child: CustomCachedImage(
+                                        imageUrl: product.imageUrl.isNotEmpty
                                             ? 'https://ambrosiaayurved.in/${product.imageUrl[0]}'
                                             : 'https://via.placeholder.com/150',
                                         fit: BoxFit.contain,
-                                        loadingBuilder:
-                                            (context, child, progress) {
-                                          if (progress == null) return child;
-                                          return const ShimmerEffect(
-                                              width: double.infinity,
-                                              height: double.infinity);
-                                        },
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return const Icon(
-                                              Icons.image_not_supported,
-                                              color: Colors.grey,
-                                              size: 150);
-                                        },
+                                        width: double.infinity,
+                                        //  height: 300,
+
+                                        shimmerWidth: double.infinity,
+                                        shimmerHeight: double.infinity,
+                                        borderRadius: BorderRadius.circular(15),
                                       ),
+//                                       Image.network(
+//                                         product.imageUrl.isNotEmpty
+//                                             ? 'https://ambrosiaayurved.in/${product.imageUrl[0]}'
+//                                             : 'https://via.placeholder.com/150',
+//                                         fit: BoxFit.contain,
+//                                         loadingBuilder:
+//                                             (context, child, progress) {
+//                                           if (progress == null) return child;
+//                                           return const ShimmerEffect(
+//                                               width: double.infinity,
+//                                               height: double.infinity);
+//                                         },
+//                                         errorBuilder:
+//                                             (context, error, stackTrace) {
+//                                           return const Icon(
+//                                               Icons.image_not_supported,
+//                                               color: Colors.grey,
+//                                               size: 150);
+//                                         },
+//                                       ),
                                     ),
                                   ),
                                 ),
@@ -251,7 +265,78 @@ class _ProductListState extends State<ProductList> {
                                   ),
                                 ),
 
+/*
                                 // Add to cart button - always at bottom
+                                Expanded(
+                                  flex: 6,
+                                  child: Container(
+                                    width: double.infinity,
+                                    margin: const EdgeInsets.only(top: 4),
+                                    child: Consumer<CartProvider>(
+                                      builder: (context, cartProvider, child) {
+                                        bool isThisProductLoading =
+                                            cartProvider.isProductBeingAdded(
+                                                product.id.toString());
+
+                                        return OutlinedButton(
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: Acolors.primary,
+                                            side: BorderSide(
+                                                color: Acolors.primary,
+                                                width: 1),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical:
+                                                  screenWidth > 600 ? 8 : 4,
+                                            ),
+                                          ),
+                                          // Disable button when this specific product is being added
+                                          onPressed: isThisProductLoading
+                                              ? null
+                                              : () async {
+                                                  await cartProvider.addToCart(
+                                                    product.id.toString(),
+                                                    product.name,
+                                                    context,
+                                                  );
+                                                },
+                                          child: isThisProductLoading
+                                              ? SizedBox(
+                                                  height: 16,
+                                                  width: 16,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    color: Acolors.primary,
+                                                    strokeWidth: 2,
+                                                  ),
+                                                )
+                                              : FittedBox(
+                                                  fit: BoxFit.scaleDown,
+                                                  child: Text(
+                                                    AppLocalizations.of(
+                                                            context)!
+                                                        .addtocart,
+                                                    style: TextStyle(
+                                                      color: Acolors.primary,
+                                                      fontSize:
+                                                          screenWidth > 600
+                                                              ? 12
+                                                              : 10,
+                                                    ),
+                                                  ),
+                                                ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                )
+
+                                */
+
                                 Expanded(
                                   flex: 6,
                                   child: Container(

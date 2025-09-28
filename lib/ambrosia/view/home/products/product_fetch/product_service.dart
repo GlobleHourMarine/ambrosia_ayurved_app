@@ -15,15 +15,19 @@ class ProductService {
           List<Product> products = (jsonData["data"] as List)
               .map((jsonItem) => Product.fromJson(jsonItem))
               .toList();
+          print('✅ Product api response : ${jsonData}');
           print("✅ Product list fetched: ${products.length} items");
           return products;
         } else {
+          print('Product api response : ${jsonData}');
           throw Exception(jsonData["message"]);
         }
       } else {
+        print('Product api response : ${response}');
         throw Exception("Failed to load products");
       }
     } catch (e) {
+      print('Product api response : ${e}');
       throw Exception("Error: $e");
     }
   }

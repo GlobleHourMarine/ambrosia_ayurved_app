@@ -250,6 +250,7 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
                           ),
                         ),
                         SizedBox(height: 20),
+
                         Container(
                           key: _benefitsKey,
                           child: Benefits(

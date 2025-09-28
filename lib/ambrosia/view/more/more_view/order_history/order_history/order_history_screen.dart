@@ -48,8 +48,26 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    updateTrackingStatus(context);
-    fetchOrders();
+    _initData();
+  }
+
+  Future<void> _initData() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      await updateTrackingStatus(context);
+      await fetchOrders();
+    } catch (e) {
+      setState(() {
+        error = e.toString();
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -93,9 +111,8 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
         });
 
         print(_shiprocketCancelMessage);
-        SnackbarMessage.showSnackbar(context, 'Order cancelled successfully');
+        //  SnackbarMessage.showSnackbar(context, 'Order cancelled successfully');
 
-        //  PhonePe refund API here
         final refundResponse =
             await PhonePePaymentService().initiateRefund(order.orderId);
         print('order id : ${order.orderId}');
@@ -106,10 +123,8 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
         }
 
         await updateTrackingStatus(context);
-        // Refresh orders to get updated status
         await fetchOrders();
 
-        // Close the bottom sheet
         Navigator.pop(context);
       } else {
         throw Exception('Failed to cancel order: ${response.statusCode}');
@@ -816,9 +831,10 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                                     color: Acolors.primary,
                                   ),
                             label: Text(
-                              _isCancelLoading
-                                  ? 'Cancelling...'
-                                  : 'Cancel Order',
+                              // _isCancelLoading
+                              //     ? 'Cancelling...'
+                              //     :
+                              'Cancel Order',
                               style: const TextStyle(color: Acolors.primary),
                             ),
                             style: OutlinedButton.styleFrom(
@@ -836,7 +852,6 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                                     setModalState(() {
                                       _isReviewLoading = true;
                                     });
-
                                     try {
                                       // Navigate to Submit Review Screen
                                       await Navigator.push(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_fetch/product_service.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_fetch/products_model.dart';
@@ -15,21 +17,44 @@ class ProductNotifier extends ChangeNotifier {
   final ProductService _productService = ProductService();
 
   Future<void> fetchProducts() async {
-    if (_disposed) return; // Prevent fetching after disposal
+    if (_disposed) return;
 
     _isLoading = true;
     _errorMessage = null;
     notifyListenersSafely();
 
     try {
-      _products = await _productService.fetchProducts();
+      final fetchedProducts = await _productService
+          .fetchProducts()
+          .timeout(const Duration(seconds: 15)); // prevent infinite wait
+
+      _products = fetchedProducts;
+    } on TimeoutException {
+      _errorMessage = "Request timed out. Please try again.";
     } catch (e) {
-      _errorMessage = e.toString();
+      print('product notifier response : $e');
+      _errorMessage = "Failed to load products: $e";
     } finally {
       _isLoading = false;
       notifyListenersSafely();
     }
   }
+  // Future<void> fetchProducts() async {
+  //   if (_disposed) return; // Prevent fetching after disposal
+
+  //   _isLoading = true;
+  //   _errorMessage = null;
+  //   notifyListenersSafely();
+
+  //   try {
+  //     _products = await _productService.fetchProducts();
+  //   } catch (e) {
+  //     _errorMessage = e.toString();
+  //   } finally {
+  //     _isLoading = false;
+  //     notifyListenersSafely();
+  //   }
+  // }
 
   // Product? getProductById(String productId) {
   //   try {

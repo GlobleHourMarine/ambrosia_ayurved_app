@@ -76,7 +76,6 @@ class CartService {
     }
   }
 
-  // API to remove product from cart
   Future<bool> removeProductFromCart(String cartId) async {
     const String apiUrl =
         'https://ambrosiaayurved.in/api/delete_product_from_cart';
@@ -99,7 +98,7 @@ class CartService {
       }
     } catch (error) {
       print('Error removing product: $error');
-      return false; // Return false in case of an error
+      return false;
     }
     throw Exception('failed to remove');
   }

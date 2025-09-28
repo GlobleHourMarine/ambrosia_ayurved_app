@@ -190,7 +190,10 @@ class TermsAndConditionsScreen1 extends StatelessWidget {
       children: [
         RichText(
           text: TextSpan(
-            style: const TextStyle(color: Colors.black),
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 15,
+            ),
             children: [
               TextSpan(
                 text: local.termsAndConditions_welcome,
@@ -218,7 +221,7 @@ class TermsAndConditionsScreen1 extends StatelessWidget {
         const SizedBox(height: 8),
         RichText(
           text: TextSpan(
-            style: const TextStyle(color: Colors.black),
+            style: const TextStyle(color: Colors.black, fontSize: 15),
             children: [
               TextSpan(text: local.termsAndConditions_eligibilityText),
             ],

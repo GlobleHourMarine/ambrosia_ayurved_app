@@ -5,6 +5,7 @@ import 'package:ambrosia_ayurved/ambrosia/view/login&register/models/user_model.
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
 import 'package:ambrosia_ayurved/widgets/new_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -89,7 +90,13 @@ class _RegistrationModalState extends State<RegistrationModal> {
   final String _apiUrl = 'https://ambrosiaayurved.in/api/userLoginRegister';
 
   Future<void> _checkUser() async {
-    if (_mobileController.text.isEmpty || _mobileController.text.length != 10) {
+    if (_mobileController.text.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter mobile number.';
+      });
+      return;
+    }
+    if (_mobileController.text.length != 10) {
       setState(() {
         _errorMessage = 'Please enter a valid 10-digit mobile number.';
       });
@@ -127,7 +134,7 @@ class _RegistrationModalState extends State<RegistrationModal> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'An error occurred. Please check your connection.';
+        _errorMessage = 'Something went wrong';
       });
     } finally {
       setState(() {
@@ -220,106 +227,112 @@ class _RegistrationModalState extends State<RegistrationModal> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.only(
-          top: 27,
-          left: 24,
-          right: 24,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 32,
-        ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Acolors.primary.withOpacity(0.1),
-                boxShadow: [
-                  BoxShadow(
-                    color: Acolors.primary.withOpacity(0.3),
-                    blurRadius: 100,
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.phone_outlined,
-                  color: Acolors
-                      .primary, // Keep the icon color as your primary green
-                  size: 30.0,
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.only(
+            top: 27,
+            left: 24,
+            right: 24,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+          ),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
               ),
-            ),
-            SizedBox(height: 16),
-            Text(
-              _currentState == RegistrationState.enterMobile
-                  ? 'Enter your mobile number'
-                  : _isNewUser
-                      ? 'Register with OTP'
-                      : 'Login with OTP',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'We\'ll send a one-time password to this number.',
-              style: TextStyle(color: Colors.grey[600]),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 20),
-            _CustomInputField(
-              controller: _mobileController,
-              hintText: 'Mobile Number',
-              keyboardType: TextInputType.phone,
-              icon: Icons.phone_android,
-              readOnly: _currentState == RegistrationState.enterOtp,
-            ),
-            if (_currentState == RegistrationState.enterOtp) ...[
-              const SizedBox(height: 16),
-              _buildOtpField(),
-              if (_isNewUser) ...[
-                const SizedBox(height: 16),
-                _buildNameField(),
-              ],
-            ],
-            const SizedBox(height: 20),
-            if (_errorMessage.isNotEmpty)
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                margin: const EdgeInsets.only(bottom: 16),
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.red[50],
-                  borderRadius: BorderRadius.circular(8),
+                  shape: BoxShape.circle,
+                  color: Acolors.primary.withOpacity(0.1),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Acolors.primary.withOpacity(0.3),
+                      blurRadius: 100,
+                    ),
+                  ],
                 ),
                 child: Center(
-                  child: Text(
-                    _errorMessage,
-                    style: const TextStyle(
-                        color: Colors.red, fontWeight: FontWeight.bold),
+                  child: Icon(
+                    Icons.phone_outlined,
+                    color: Acolors
+                        .primary, // Keep the icon color as your primary green
+                    size: 30.0,
                   ),
                 ),
               ),
-            const SizedBox(height: 5),
-            _buildActionButton(),
-          ],
+              SizedBox(height: 16),
+              Text(
+                _currentState == RegistrationState.enterMobile
+                    ? 'Enter your mobile number'
+                    : _isNewUser
+                        ? 'Register with OTP'
+                        : 'Login with OTP',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'We\'ll send a one-time password to this number.',
+                style: TextStyle(color: Colors.grey[600]),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 20),
+              _CustomInputField(
+                controller: _mobileController,
+                hintText: 'Mobile Number',
+                keyboardType: TextInputType.phone,
+                icon: Icons.phone_android,
+                readOnly: _currentState == RegistrationState.enterOtp,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(10),
+                ],
+              ),
+              if (_currentState == RegistrationState.enterOtp) ...[
+                const SizedBox(height: 16),
+                _buildOtpField(),
+                if (_isNewUser) ...[
+                  const SizedBox(height: 16),
+                  _buildNameField(),
+                ],
+              ],
+              const SizedBox(height: 20),
+              if (_errorMessage.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.red[50],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      _errorMessage,
+                      style: const TextStyle(
+                          color: Colors.red, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 5),
+              _buildActionButton(),
+            ],
+          ),
         ),
       ),
     );
@@ -340,6 +353,10 @@ class _RegistrationModalState extends State<RegistrationModal> {
       hintText: 'Enter OTP',
       keyboardType: TextInputType.number,
       icon: Icons.dialpad,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(6),
+      ],
     );
   }
 
@@ -409,14 +426,16 @@ class _CustomInputField extends StatelessWidget {
   final String hintText;
   final TextInputType keyboardType;
   final IconData icon;
-  final bool readOnly; // Add this parameter
+  final bool readOnly;
+  final List<TextInputFormatter>? inputFormatters;
 
   const _CustomInputField({
     required this.controller,
     required this.hintText,
     required this.keyboardType,
     required this.icon,
-    this.readOnly = false, // Set a default value of false
+    this.readOnly = false,
+    this.inputFormatters,
   });
 
   @override
@@ -424,7 +443,8 @@ class _CustomInputField extends StatelessWidget {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
-      readOnly: readOnly, // Use the new parameter
+      readOnly: readOnly,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         hintText: hintText,
         prefixIcon: Icon(icon, color: Colors.grey[400]),

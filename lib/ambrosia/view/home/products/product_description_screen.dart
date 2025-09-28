@@ -1,3 +1,5 @@
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_cached_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/shimmer_effect/shimmer_effect.dart';
@@ -116,19 +118,38 @@ class _ProductDescriptionScreenState extends State<ProductDescriptionScreen>
               controller: _pageController,
               itemCount: imageList.length,
               itemBuilder: (context, index) {
-                return Image.network(
-                  'https://ambrosiaayurved.in/${imageList[index]}',
-                  //   imageList[index],
-                  //   fit: BoxFit.contain,
-                  loadingBuilder: (context, child, progress) {
-                    if (progress == null) return child;
-                    return const ShimmerEffect(width: 250, height: 250);
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(Icons.image_not_supported,
-                        color: Colors.grey, size: 100);
-                  },
+                return CustomCachedImage(
+                  imageUrl: 'https://ambrosiaayurved.in/${imageList[index]}',
+                  fit: BoxFit.contain,
+                  shimmerWidth: 250,
+                  shimmerHeight: 250,
                 );
+
+                // CachedNetworkImage(
+                //   imageUrl: 'https://ambrosiaayurved.in/${imageList[index]}',
+                //   placeholder: (context, url) =>
+                //       const ShimmerEffect(width: 250, height: 250),
+                //   errorWidget: (context, url, error) => const Icon(
+                //     Icons.image_not_supported,
+                //     color: Colors.grey,
+                //     size: 100,
+                //   ),
+                //   fit: BoxFit.contain,
+                // );
+
+                // Image.network(
+                //   'https://ambrosiaayurved.in/${imageList[index]}',
+                //   //   imageList[index],
+                //   //   fit: BoxFit.contain,
+                //   loadingBuilder: (context, child, progress) {
+                //     if (progress == null) return child;
+                //     return const ShimmerEffect(width: 250, height: 250);
+                //   },
+                //   errorBuilder: (context, error, stackTrace) {
+                //     return const Icon(Icons.image_not_supported,
+                //         color: Colors.grey, size: 100);
+                //   },
+                // );
               },
             ),
           ),

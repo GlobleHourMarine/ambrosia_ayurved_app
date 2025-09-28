@@ -1,3 +1,4 @@
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_cached_image.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_description_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/review_section/review_model.dart';
@@ -118,56 +119,72 @@ class _CustomerReviewSectionState extends State<CustomerReviewSection> {
             _showImageSlider(context, imagePaths, initialIndex);
           }
         },
-        child: Image.network(
-          'https://ambrosiaayurved.in/$path',
-          height: 150,
+        child: CustomCachedImage(
+          imageUrl: 'https://ambrosiaayurved.in/$path',
+          fit: BoxFit.contain,
           width: 150,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            print(
-                'Image load error: $error, URL: https://ambrosiaayurved.in/$path');
-            return Container(
-              height: 150,
-              width: 150,
-              color: Colors.grey[300],
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.broken_image, color: Colors.grey[600]),
-                  Text('Image Error', style: TextStyle(fontSize: 10)),
-                ],
-              ),
-            );
-          },
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Container(
-              height: 150,
-              width: 150,
-              child: Center(
-                child: CircularProgressIndicator(
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
-                      : null,
-                ),
-              ),
-            );
-          },
+          height: 150,
+          shimmerWidth: 150,
+          shimmerHeight: 150,
+          borderRadius: BorderRadius.circular(8),
         ),
+
+        // Image.network(
+        //   'https://ambrosiaayurved.in/$path',
+        //   height: 150,
+        //   width: 150,
+        //   fit: BoxFit.contain,
+        //   errorBuilder: (context, error, stackTrace) {
+        // print(
+        //     'Image load error: $error, URL: https://ambrosiaayurved.in/$path');
+        //     return Container(
+        //       height: 150,
+        //       width: 150,
+        //       color: Colors.grey[300],
+        //       child: Column(
+        //         mainAxisAlignment: MainAxisAlignment.center,
+        //         children: [
+        //           Icon(Icons.broken_image, color: Colors.grey[600]),
+        //           Text('Image Error', style: TextStyle(fontSize: 10)),
+        //         ],
+        //       ),
+        //     );
+        //   },
+
+        //   loadingBuilder: (context, child, loadingProgress) {
+        //     if (loadingProgress == null) return child;
+        //     return Container(
+        //       height: 150,
+        //       width: 150,
+        //       child: Center(
+        //         child: CircularProgressIndicator(
+        //           value: loadingProgress.expectedTotalBytes != null
+        //               ? loadingProgress.cumulativeBytesLoaded /
+        //                   loadingProgress.expectedTotalBytes!
+        //               : null,
+        //         ),
+        //       ),
+        //     );
+        //   },
+        // ),
       );
     } else {
       return Container(
         height: 150,
         width: 150,
         color: Colors.grey[300],
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.insert_drive_file, color: Colors.grey[600]),
-            Text('Unknown File', style: TextStyle(fontSize: 10)),
-          ],
+        child: Icon(
+          Icons.image_not_supported,
+          color: Colors.grey,
+          size: 100,
         ),
+        // Column(
+        //   mainAxisAlignment: MainAxisAlignment.center,
+        //   children: [
+        //     Icon(Icons.insert_drive_file, color: Colors.grey[600]),
+        //     Text('Unknown File', style: TextStyle(fontSize: 10)),
+        //   ],
+        // ),
       );
     }
   }

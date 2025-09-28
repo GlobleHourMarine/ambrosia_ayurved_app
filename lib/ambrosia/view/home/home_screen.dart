@@ -567,7 +567,7 @@ class _HomeScreenState extends State<HomeScreen>
                                                     .showModalBottomSheetregister(
                                                         context),
                                                 child: Text(
-                                                  'Guest User',
+                                                  'Login',
                                                   style: TextStyle(
                                                       color: Colors.black,
                                                       fontWeight:
