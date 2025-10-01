@@ -23,13 +23,13 @@ class Ingredients extends StatelessWidget {
           "description": "${AppLocalizations.of(context)!.gudmarDesc}",
           // " Reduces sugar cravings and controls blood sugar levels.",
         },
-        {
-          "name": "${AppLocalizations.of(context)!.jamunName}",
-          // "Jamun (Black Plum) ",
-          "image": "assets/images/incr_jamun.jpg",
-          "description": "${AppLocalizations.of(context)!.jamunDesc}",
-          //  " Enhances insulin production and helps maintain glucose balance.",
-        },
+        // {
+        //   "name": "${AppLocalizations.of(context)!.jamunName}",
+        //   // "Jamun (Black Plum) ",
+        //   "image": "assets/images/incr_jamun.jpg",
+        //   "description": "${AppLocalizations.of(context)!.jamunDesc}",
+        //   //  " Enhances insulin production and helps maintain glucose balance.",
+        // },
         {
           "name": "${AppLocalizations.of(context)!.methiName}",
           // "Methi (Fenugreek)",

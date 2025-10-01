@@ -33,7 +33,7 @@ class _MoreViewState extends State<MoreView> {
       },
       {
         "index": "2",
-        "name": "Manage Address",
+        "name": "My Profile",
         "image": "assets/images/address_icon.png",
         "base": 0
       },

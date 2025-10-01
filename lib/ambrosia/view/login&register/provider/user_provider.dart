@@ -11,8 +11,8 @@ class UserProvider with ChangeNotifier {
   String _email = '';
   String _fname = '';
   String _lname = '';
+  String _mobile = '';
 
-  // Getters with fallback values
   String get id {
     if (_id.isEmpty && _user != null) {
       _id = _user!.id;
@@ -41,6 +41,13 @@ class UserProvider with ChangeNotifier {
     return _lname;
   }
 
+  String get mobile {
+    if (_mobile.isEmpty && _user != null) {
+      _mobile = _user!.mobile;
+    }
+    return _mobile;
+  }
+
   User? get user => _user;
 
   bool get isLoggedIn => _user != null && id.isNotEmpty;
@@ -51,6 +58,7 @@ class UserProvider with ChangeNotifier {
     // _email = user.email;
     _fname = user.fname;
     // _lname = user.lname;
+    _mobile = user.mobile;
     notifyListeners();
   }
 
@@ -68,11 +76,13 @@ class UserProvider with ChangeNotifier {
         _email = _user?.email ?? '';
         _fname = _user?.fname ?? '';
         _lname = _user?.lname ?? '';
+        _mobile = _user?.mobile ?? '';
 
         print('User data loaded successfully');
         print('User ID: $_id');
+        print('User Name: $_fname');
         print('User Email: $_email');
-
+        print('User Phone Number: $_mobile');
         notifyListeners();
       } else {
         print('No user data found in preferences');
@@ -81,6 +91,7 @@ class UserProvider with ChangeNotifier {
         _email = '';
         _fname = '';
         _lname = '';
+        _mobile = '';
         notifyListeners();
       }
     } catch (e) {
@@ -90,6 +101,7 @@ class UserProvider with ChangeNotifier {
       _email = '';
       _fname = '';
       _lname = '';
+      _mobile = '';
       notifyListeners();
     }
   }
@@ -113,6 +125,7 @@ class UserProvider with ChangeNotifier {
     _email = '';
     _fname = '';
     _lname = '';
+    _mobile = '';
 
     // Clear from SharedPreferences
     final prefs = await SharedPreferences.getInstance();

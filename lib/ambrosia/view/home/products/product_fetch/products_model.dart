@@ -5,6 +5,8 @@ class Product {
   final double price;
   final int quantity;
   final List<String> imageUrl;
+  final String slug;
+  final String gstprice;
 
   Product({
     required this.id,
@@ -13,6 +15,8 @@ class Product {
     required this.price,
     required this.quantity,
     required this.imageUrl,
+    required this.slug,
+    required this.gstprice,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -28,6 +32,8 @@ class Product {
       quantity:
           json['quantity'] != null ? int.parse(json['quantity'].toString()) : 0,
       imageUrl: json['image'] != null ? List<String>.from(json['image']) : [],
+      slug: json['slug'] ?? 'Not found',
+      gstprice: json['gst_price'] ?? '',
     );
   }
 }

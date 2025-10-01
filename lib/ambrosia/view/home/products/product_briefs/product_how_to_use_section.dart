@@ -170,6 +170,7 @@ class _HowToUseSectionState extends State<HowToUseSection> {
 
 // static one 
 /* 
+
 import 'package:ambrosia_ayurved/cosmetics/view/home/products/product_briefs/foods_to_avoid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

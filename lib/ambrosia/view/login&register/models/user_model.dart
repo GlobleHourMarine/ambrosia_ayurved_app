@@ -5,27 +5,27 @@ class User {
   final String lname;
 
   final String email;
-  final String password;
+//  final String password;
 
   final String mobile;
 
-  final String createdAt;
+  // final String createdAt;
 
-  String image;
-  String otp;
-  String address;
+  // String image;
+  // String otp;
+  // String address;
 
   User({
     required this.id,
     required this.fname,
     required this.lname,
     required this.email,
-    required this.password,
+    // required this.password,
     required this.mobile,
-    required this.createdAt,
-    this.image = '',
-    required this.otp,
-    required this.address,
+    // required this.createdAt,
+    // this.image = '',
+    // required this.otp,
+    // required this.address,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -34,12 +34,12 @@ class User {
       fname: json['fname'] ?? '',
       lname: json['lname'] ?? '',
       email: json['email'] ?? '',
-      password: json['password'] ?? '',
+      // password: json['password'] ?? '',
       mobile: json['mobile'] ?? '',
-      otp: json['otp'].toString(),
-      address: json['address'] ?? '',
-      createdAt: json['created_at'] ?? '',
-      image: json['image'] ?? '',
+      // otp: json['otp'].toString(),
+      // address: json['address'] ?? '',
+      // createdAt: json['created_at'] ?? '',
+      // image: json['image'] ?? '',
     );
   }
 
@@ -49,15 +49,15 @@ class User {
       'fname': fname,
       'lname': lname,
       'email': email,
-      'password': password,
+      // 'password': password,
       'mobile': mobile,
-      'otp': otp,
-      'address': address,
-      'image': image,
+      // 'otp': otp,
+      // 'address': address,
+      // 'image': image,
     };
   }
 
-  void updateImage(String newImageUrl) {
-    image = newImageUrl;
-  }
+//   void updateImage(String newImageUrl) {
+//     image = newImageUrl;
+//   }
 }

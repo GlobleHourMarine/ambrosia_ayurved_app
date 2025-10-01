@@ -46,16 +46,9 @@ class CartProvider with ChangeNotifier {
     }
   }
 
-/*
-// Fixed addToCart method with proper loading state management
+  // add to cart
   Future<void> addToCart(
       String productId, String productName, BuildContext context) async {
-    // Check if this product is already being added to cart
-    if (_isAddingToCart && _addingProductId == productId) {
-      print('Product $productId is already being added to cart');
-      return; // Prevent multiple calls for the same product
-    }
-
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userId = userProvider.id;
 
@@ -65,44 +58,26 @@ class CartProvider with ChangeNotifier {
       return;
     }
 
-    // Set loading state for this specific product
-    _isAddingToCart = true;
-    _addingProductId = productId;
-    notifyListeners();
-
     try {
-      // Check if product already exists in the cart
       int existingIndex =
           _cartItems.indexWhere((item) => item.productId == productId);
-
       if (existingIndex != -1) {
-        // Product exists, update its quantity
-        int currentQuantity = int.parse(_cartItems[existingIndex].quantity);
+        int updatedQuantity = int.parse(_cartItems[existingIndex].quantity) + 1;
 
-        // Check maximum quantity limit BEFORE incrementing
-        if (currentQuantity >= 25) {
-          SnackbarMessage.showSnackbar(context, 'Maximum 25 items allowed');
-          return;
-        }
-
-        int updatedQuantity = currentQuantity + 1;
-
-        // Update on the server
         bool success = await _cartService.updateQuantity(
             _cartItems[existingIndex].productId, updatedQuantity, userId);
 
         if (success) {
           _cartItems[existingIndex].quantity = updatedQuantity.toString();
-          SnackbarMessage.showSnackbar(context,
-              '$productName is already in cart. We have updated Quantity.');
+          SnackbarMessage.showSnackbar(
+              context, '$productName is already in cart. Quantity updated.');
         }
       } else {
-        // Product does not exist, add a new item
-        CartItemss? newCartItem =
+        bool success =
             await _cartService.addToCart(productId, 1, userId, context);
 
-        if (newCartItem != null) {
-          _cartItems.add(newCartItem);
+        if (success) {
+          await fetchCartData(userId);
           SnackbarMessage.showSnackbar(
               context, '$productName added to the cart');
         }
@@ -111,74 +86,6 @@ class CartProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       print("Error adding to cart: $e");
-      SnackbarMessage.showSnackbar(
-          context, 'Failed to add $productName to cart');
-    } finally {
-      // Always clear loading state
-      _isAddingToCart = false;
-      _addingProductId = null;
-      notifyListeners();
-    }
-  }
-
-// Add this helper method to check if a specific product is being added
-  bool isProductBeingAdded(String productId) {
-    return _isAddingToCart && _addingProductId == productId;
-  }
-*/
-
-  // add to cart
-  Future<void> addToCart(
-      String productId, String productName, BuildContext context) async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    // Check login state before proceeding
-
-    final userId = userProvider.id;
-
-    if (userId == null || userId.isEmpty) {
-      // Show login required dialog
-      print('User Id not found');
-      // Call the modal bottom sheet directly here
-      RegisterService().showModalBottomSheetregister(context);
-
-      return;
-    }
-
-    try {
-      // Check if product already exists in the cart
-      int existingIndex =
-          _cartItems.indexWhere((item) => item.productId == productId);
-
-      if (existingIndex != -1) {
-        // Product exists, update its quantity
-        int updatedQuantity = int.parse(_cartItems[existingIndex].quantity) + 1;
-
-        // Update on the server
-        bool success = await _cartService.updateQuantity(
-            _cartItems[existingIndex].productId, updatedQuantity, userId);
-
-        if (success) {
-          _cartItems[existingIndex].quantity = updatedQuantity.toString();
-          SnackbarMessage.showSnackbar(context,
-              '$productName is already in cart. We have updated Quantity.');
-        }
-      } else {
-        // Product does not exist, add a new item
-        CartItemss? newCartItem =
-            await _cartService.addToCart(productId, 1, userId, context);
-
-        if (newCartItem != null) {
-          _cartItems.add(newCartItem);
-        }
-        SnackbarMessage.showSnackbar(context, '$productName added to the cart');
-      }
-
-      notifyListeners();
-
-      // Show success message
-    } catch (e) {
-      print("Error adding to cart: $e"); // Debugging message
-
       SnackbarMessage.showSnackbar(
           context, 'Failed to add $productName to cart');
     }

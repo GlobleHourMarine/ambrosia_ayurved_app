@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart'; // For accessing user provider
 import 'dart:convert';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -281,7 +280,6 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
 
   Future<void> _pickImages() async {
     try {
-      // For gallery: Photo Picker (no storage permission needed)
       final List<XFile>? images = await _picker.pickMultiImage();
       if (images != null && images.isNotEmpty) {
         setState(() {
@@ -293,20 +291,15 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
         });
       }
     } catch (e) {
+      print('submit review : $e');
       if (mounted) {
-        SnackbarMessage.showSnackbar(context, 'Error occurred: $e');
+        SnackbarMessage.showSnackbar(context, 'Failed to submit review.');
       }
     }
   }
 
   Future<void> _takePicture() async {
     try {
-      final cameraStatus = await Permission.camera.request();
-      if (!cameraStatus.isGranted) {
-        SnackbarMessage.showSnackbar(context, 'Camera permission denied.');
-        return;
-      }
-
       final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
       if (photo != null && _imageFiles.length < 5) {
         setState(() {
@@ -314,8 +307,9 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
         });
       }
     } catch (e) {
+      print('submit review : $e');
       if (mounted) {
-        SnackbarMessage.showSnackbar(context, 'Error occurred: $e');
+        SnackbarMessage.showSnackbar(context, 'Failed to submit reivew.');
       }
     }
   }
@@ -431,21 +425,24 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
             debugPrint('Uploaded files: ${jsonResponse['file_path']}');
           }
         } else {
-          throw Exception(jsonResponse['message'] ??
-              AppLocalizations.of(context)!.reviewSubmitFailed);
+          throw Exception('Failed to submit review'
+              // jsonResponse['message'] ??
+              //   AppLocalizations.of(context)!.reviewSubmitFailed
+
+              );
         }
       } else {
-        throw Exception(
-          jsonResponse['message'] ??
-              '${AppLocalizations.of(context)!.serverError}: ${response.statusCode}',
-        );
+        throw Exception('Failed to submit review.'
+            // jsonResponse['message'] ??
+            //     '${AppLocalizations.of(context)!.serverError}: ${response.statusCode}',
+            );
       }
     } catch (e, stackTrace) {
       debugPrint('Error: $e');
       debugPrint('Stack Trace: $stackTrace');
       SnackbarMessage.showSnackbar(
         context,
-        '${AppLocalizations.of(context)!.error}: ${e.toString()}',
+        'Failed to submit review.',
       );
     } finally {
       if (mounted) {

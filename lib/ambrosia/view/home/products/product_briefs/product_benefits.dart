@@ -9,8 +9,10 @@ import 'package:provider/provider.dart';
 
 class Benefits extends StatefulWidget {
   final String productId;
+  final String productSlug;
 
-  const Benefits({super.key, required this.productId});
+  const Benefits(
+      {super.key, required this.productId, required this.productSlug});
 
   @override
   State<Benefits> createState() => _BenefitsState();
@@ -96,7 +98,8 @@ class _BenefitsState extends State<Benefits> {
                 ),
               ),
             ),
-            if (widget.productId == '1') ...[
+            //if (widget.productId == '1')
+            if (widget.productSlug == 'a5-herbal-supplement') ...[
               _buildBenefit(
                   t.completelyEliminatesSugar, t.naturallyControlsSugar),
               _buildBenefit(t.boostsInsulinSensitivity, t.helpsProcessGlucose),

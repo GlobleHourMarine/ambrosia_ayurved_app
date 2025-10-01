@@ -231,7 +231,8 @@ class _ProductDescriptionScreenState extends State<ProductDescriptionScreen>
       padding: const EdgeInsets.only(left: 12.0),
       child: Text(
         product.description,
-        style: const TextStyle(fontSize: 16, color: Colors.grey),
+        style: const TextStyle(
+            fontSize: 16, color: Color.fromARGB(255, 47, 47, 47)),
       ),
     );
   }
@@ -247,8 +248,7 @@ class _ProductDescriptionScreenState extends State<ProductDescriptionScreen>
         children: [
           Container(
             height: 160,
-            width: screenWidth * 0.25, // 25% of screen width
-
+            width: screenWidth * 0.25,
             decoration: const BoxDecoration(
               borderRadius: BorderRadius.only(
                 topRight: Radius.circular(40),

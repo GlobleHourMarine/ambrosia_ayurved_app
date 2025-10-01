@@ -17,11 +17,12 @@ class CartService {
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        if (responseData['status']) {
+        if (responseData['status'] == true) {
           List<CartItemss> cartItems = [];
           for (var item in responseData['data']) {
             cartItems.add(CartItemss.fromJson(item));
           }
+
           print(responseData);
           return cartItems;
         } else {
@@ -37,6 +38,39 @@ class CartService {
 
   // add to cart
 
+  Future<bool> addToCart(String productId, int quantity, String userId,
+      BuildContext context) async {
+    try {
+      final response = await http.post(
+        Uri.parse('https://ambrosiaayurved.in/api/add_product_into_cart'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'user_id': userId,
+          'product_id': productId,
+          'quantity': quantity,
+        }),
+      );
+      Map<String, dynamic> responseBody = jsonDecode(response.body);
+      print('responseBody of add to cart : $responseBody');
+
+      if (response.statusCode == 200) {
+        if (responseBody['status'] == true) {
+          return true;
+        } else {
+          throw Exception(
+              responseBody['message'] ?? 'Failed to add item to cart.');
+        }
+      } else {
+        throw Exception(
+            'Failed to add item to cart (status code ${response.statusCode}).');
+      }
+    } catch (error) {
+      print('Error: $error');
+      throw Exception('Error: $error');
+    }
+  }
+
+/*
   Future<CartItemss?> addToCart(String productId, int quantity, String userId,
       BuildContext context) async {
     try {
@@ -49,12 +83,11 @@ class CartService {
           'quantity': quantity.toString(),
         }),
       );
-
+      Map<String, dynamic> responseBody = jsonDecode(response.body);
+      print('responseBody of add to cart : $responseBody');
       if (response.statusCode == 200) {
-        Map<String, dynamic> responseBody = jsonDecode(response.body);
-
         if (responseBody.containsKey('status') &&
-            responseBody['status'] == 'success') {
+            responseBody['status'] == true) {
           if (responseBody.containsKey('data') &&
               responseBody['data'] is List &&
               responseBody['data'].isNotEmpty) {
@@ -68,7 +101,7 @@ class CartService {
           throw Exception('Failed to add item to cart.');
         }
       } else {
-        throw Exception('Failed to add item to cart in database.');
+        throw Exception('Failed to add item to cart in data.');
       }
     } catch (error) {
       print('Error: $error');
@@ -76,6 +109,10 @@ class CartService {
     }
   }
 
+
+*/
+
+// remove from cart
   Future<bool> removeProductFromCart(String cartId) async {
     const String apiUrl =
         'https://ambrosiaayurved.in/api/delete_product_from_cart';
@@ -91,7 +128,7 @@ class CartService {
         final responseData = json.decode(response.body);
         if (responseData['status'] == 'success') {
           print(responseData);
-          return true; // Return true if product was successfully removed
+          return true;
         }
       } else {
         throw Exception('Failed to remove product');
@@ -103,12 +140,10 @@ class CartService {
     throw Exception('failed to remove');
   }
 
-  // update quantity
-
+// update quantity in cart
   static const String updateQuantityUrl =
       'https://ambrosiaayurved.in/api/update_quantity';
 
-  // API Call to Update Quantity
   Future<bool> updateQuantity(
       String productId, int quantity, String userId) async {
     try {
@@ -126,12 +161,12 @@ class CartService {
         final responseData = json.decode(response.body);
         if (responseData['status'] == 'success') {
           print(responseData);
-          return true; // Return true if update was successful
+          return true;
         }
       }
     } catch (error) {
       print('Error updating quantity: $error');
     }
-    return false; // Return false in case of error
+    return false;
   }
 }

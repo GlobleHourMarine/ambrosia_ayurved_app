@@ -5,6 +5,7 @@ import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/prod
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/ambrosia_static_details/foods_to_avoid.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_how_to_use_section.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_ingredients.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_specification_section.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/products_faq.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_description_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_fetch/products_model.dart';
@@ -250,10 +251,10 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
                           ),
                         ),
                         SizedBox(height: 20),
-
                         Container(
                           key: _benefitsKey,
                           child: Benefits(
+                            productSlug: widget.product.slug,
                             productId: widget.product.id.toString(),
                           ),
                         ),
@@ -264,7 +265,9 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
                           ),
                         ),
                         //      if (widget.product.id == 1) ThreeMonthPlan(),
-                        if (widget.product.id == 1) FoodsToAvoidSection(),
+                        if (widget.product.slug == 'a5-herbal-supplement')
+                          FoodsToAvoidSection(),
+                        //  if (widget.product.id == 1) FoodsToAvoidSection(),
                         Container(
                           key: _ingredientsKey,
                           child: widget.product.id == 1
@@ -275,6 +278,8 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
                           key: _reviewsKey,
                           child: Column(
                             children: [
+                              if (widget.product.slug == 'a5-herbal-supplement')
+                                ProductSpecificationsSection(),
                               CustomerReviewSection(
                                 productId: widget.product.id.toString(),
                               ),
@@ -345,7 +350,15 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
                   bottom: 110,
                   right: 20,
                   child: FloatingActionButton(
-                    onPressed: _launchWhatsApp,
+                    onPressed:
+                        //  () {
+                        //   Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //         builder: (context) => ProductSpecificationsSection(),
+                        //       ));
+                        // },
+                        _launchWhatsApp,
                     child: Image.asset(
                       'assets/images/whatsapp.png',
                       width: 35,
