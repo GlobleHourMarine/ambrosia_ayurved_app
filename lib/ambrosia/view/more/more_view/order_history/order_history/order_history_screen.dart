@@ -1,6 +1,7 @@
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_loading_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/snackbar.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/login&register/user_register.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/order_history/order_history/order_model.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/more/more_view/order_history/submit_review/submit_review.dart';
@@ -74,6 +75,127 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  //
+  //
+
+  // Add this method to show login prompt
+  void _showLoginPrompt() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(25),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon
+                Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Acolors.primary.withOpacity(0.1),
+                  ),
+                  child: Icon(
+                    Icons.person_outline_rounded,
+                    color: Acolors.primary,
+                    size: 35,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Title
+                Text(
+                  'Login Required',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Message
+                Text(
+                  'Please login to view your order history',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 25),
+
+                // Buttons
+                Row(
+                  children: [
+                    // Cancel Button
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          side: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+
+                    // Login Button
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          // Navigate to login/registration
+                          RegisterService()
+                              .showModalBottomSheetregister(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Acolors.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Login',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
 // Cancel Order Function
@@ -314,13 +436,112 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
     );
   }
 
+  Widget _buildLoginRequiredWidget() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Acolors.primary.withOpacity(0.1),
+          ),
+          child: Icon(
+            Icons.person_outline_rounded,
+            color: Acolors.primary,
+            size: 50,
+          ),
+        ),
+        const SizedBox(height: 25),
+        Text(
+          'Login Required',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[800],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Text(
+            'Please login to view your order history and track your orders',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+            ),
+          ),
+        ),
+        const SizedBox(height: 30),
+        Container(
+          width: 200,
+          height: 50,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Acolors.primary,
+                Acolors.primary.withOpacity(0.8),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Acolors.primary.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: () {
+              RegisterService().showModalBottomSheetregister(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.login_rounded, color: Colors.white, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'Login Now',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildBody() {
+    final userProvider = Provider.of<UserProvider>(context);
+    final isLoggedIn = userProvider.id != null && userProvider.id.isNotEmpty;
+
     if (isLoading) {
       return AnimatedLoadingScreen(
         message: 'Loading your orders...',
         primaryColor: Acolors.primary,
         animationDuration: Duration(milliseconds: 1000),
       );
+    }
+
+    if (!isLoggedIn) {
+      return _buildLoginRequiredWidget();
     }
 
     // if (error != null) {

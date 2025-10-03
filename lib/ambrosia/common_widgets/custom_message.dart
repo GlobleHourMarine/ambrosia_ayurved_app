@@ -13,7 +13,8 @@ class SuccessPopup {
     int autoCloseDuration = 2, // in seconds
     Widget? navigateToScreen,
     VoidCallback? onClose,
-    bool showButtonLoader = false, // NEW: control loader instead of button
+    bool showButtonLoader = false,
+    bool usePushAndRemoveUntil = false, // NEW: Option for pushAndRemoveUntil
   }) {
     final rootContext = context; // save the parent context
 
@@ -27,11 +28,8 @@ class SuccessPopup {
               Navigator.of(dialogContext).pop();
             }
             if (navigateToScreen != null && rootContext.mounted) {
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => navigateToScreen,
-                  ));
+              _navigateToScreen(
+                  rootContext, navigateToScreen, usePushAndRemoveUntil);
             }
             onClose?.call();
           });
@@ -99,13 +97,10 @@ class SuccessPopup {
                               ),
                             ),
                             onPressed: () {
-                              Navigator.of(context).pop();
+                              Navigator.of(dialogContext).pop();
                               if (navigateToScreen != null) {
-                                Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => navigateToScreen,
-                                    ));
+                                _navigateToScreen(rootContext, navigateToScreen,
+                                    usePushAndRemoveUntil);
                               }
                               onClose?.call();
                             },
@@ -123,6 +118,23 @@ class SuccessPopup {
         );
       },
     );
+  }
+
+  // NEW: Helper method for navigation
+  static void _navigateToScreen(
+      BuildContext context, Widget screen, bool usePushAndRemoveUntil) {
+    if (usePushAndRemoveUntil) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => screen),
+        (route) => false, // Remove all routes
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => screen),
+      );
+    }
   }
 }
 

@@ -177,7 +177,6 @@ class CartProvider with ChangeNotifier {
     }
   }
 
-  // Increment Quantity
   Future<void> incrementQuantity(String productId, BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userId = userProvider.id;

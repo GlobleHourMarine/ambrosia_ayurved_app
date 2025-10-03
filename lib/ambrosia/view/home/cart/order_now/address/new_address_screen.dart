@@ -5,9 +5,11 @@ import 'package:ambrosia_ayurved/ambrosia/common_widgets/snackbar.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/address/address_fetch_service.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/address/address_model.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_app_bar.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/address/edit_address_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/address/newaddresssection.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/models/user_model.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/login&register/user_register.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -96,8 +98,6 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
       print('update profile response : $responseData');
       if (response.statusCode == 200) {
         if (responseData['status'] == true) {
-          // Update only the name in UserProvider
-          // Get the current user
           final currentUser = userProvider.user!;
 
           final updatedUser = User(
@@ -153,6 +153,171 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
               )),
     ).then((_) => _loadAddresses()); // Refresh after returning
   }
+
+  Widget _buildProfileSection() {
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, child) {
+        // Check if user is not logged in (userid is null or empty)
+        if (userProvider.id == null || userProvider.id!.isEmpty) {
+          return Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.15),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+              border: Border.all(color: Colors.grey.shade100),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white,
+                  Colors.grey[50]!,
+                ],
+              ),
+            ),
+            child: Column(
+              children: [
+                // Header Section for Login
+                Container(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Colors.grey.shade200,
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Acolors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.person_rounded,
+                          color: Acolors.primary,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Login Required',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Please login to view your profile',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[500],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Login Button
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    gradient: LinearGradient(
+                      colors: [
+                        Acolors.primary,
+                        Acolors.primary.withOpacity(0.9),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Acolors.primary.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      RegisterService().showModalBottomSheetregister(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shadowColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 24),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      minimumSize: const Size(double.infinity, 50),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.login_rounded,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Login to Continue',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  'Access your profile information by logging in',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[500],
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        }
+
+        // If user is logged in, show the profile section
+        return _buildUserProfileSection();
+      },
+    );
+  }
+
+/*
 
   Widget _buildUserProfileSection() {
     return Consumer<UserProvider>(
@@ -677,8 +842,7 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
       ),
     );
   }
-
-/*
+*/
   Widget _buildUserProfileSection() {
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
@@ -872,7 +1036,8 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: Acolors.white,
+        //   color: color.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: color.withOpacity(0.1),
@@ -944,7 +1109,7 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
           child: TextFormField(
             controller: _firstNameController,
             decoration: InputDecoration(
-              labelText: 'First Name',
+              labelText: 'Name',
               labelStyle: TextStyle(
                 color: Acolors.primary,
                 fontWeight: FontWeight.w500,
@@ -1167,10 +1332,24 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
     );
   }
 
+  void _editAddress(Address address) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditAddressScreen(
+          address: address,
+          onAddressUpdated: _loadAddresses, // Refresh list after edit
+        ),
+      ),
+    );
+  }
 
-*/
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    bool isLoggedIn = userProvider.id != null && userProvider.id.isNotEmpty;
+
     return Scaffold(
       appBar: CustomAppBar(
           leading: const BackButton(color: Colors.black), title: 'My Profile'),
@@ -1184,123 +1363,130 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
               child: Column(
                 children: [
                   // User Profile Section
-                  _buildUserProfileSection(),
 
-                  // Manage Address Section Title
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          color: Acolors.primary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Manage Addresses',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[700],
+                  _buildProfileSection(),
+                  // _buildUserProfileSection(),
+
+                  if (isLoggedIn) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            color: Acolors.primary,
+                            size: 20,
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Address List
-                  Expanded(
-                    child: _addresses.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.location_off,
-                                  size: 48,
-                                  color: Colors.grey[400],
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  AppLocalizations.of(context)!.noAddresses,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[600],
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  AppLocalizations.of(context)!.addFirstAddress,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey[500],
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                ElevatedButton.icon(
-                                  onPressed: _navigateToAddAddress,
-                                  icon: const Icon(Icons.add_location_alt),
-                                  label: Text(
-                                    AppLocalizations.of(context)!.addAddress,
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green[600],
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                      vertical: 12,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          const SizedBox(width: 8),
+                          Text(
+                            'Manage Addresses',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[700],
                             ),
-                          )
-                        : ListView.builder(
-                            itemCount: _addresses.length,
-                            itemBuilder: (context, index) {
-                              final address = _addresses[index];
-                              return AddressCard(
-                                address: address,
-                                onDelete: () => _deleteAddress(address.id),
-                              );
-                            },
                           ),
-                  ),
-                  // Add New Address Button
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: _navigateToAddAddress,
-                        icon: const Icon(Icons.add_location_alt),
-                        label: Text(
-                          AppLocalizations.of(context)!.addNewAddress,
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.green[600],
-                          side: BorderSide(color: Colors.green[600]!),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Address List
+                    Expanded(
+                      child: _addresses.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.location_off,
+                                    size: 48,
+                                    color: Colors.grey[400],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    AppLocalizations.of(context)!.noAddresses,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey[600],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    AppLocalizations.of(context)!
+                                        .addFirstAddress,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[500],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  ElevatedButton.icon(
+                                    onPressed: _navigateToAddAddress,
+                                    icon: const Icon(Icons.add_location_alt),
+                                    label: Text(
+                                      AppLocalizations.of(context)!.addAddress,
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green[600],
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: _addresses.length,
+                              itemBuilder: (context, index) {
+                                final address = _addresses[index];
+                                return AddressCard(
+                                  address: address,
+                                  onDelete: () => _deleteAddress(address.id),
+                                  onEdit: () => _editAddress(address),
+                                );
+                              },
+                            ),
+                    ),
+                    // Add New Address Button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _navigateToAddAddress,
+                          icon: const Icon(Icons.add_location_alt),
+                          label: Text(
+                            AppLocalizations.of(context)!.addNewAddress,
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.green[600],
+                            side: BorderSide(color: Colors.green[600]!),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
     );
   }
 }
+
+/*
 
 // AddressCard widget remains the same as in your original code
 class AddressCard extends StatelessWidget {
@@ -1425,6 +1611,150 @@ class AddressCard extends StatelessWidget {
                     ),
                   );
                 },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+*/
+
+class AddressCard extends StatelessWidget {
+  final Address address;
+  final VoidCallback onDelete;
+  final VoidCallback onEdit; // Add this
+
+  const AddressCard({
+    Key? key,
+    required this.address,
+    required this.onDelete,
+    required this.onEdit, // Add this
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.green),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (address.status == '1')
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check_circle,
+                            color: Colors.green, size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Default Address',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${address.fname} ${address.lname}',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.green[100],
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                      child: Text(
+                        address.addressType,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green[700],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 2.0),
+                  child: Text(address.mobile),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 2.0),
+                  child: Text(address.address),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 2.0),
+                  child: Text(
+                    '${address.city}, ${address.district}, ${address.state} - ${address.pincode}',
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 2.0),
+                  child: Text(address.country),
+                ),
+              ],
+            ),
+            Positioned(
+              bottom: 0,
+              right: 40, // Moved to make space for edit button
+              child: IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Delete Address'),
+                      content: const Text(
+                          'Are you sure you want to delete this address?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            onDelete();
+                          },
+                          child: const Text('Delete',
+                              style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: IconButton(
+                icon: const Icon(Icons.edit, color: Colors.blue),
+                onPressed: onEdit, // Use the new callback
               ),
             ),
           ],

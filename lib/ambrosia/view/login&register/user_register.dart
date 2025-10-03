@@ -194,8 +194,7 @@ class _RegistrationModalState extends State<RegistrationModal> {
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         userProvider.setUser(user);
         await userProvider.saveUserData(user);
-
-        Navigator.of(context).pop();
+        // Navigator.of(context).pop();
         SuccessPopup.show(
           context: context,
           title: "${AppLocalizations.of(context)!.loginSuccess}",
@@ -204,6 +203,7 @@ class _RegistrationModalState extends State<RegistrationModal> {
           icon: Icons.verified_user,
           iconColor: Acolors.primary,
           navigateToScreen: MainTabView(),
+          usePushAndRemoveUntil: true,
           autoCloseDuration: 2,
         );
       } else {

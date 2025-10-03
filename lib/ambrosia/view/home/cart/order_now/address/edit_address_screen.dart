@@ -1,25 +1,28 @@
 import 'package:ambrosia_ayurved/ambrosia/common/color_extension.dart';
-import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/address/address_provider.dart';
-import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/order_now_page.dart';
-import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/cart/order_now/address/address_model.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_app_bar.dart';
+import 'package:ambrosia_ayurved/ambrosia/common_widgets/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class AddressSection extends StatefulWidget {
-  final bool isFromManageAddress;
-  const AddressSection({Key? key, this.isFromManageAddress = false})
-      : super(key: key);
+class EditAddressScreen extends StatefulWidget {
+  final Address address;
+  final VoidCallback onAddressUpdated;
+
+  const EditAddressScreen({
+    Key? key,
+    required this.address,
+    required this.onAddressUpdated,
+  }) : super(key: key);
 
   @override
-  State<AddressSection> createState() => _AddressSectionState();
+  State<EditAddressScreen> createState() => _EditAddressScreenState();
 }
 
-class _AddressSectionState extends State<AddressSection> {
+class _EditAddressScreenState extends State<EditAddressScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _fnameController = TextEditingController();
   final TextEditingController _lnameController = TextEditingController();
@@ -40,7 +43,22 @@ class _AddressSectionState extends State<AddressSection> {
   @override
   void initState() {
     super.initState();
+    _initializeFormData();
     _pincodeController.addListener(_onPincodeChanged);
+  }
+
+  void _initializeFormData() {
+    _fnameController.text = widget.address.fname;
+    _lnameController.text = widget.address.lname;
+    _emailController.text = widget.address.email;
+    _mobileController.text = widget.address.mobile;
+    _pincodeController.text = widget.address.pincode;
+    _addressController.text = widget.address.address;
+    _countryController.text = widget.address.country;
+    _cityController.text = widget.address.city;
+    _stateController.text = widget.address.state;
+    _districtController.text = widget.address.district;
+    _addressType = widget.address.addressType;
   }
 
   @override
@@ -88,23 +106,15 @@ class _AddressSectionState extends State<AddressSection> {
             _countryController.text = postOfficeData['Country'] ?? '';
           });
         } else {
-          _showSnackBar(AppLocalizations.of(context)!.invalidPincode
-              //'Invalid pincode. Please enter a valid pincode.'
-              );
+          _showSnackBar(AppLocalizations.of(context)!.invalidPincode);
           _clearLocationFields();
         }
       } else {
-        _showSnackBar(
-          AppLocalizations.of(context)!.locationFetchFail,
-          //  'Failed to fetch location data. Please try again.'
-        );
+        _showSnackBar(AppLocalizations.of(context)!.locationFetchFail);
         _clearLocationFields();
       }
     } catch (e) {
-      _showSnackBar(
-        AppLocalizations.of(context)!.locationError,
-        //  'Error fetching location data. Please check your internet connection.'
-      );
+      _showSnackBar(AppLocalizations.of(context)!.locationError);
       _clearLocationFields();
     } finally {
       setState(() {
@@ -130,35 +140,61 @@ class _AddressSectionState extends State<AddressSection> {
     );
   }
 
-  // void _saveAddress() {
-  //   if (_formKey.currentState!.validate()) {
-  //     final addressData = {
-  //       'first_name': _fnameController.text,
-  //       'last_name': _lnameController.text,
-  //       'mobile': _mobileController.text,
-  //       'pincode': _pincodeController.text,
-  //       'address': _addressController.text,
-  //       'landmark': _landmarkController.text,
-  //       'country': _countryController.text,
-  //       'city': _cityController.text,
-  //       'state': _stateController.text,
-  //       'district': _districtController.text,
-  //       'type': _addressType,
-  //     };
+  Future<void> _updateAddress() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
 
-  //     print('Address Data: $addressData');
-  //     _showSnackBar('Address saved successfully!');
-  //   }
-  // }
+      try {
+        final response = await http.patch(
+          Uri.parse('https://ambrosiaayurved.in/api/UpdateAddress'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            "id": widget.address.id, // Use the address ID from the widget
+            "fname": _fnameController.text,
+            "lname": _lnameController.text,
+            "mobile": _mobileController.text,
+            "address": _addressController.text,
+            "district": _districtController.text,
+            "city": _cityController.text,
+            "email": _emailController.text,
+            "state": _stateController.text,
+            "pincode": _pincodeController.text,
+            "country": _countryController.text,
+          }),
+        );
+
+        final responseData = jsonDecode(response.body);
+        print('Update Address Response: $responseData');
+        if (response.statusCode == 200 && responseData['status'] == true) {
+          SnackbarMessage.showSnackbar(context, 'Address updated successfully');
+          widget.onAddressUpdated();
+          Navigator.pop(context);
+        } else {
+          SnackbarMessage.showSnackbar(
+            context,
+            responseData['message'] ?? 'Failed to update address',
+          );
+        }
+      } catch (e) {
+        SnackbarMessage.showSnackbar(context, 'Failed to update address: $e');
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
         leading: BackButton(color: Colors.black),
-        title: AppLocalizations.of(context)!.addAddress,
-
-        //'Add Address',
+        title: 'Edit Address',
       ),
       body: Form(
         key: _formKey,
@@ -177,8 +213,7 @@ class _AddressSectionState extends State<AddressSection> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        AppLocalizations.of(context)!.contactInformation,
-                        // 'Contact Information',
+                        'Contact Information',
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -191,9 +226,7 @@ class _AddressSectionState extends State<AddressSection> {
                             child: TextFormField(
                               controller: _fnameController,
                               decoration: InputDecoration(
-                                labelText:
-                                    AppLocalizations.of(context)!.firstName,
-                                // 'First Name',
+                                labelText: 'First Name',
                                 border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.person, size: 20),
                                 contentPadding: EdgeInsets.symmetric(
@@ -201,9 +234,7 @@ class _AddressSectionState extends State<AddressSection> {
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return AppLocalizations.of(context)!
-                                      .pleaseEnterFirstName;
-                                  //  'Please enter your first name';
+                                  return 'Please enter your first name';
                                 }
                                 return null;
                               },
@@ -214,9 +245,7 @@ class _AddressSectionState extends State<AddressSection> {
                             child: TextFormField(
                               controller: _lnameController,
                               decoration: InputDecoration(
-                                labelText:
-                                    AppLocalizations.of(context)!.lastName,
-                                //'Last Name',
+                                labelText: 'Last Name',
                                 border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.person, size: 20),
                                 contentPadding: EdgeInsets.symmetric(
@@ -224,9 +253,7 @@ class _AddressSectionState extends State<AddressSection> {
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return AppLocalizations.of(context)!
-                                      .pleaseEnterLastName;
-                                  // 'Please enter your last name';
+                                  return 'Please enter your last name';
                                 }
                                 return null;
                               },
@@ -239,8 +266,7 @@ class _AddressSectionState extends State<AddressSection> {
                         controller: _mobileController,
                         keyboardType: TextInputType.phone,
                         decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.phone,
-                          //  'Phone Number',
+                          labelText: 'Phone Number',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.phone, size: 20),
                           contentPadding: EdgeInsets.symmetric(
@@ -248,9 +274,9 @@ class _AddressSectionState extends State<AddressSection> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return "${AppLocalizations.of(context)!.enterMobile}";
+                            return "Please enter mobile number";
                           } else if (!RegExp(r'^\d{10}$').hasMatch(value)) {
-                            return "${AppLocalizations.of(context)!.validMobile}";
+                            return "Please enter valid mobile number";
                           }
                           return null;
                         },
@@ -264,24 +290,12 @@ class _AddressSectionState extends State<AddressSection> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.email,
-                          //  'Phone Number',
+                          labelText: 'Email',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.email, size: 20),
                           contentPadding: EdgeInsets.symmetric(
                               vertical: 12, horizontal: 12),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "${AppLocalizations.of(context)!.pleaseEnterEmail}";
-                            //  'Please enter Email';
-                          } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                              .hasMatch(value)) {
-                            return "${AppLocalizations.of(context)!.pleaseEnterValidEmail}";
-                            // 'Please enter a valid email';
-                          }
-                          return null;
-                        },
                       ),
                     ],
                   ),
@@ -300,8 +314,7 @@ class _AddressSectionState extends State<AddressSection> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        AppLocalizations.of(context)!.addressInformation,
-                        //  'Address Information',
+                        'Address Information',
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -318,8 +331,7 @@ class _AddressSectionState extends State<AddressSection> {
                           LengthLimitingTextInputFormatter(6),
                         ],
                         decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.pincode,
-                          // 'Pincode',
+                          labelText: 'Pincode',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.location_on, size: 20),
                           contentPadding: EdgeInsets.symmetric(
@@ -338,9 +350,9 @@ class _AddressSectionState extends State<AddressSection> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return "${AppLocalizations.of(context)!.enterPincode}";
+                            return "Please enter pincode";
                           } else if (!RegExp(r'^\d{6}$').hasMatch(value)) {
-                            return "${AppLocalizations.of(context)!.validPincode}";
+                            return "Please enter valid pincode";
                           }
                           return null;
                         },
@@ -355,9 +367,7 @@ class _AddressSectionState extends State<AddressSection> {
                             child: TextFormField(
                               controller: _cityController,
                               decoration: InputDecoration(
-                                labelText:
-                                    AppLocalizations.of(context)!.cityTown,
-                                //'City/Town',
+                                labelText: 'City/Town',
                                 border: OutlineInputBorder(),
                                 filled: true,
                                 fillColor: Color(0xFFF5F5F5),
@@ -366,9 +376,7 @@ class _AddressSectionState extends State<AddressSection> {
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return AppLocalizations.of(context)!
-                                      .enterCity;
-                                  // 'Please enter city/town';
+                                  return 'Please enter city/town';
                                 }
                                 return null;
                               },
@@ -379,9 +387,7 @@ class _AddressSectionState extends State<AddressSection> {
                             child: TextFormField(
                               controller: _districtController,
                               decoration: InputDecoration(
-                                labelText:
-                                    AppLocalizations.of(context)!.district,
-                                // 'District',
+                                labelText: 'District',
                                 border: OutlineInputBorder(),
                                 filled: true,
                                 fillColor: Color(0xFFF5F5F5),
@@ -407,24 +413,7 @@ class _AddressSectionState extends State<AddressSection> {
                             child: TextFormField(
                               controller: _stateController,
                               decoration: InputDecoration(
-                                labelText: AppLocalizations.of(context)!.state,
-                                // 'State',
-                                border: OutlineInputBorder(),
-                                filled: true,
-                                fillColor: Color(0xFFF5F5F5),
-                                contentPadding: EdgeInsets.symmetric(
-                                    vertical: 12, horizontal: 12),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _countryController,
-                              decoration: InputDecoration(
-                                labelText:
-                                    AppLocalizations.of(context)!.country,
-                                //'Country',
+                                labelText: 'State',
                                 border: OutlineInputBorder(),
                                 filled: true,
                                 fillColor: Color(0xFFF5F5F5),
@@ -433,9 +422,27 @@ class _AddressSectionState extends State<AddressSection> {
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return AppLocalizations.of(context)!
-                                      .enterCountry;
-                                  //'Please enter country';
+                                  return 'Please enter State';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _countryController,
+                              decoration: InputDecoration(
+                                labelText: 'Country',
+                                border: OutlineInputBorder(),
+                                filled: true,
+                                fillColor: Color(0xFFF5F5F5),
+                                contentPadding: EdgeInsets.symmetric(
+                                    vertical: 12, horizontal: 12),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter country';
                                 }
                                 return null;
                               },
@@ -450,8 +457,7 @@ class _AddressSectionState extends State<AddressSection> {
                         controller: _addressController,
                         maxLines: 2,
                         decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.houseDetails,
-                          //'House No, Building, Road, Area',
+                          labelText: 'House No, Building, Road, Area',
                           border: OutlineInputBorder(),
                           alignLabelWithHint: true,
                           contentPadding: EdgeInsets.symmetric(
@@ -459,8 +465,7 @@ class _AddressSectionState extends State<AddressSection> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return AppLocalizations.of(context)!.enterAddress;
-                            //'Please enter your address';
+                            return 'Please enter your address';
                           }
                           return null;
                         },
@@ -482,8 +487,7 @@ class _AddressSectionState extends State<AddressSection> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        AppLocalizations.of(context)!.addressType,
-                        // 'Address Type',
+                        'Address Type',
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -494,11 +498,9 @@ class _AddressSectionState extends State<AddressSection> {
                         children: [
                           Expanded(
                             child: RadioListTile<String>(
-                              title: Text(AppLocalizations.of(context)!.home,
-                                  // 'Home',
-                                  style: TextStyle(fontSize: 14)),
-                              value: AppLocalizations.of(context)!.home,
-                              //'Home',
+                              title:
+                                  Text('Home', style: TextStyle(fontSize: 14)),
+                              value: 'Home',
                               groupValue: _addressType,
                               onChanged: (value) {
                                 setState(() {
@@ -511,11 +513,9 @@ class _AddressSectionState extends State<AddressSection> {
                           ),
                           Expanded(
                             child: RadioListTile<String>(
-                              title: Text(AppLocalizations.of(context)!.work,
-                                  //'Work',
-                                  style: TextStyle(fontSize: 14)),
-                              value: AppLocalizations.of(context)!.work,
-                              //   'Work',
+                              title:
+                                  Text('Work', style: TextStyle(fontSize: 14)),
+                              value: 'Work',
                               groupValue: _addressType,
                               onChanged: (value) {
                                 setState(() {
@@ -532,116 +532,41 @@ class _AddressSectionState extends State<AddressSection> {
                   ),
                 ),
               ),
-
-              // const SizedBox(height: 30),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: // Save Button
-          SafeArea(
+      bottomNavigationBar: SafeArea(
         child: Padding(
           padding: EdgeInsets.only(
             left: 16,
             right: 16,
             bottom: MediaQuery.of(context).viewInsets.bottom + 8,
-            // ✅ pushes button above keyboard
           ),
           child: SizedBox(
-            child: OutlinedButton(
-              onPressed: _isLoading
-                  ? null
-                  : () async {
-                      if (_formKey.currentState!.validate()) {
-                        setState(() {
-                          _isLoading = true;
-                        });
-
-                        final userProvider =
-                            Provider.of<UserProvider>(context, listen: false);
-                        final userId = userProvider.id;
-
-                        final addressProvider = Provider.of<AddressProvider>(
-                            context,
-                            listen: false);
-
-                        bool success =
-                            await addressProvider.saveCheckoutInformation(
-                          address_type: _addressType.toString(),
-                          district: _districtController.text,
-                          userid: userId,
-                          fname: _fnameController.text,
-                          lname: _lnameController.text,
-                          email: _emailController.text,
-                          address: _addressController.text,
-                          city: _cityController.text,
-                          state: _stateController.text,
-                          mobile: _mobileController.text,
-                          country: _countryController.text,
-                          pincode: _pincodeController.text,
-                          context: context,
-                        );
-
-                        setState(() {
-                          _isLoading = false;
-                        });
-
-                        if (success) {
-                          // FIXED: Navigate based on where this screen was opened from
-                          if (widget.isFromManageAddress) {
-                            // If opened from manage address screen, go back
-                            Navigator.pop(context);
-                          } else {
-                            // If opened from checkout/order flow, go to order page
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => OrderNowPage()),
-                            );
-                          }
-                        }
-                      }
-                    },
-
-              // if (success) {
-              //  _openRazorpayCheckout(grandTotalProvider.grandTotal);
-              // _startPhonePePayment(grandTotalProvider.grandTotal);
-              // Navigator.pushReplacement(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => OrderNowPage(),
-              //   ),
-              // );
-              //     }
-              // setState(() {
-              //   _isLoading = false;
-              // });
-
-              style: OutlinedButton.styleFrom(
-                // backgroundColor: Colors.blue[600],
-                foregroundColor: Acolors.primary,
-                side: BorderSide(color: Acolors.primary, width: 1),
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _updateAddress,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Acolors.primary,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
-                padding: EdgeInsets.zero,
+                padding: const EdgeInsets.symmetric(vertical: 12),
               ),
               child: _isLoading
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Acolors.primary),
-                        ),
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
                   : Text(
-                      AppLocalizations.of(context)!.saveAddress,
-                      //"Save Address"
+                      'Update Address',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
             ),
           ),

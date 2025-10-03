@@ -735,7 +735,6 @@ class _HomeScreenState extends State<HomeScreen>
                   MaterialPageRoute(builder: (context) => ChatScreen()),
                 );
               },
-
               backgroundColor: Colors.green[50],
               child: Padding(
                 padding: const EdgeInsets.all(6.0),
