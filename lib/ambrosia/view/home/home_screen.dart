@@ -724,24 +724,20 @@ class _HomeScreenState extends State<HomeScreen>
               ],
             ),
           ),
-          floatingActionButton: SizedBox(
-            height: 70,
-            width: 70,
-            child: FloatingActionButton(
-              heroTag: "chat_fab",
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ChatScreen()),
-                );
-              },
-              backgroundColor: Colors.green[50],
-              child: Padding(
-                padding: const EdgeInsets.all(6.0),
-                child: Image.asset('assets/images/chat.png'),
-              ),
-              // const Icon(Icons.chat, color: Colors.white),
+          floatingActionButton: FloatingActionButton(
+            heroTag: "chat_fab",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChatScreen()),
+              );
+            },
+            backgroundColor: Colors.green[50],
+            child: Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Image.asset('assets/images/chat.png'),
             ),
+            // const Icon(Icons.chat, color: Colors.white),
           ),
         );
       },

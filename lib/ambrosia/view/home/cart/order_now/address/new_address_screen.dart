@@ -27,7 +27,7 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
   bool _isLoading = true;
   String _errorMessage = '';
   final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
+
   final TextEditingController _mobileController = TextEditingController();
   bool _isEditing = false;
   bool _isUpdatingProfile = false;
@@ -843,6 +843,7 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
     );
   }
 */
+
   Widget _buildUserProfileSection() {
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
@@ -1336,10 +1337,15 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditAddressScreen(
-          address: address,
-          onAddressUpdated: _loadAddresses, // Refresh list after edit
+        builder: (context) => AddressSection(
+          isFromManageAddress: true,
+          address: address, // Pass the address to edit
+          onAddressUpdated: _loadAddresses, // Callback to refresh list
         ),
+        //   EditAddressScreen(
+        //     address: address,
+        //     onAddressUpdated: _loadAddresses, // Refresh list after edit
+        //   ),
       ),
     );
   }
@@ -1362,11 +1368,8 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
           : SafeArea(
               child: Column(
                 children: [
-                  // User Profile Section
-
                   _buildProfileSection(),
                   // _buildUserProfileSection(),
-
                   if (isLoggedIn) ...[
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1390,7 +1393,6 @@ class _AddressNewScreenState extends State<AddressNewScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-
                     // Address List
                     Expanded(
                       child: _addresses.isEmpty

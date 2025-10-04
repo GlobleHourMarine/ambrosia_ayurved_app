@@ -13,9 +13,30 @@ class _ProductSpecificationsSectionState
   int _expandedIndex =
       -1; // -1 means none expanded, 0 for ingredients, 1 for additional info
 
+  final GlobalKey _ingredientsKey = GlobalKey();
+  final GlobalKey _additionalInfoKey = GlobalKey();
+
   void _toggleExpansion(int index) {
     setState(() {
       _expandedIndex = _expandedIndex == index ? -1 : index;
+    });
+
+    // After the section expands, smoothly scroll to make it visible
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_expandedIndex == index) {
+        final context = index == 0
+            ? _ingredientsKey.currentContext
+            : _additionalInfoKey.currentContext;
+        if (context != null) {
+          Scrollable.ensureVisible(
+            context,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            alignment:
+                0.1, // Align to 10% from top (so it's not exactly at the top)
+          );
+        }
+      }
     });
   }
 
@@ -26,11 +47,8 @@ class _ProductSpecificationsSectionState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Combined Product Specifications Header
           _buildCombinedSectionHeader(),
           const SizedBox(height: 12),
-
-          // Combined Expandable Sections
           Card(
             elevation: 2,
             //  color: Colors.white,
@@ -40,24 +58,30 @@ class _ProductSpecificationsSectionState
             child: Column(
               children: [
                 // Ingredient List Section
-                _buildCombinedSectionItem(
-                  index: 0,
-                  title: 'Ingredient List',
-                  icon: Icons.eco_rounded,
-                  iconColor: Colors.green[700]!,
-                  content: _buildIngredientContent(),
+                KeyedSubtree(
+                  key: _ingredientsKey,
+                  child: _buildCombinedSectionItem(
+                    index: 0,
+                    title: 'Ingredient List',
+                    icon: Icons.eco_rounded,
+                    iconColor: Colors.green[700]!,
+                    content: _buildIngredientContent(),
+                  ),
                 ),
 
                 // Divider between sections
                 const Divider(height: 1, thickness: 1),
 
                 // Additional Information Section
-                _buildCombinedSectionItem(
-                  index: 1,
-                  title: 'Additional Information',
-                  icon: Icons.info_outline_rounded,
-                  iconColor: Colors.green[700]!,
-                  content: _buildAdditionalInfoContent(),
+                KeyedSubtree(
+                  key: _additionalInfoKey,
+                  child: _buildCombinedSectionItem(
+                    index: 1,
+                    title: 'Additional Information',
+                    icon: Icons.info_outline_rounded,
+                    iconColor: Colors.green[700]!,
+                    content: _buildAdditionalInfoContent(),
+                  ),
                 ),
               ],
             ),
@@ -143,7 +167,7 @@ class _ProductSpecificationsSectionState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'INGREDIENTS: Each 35g contains:',
+            'INGREDIENTS:',
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 14,
@@ -151,59 +175,26 @@ class _ProductSpecificationsSectionState
             ),
           ),
           SizedBox(height: 12),
-          _IngredientItem(
-              'WHEY ISOLATE & CONCENTRATE BLEND derived from Dadhi Mastu Extract (Butter Milk)',
-              '30.5g'),
-          _IngredientItem('Pomegranate Extract (Punica granatum) Fr.', '100mg'),
-          _IngredientItem('Gokshura Extract (Tribulus terrestris) Fr.', '45mg'),
-          _IngredientItem('Kapikacchu Extract (Mucuna pruriens) Sd.', '45mg'),
-          _IngredientItem(
-              'Black Musli Extract (Curculigo orchioides) Rt.', '45mg'),
-          _IngredientItem('Bala Extract (Sida cordifolia) Rt.', '25mg'),
-          _IngredientItem('Vidarikand Extract (Pueraria tuberosa) Rt.', '25mg'),
-          _IngredientItem(
-              'Kutaki Extract (Picrorhiza kurroa) Rz., Lf., Bk.', '25mg'),
-          _IngredientItem('Mariccha Extract (Piper nigrum) Fr.', '10mg'),
-          SizedBox(height: 12),
-          Text(
-            'Minerals:',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              color: Colors.black87,
-            ),
-          ),
-          _IngredientItem(
-              'Resin of: Shilajit (Asphaltum punjabianum) Exd.', '250mg'),
-          SizedBox(height: 12),
-          Text(
-            'Excipient:',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              color: Colors.black87,
-            ),
-          ),
-          _IngredientItem('Xanthan Gum', 'Q.S.'),
-          _IngredientItem('Carragenan', 'Q.S.'),
-          _IngredientItem('Guar Gum', 'Q.S.'),
-          _IngredientItem('Sucralose', 'Q.S.'),
-          _IngredientItem('Digezyme', 'Q.S.'),
-          _IngredientItem('Probiotic Blend', 'Q.S.'),
-          _IngredientItem('Cocoa Powder', 'Q.S.'),
-          _IngredientItem('Salt', 'Q.S.'),
-          _IngredientItem('Milk Solids', 'Q.S.'),
-          SizedBox(height: 12),
-          Text(
-            'Flavour:',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              color: Colors.black87,
-            ),
-          ),
-          _IngredientItem('Chocolate Flavour', 'Q.S.'),
-          _IngredientItem('Cookies and Cream Flavour', 'Q.S.'),
+          Text('Tinospora cordifolia (Giloy)'),
+          Text('Azadirachta indica (Neem)'),
+          Text('Trigonella foenum-graecum (Fenugreek)'),
+          Text('Gymnema sylvestre (Gurmar)'),
+          Text('Salacia chinensis (Salacia)'),
+          Text('Pterocarpus marsupium (Indian Kino Tree / Vijaysar)'),
+          Text('Alpinia galanga (Greater Galangal)'),
+          Text('Cedrus deodara (Deodar Cedar / Himalayan Cedar)'),
+          Text('Momordica charantia (Bitter Gourd / Bitter Melon)'),
+          Text('Terminalia bellirica (Beleric / Baheda)'),
+          Text('Phyllanthus emblica (Indian Gooseberry / Amla)'),
+          Text('Asparagus racemosus (Shatavari / Wild Asparagus)'),
+          Text('Glycyrrhiza glabra (Licorice / Mulethi)'),
+          Text('Tribulus terrestris (Puncture Vine / Gokshura)'),
+          Text('Withania somnifera (Ashwagandha / Indian Ginseng)'),
+          Text('Moringa oleifera (Drumstick Tree / Moringa)'),
+          Text('Siraitia grosvenorii (Monk Fruit / Luo Han Guo)'),
+          Text('Catharanthus (Madagascar Periwinkle)'),
+          Text('Sri Lankan Eucalyptus (Sri Lankan Eucalyptus Tree)'),
+          Text('Caterpillar Fungus (Cordyceps / Himalayan Viagra)'),
         ],
       ),
     );
@@ -223,7 +214,7 @@ class _ProductSpecificationsSectionState
           _buildInfoRow(
             icon: Icons.inventory_2_outlined,
             title: 'Product Items Name',
-            content: 'A5 – Herbal Supplement\nAmbrosia Juice',
+            content: 'A5 – Herbal Supplement',
           ),
           const Divider(height: 20),
           _buildInfoRow(
