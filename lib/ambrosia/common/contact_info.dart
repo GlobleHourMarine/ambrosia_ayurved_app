@@ -28,6 +28,9 @@ class ContactInfo {
       'https://www.instagram.com/ambrosia.ayurved';
   static const String instagramName = 'Ambrosia Ayurved';
 
+  static const String youtubeUrl =
+      'https://www.youtube.com/channel/UCRfyYjfGftIl9eSBMUHKuHQ';
+  static const String youtubeName = 'Ambrosia Ayurved';
   // Website
   static const String websiteUrl = 'https://ambrosiaayurved.in/';
   static const String websiteName = 'www.ambrosiaayurved.in';

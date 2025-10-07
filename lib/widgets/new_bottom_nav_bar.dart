@@ -425,7 +425,6 @@ class _MainTabViewState extends State<MainTabView> {
                 ),
               ],
             ),
-
             const SizedBox(height: 10),
           ],
         ),

@@ -179,6 +179,16 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                       Colors.orange,
                     ),
                     _buildContactCard(
+                      'Youtube',
+                      // AppLocalizations.of(context)?.website ?? "Website",
+                      FontAwesomeIcons.youtube,
+                      ContactInfo.youtubeUrl,
+                      ContactInfo.youtubeName,
+                      // 'https://ambrosiaayurved.in/',
+                      // 'www.ambrosiaayurved.in',
+                      Colors.red,
+                    ),
+                    _buildContactCard(
                       AppLocalizations.of(context)?.website ?? "Website",
                       FontAwesomeIcons.earth,
                       ContactInfo.websiteUrl,

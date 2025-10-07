@@ -15,11 +15,10 @@ class _CarouselState extends State<Carousel> {
     // 'assets/images/c44.jpg',
     // 'assets/images/c66.jpg',
 
-    'assets/images/carosel.3.webp',
-    'assets/images/carosel.4.webp',
-    'assets/images/carosel.1.webp',
-    'assets/images/carosel.2.webp',
-    'assets/images/carosel.5.webp',
+    'assets/images/Homepage_slideM1.webp',
+    'assets/images/Homepage_slideM2.webp',
+    'assets/images/Homepage_slideM3.webp',
+    'assets/images/Homepage_slideM4.webp',
   ];
 
   @override

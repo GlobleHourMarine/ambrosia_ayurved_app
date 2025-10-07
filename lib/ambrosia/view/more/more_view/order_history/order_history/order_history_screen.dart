@@ -1016,8 +1016,11 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
 
                         const SizedBox(height: 12),
                         if (order.currentStatus.toLowerCase() ==
-                            'pickup generated')
-                          // Cancel Order Button
+                                'pickup generated' ||
+                            order.currentStatus.toLowerCase() ==
+                                'awb assigned' ||
+                            order.currentStatus.toLowerCase() ==
+                                'out for pickup')
                           OutlinedButton.icon(
                             onPressed: _isCancelLoading
                                 ? null
@@ -1025,7 +1028,6 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                                     setModalState(() {
                                       _isCancelLoading = true;
                                     });
-
                                     try {
                                       await _showCancelConfirmation(
                                         order,
@@ -1037,7 +1039,23 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                                       });
                                     }
                                   },
-                            icon: _isCancelLoading
+                            icon:
+                                // _isCancelLoading
+                                //     ? const SizedBox(
+                                //         width: 20,
+                                //         height: 20,
+                                //         child: CircularProgressIndicator(
+                                //           strokeWidth: 2,
+                                //           valueColor: AlwaysStoppedAnimation<Color>(
+                                //               Colors.red),
+                                //         ),
+                                //       )
+                                //     :
+                                const Icon(
+                              Icons.cancel_outlined,
+                              color: Acolors.primary,
+                            ),
+                            label: _isCancelLoading
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,
@@ -1047,17 +1065,14 @@ class _OrderHistoryScreenNState extends State<OrderHistoryScreenN>
                                           Colors.red),
                                     ),
                                   )
-                                : const Icon(
-                                    Icons.cancel_outlined,
-                                    color: Acolors.primary,
+                                : Text(
+                                    // _isCancelLoading
+                                    //     ? 'Cancelling...'
+                                    //     :
+                                    'Cancel Order',
+                                    style:
+                                        const TextStyle(color: Acolors.primary),
                                   ),
-                            label: Text(
-                              // _isCancelLoading
-                              //     ? 'Cancelling...'
-                              //     :
-                              'Cancel Order',
-                              style: const TextStyle(color: Acolors.primary),
-                            ),
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(color: Acolors.primary),
                               minimumSize: const Size(double.infinity, 50),

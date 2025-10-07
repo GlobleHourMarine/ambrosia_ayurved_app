@@ -50,6 +50,7 @@ class CartService {
           'quantity': quantity,
         }),
       );
+      
       Map<String, dynamic> responseBody = jsonDecode(response.body);
       print('responseBody of add to cart : $responseBody');
 

@@ -107,9 +107,9 @@ class _HomeTextfieldState extends State<HomeTextfield> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       child: SizedBox(
-        height: 45,
+        height: 50,
         child: TextField(
           controller: _controller,
           focusNode: _focusNode, // Use FocusNode
@@ -127,9 +127,9 @@ class _HomeTextfieldState extends State<HomeTextfield> {
           enableInteractiveSelection: true,
           autofocus: false, // Prevent automatic focus
           decoration: InputDecoration(
-            fillColor: Acolors.textfield,
+            fillColor: Colors.white.withOpacity(0.9),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(color: Acolors.textfield),
             ),
             focusedBorder: OutlineInputBorder(

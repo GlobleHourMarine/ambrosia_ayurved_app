@@ -682,7 +682,7 @@
   "reviewSubmitFailed": "فشل في تقديم التقييم",
   "priceBreakDown": "تفصيل السعر :",
   "basePrice": "السعر الأساسي :",
-  "gst": "ضريبة السلع والخدمات (٪12) :",
+  "gst": "ضريبة السلع والخدمات (٪5) :",
   "addressDeleted": "تم حذف العنوان بنجاح",
   "noAddressesForUser": "لم يتم العثور على عناوين لهذا المستخدم",
   "deleteAddress": "حذف العنوان",

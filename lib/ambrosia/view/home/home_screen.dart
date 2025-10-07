@@ -395,6 +395,7 @@ import 'package:ambrosia_ayurved/ambrosia/view/home/cart/cart_page.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/cart/users_cart/cart_provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/provider/user_provider.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/login&register/user_register.dart';
+import 'package:ambrosia_ayurved/widgets/appbar.dart';
 import 'package:ambrosia_ayurved/widgets/chatbot/chatbot.dart';
 import 'package:ambrosia_ayurved/widgets/translation/translation_provider_local.dart';
 import 'package:flutter/material.dart';
@@ -497,250 +498,255 @@ class _HomeScreenState extends State<HomeScreen>
     Size size = MediaQuery.of(context).size;
     final cart = Provider.of<CartProvider>(context);
     final user = Provider.of<UserProvider>(context).user;
-    return Consumer<LanguageProvider>(
-      builder: (context, languageProvider, child) {
-        final currentLanguage = languageProvider.selectedLocale.languageCode;
-        return Scaffold(
-          backgroundColor: Colors.white,
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(size.height * 0.3),
-            child: Container(
-              height: size.height * 0.2,
-              child: Stack(
-                children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).padding.top,
-                    ),
-                    height: size.height * 0.2 - 22,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Color.fromARGB(166, 207, 250, 187),
-                          const Color.fromARGB(255, 90, 196, 80),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(36),
-                        bottomRight: Radius.circular(36),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        SizedBox(height: 10),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Row(
-                            children: <Widget>[
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: Colors.black.withOpacity(0.2),
-                                ),
-                                child: Image.asset(
-                                  "assets/images/abmrosia_log_woutb.png",
-                                  width: 50,
-                                  height: 50,
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Welcome back!',
-                                      style: TextStyle(
-                                          color: Colors.black, fontSize: 14),
-                                    ),
-                                    user == null
-                                        ? Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              GestureDetector(
-                                                onTap: () => RegisterService()
-                                                    .showModalBottomSheetregister(
-                                                        context),
-                                                child: Text(
-                                                  'Login',
-                                                  style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      fontSize: 16),
-                                                ),
-                                              ),
-                                            ],
-                                          )
-                                        : Column(
-                                            children: [
-                                              // Text(
-                                              //   ' Welcome back!',
-                                              //   style: TextStyle(
-                                              //       color: Colors.black,
-                                              //       fontSize: 14),
-                                              // ),
-                                              Text(
-                                                '${user.fname}',
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 16),
-                                              ),
-                                            ],
-                                          ),
-                                  ]),
-                              Spacer(),
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: Colors.black.withOpacity(0.2),
-                                ),
-                                child: PopupMenuButton<String>(
-                                  onSelected: (String value) {
-                                    print("🔤 Language selected: $value");
-                                    if (value != currentLanguage) {
-                                      Provider.of<LanguageProvider>(context,
-                                              listen: false)
-                                          .changeLanguage(value);
-                                    }
-                                  },
-                                  offset: const Offset(0, 60),
-                                  icon: Icon(Icons.language),
-                                  itemBuilder: (BuildContext context) =>
-                                      LanguageProvider.languages
-                                          .map((language) =>
-                                              PopupMenuItem<String>(
-                                                value: language['locale'],
-                                                child: Row(
-                                                  children: [
-                                                    if (language['locale'] ==
-                                                        currentLanguage)
-                                                      Icon(Icons.check,
-                                                          size: 16,
-                                                          color: Colors.green)
-                                                    else
-                                                      SizedBox(width: 16),
-                                                    SizedBox(width: 8),
-                                                    Text(language['name']),
-                                                  ],
-                                                ),
-                                              ))
-                                          .toList(),
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: Colors.black.withOpacity(0.2),
-                                ),
-                                child: IconButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const CartPage(),
-                                        ));
-                                  },
-                                  icon: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.shopping_cart_outlined,
-                                          size: 30,
-                                          color: Colors.black,
-                                        ),
-                                        Positioned(
-                                          right: 0,
-                                          top: 0,
-                                          child: CircleAvatar(
-                                            radius: 7,
-                                            backgroundColor:
-                                                const Color.fromARGB(
-                                                    255, 245, 114, 74),
-                                            child: Text(
-                                              '${cart.totalUniqueItems}',
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: Colors.black,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ]),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: HomeTextfield(
-                        onSearchChanged: _onSearchChanged,
-                        searchQuery: _searchQuery,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(height: 20),
-                if (_searchQuery.isEmpty) ...[
-                  Carousel(),
-                  SizedBox(height: 10),
-                ],
-                SizedBox(height: 10),
-                ProductList(searchQuery: _searchQuery),
-                if (_searchQuery.isEmpty) ...[
-                  SizedBox(height: 10),
-                  AnimatedCountersScreen(),
-                  SizedBox(height: 35),
-                  WhyA5Section(),
-                  SizedBox(height: 20),
-                  WhyUsScreen(),
-                  SizedBox(height: 35),
-                  FeaturesSection(),
-                  SizedBox(height: 20),
-                  FooterHome(),
-                ],
-              ],
-            ),
-          ),
-          floatingActionButton: FloatingActionButton(
-            heroTag: "chat_fab",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ChatScreen()),
-              );
-            },
-            backgroundColor: Colors.green[50],
-            child: Padding(
-              padding: const EdgeInsets.all(6.0),
-              child: Image.asset('assets/images/chat.png'),
-            ),
-            // const Icon(Icons.chat, color: Colors.white),
-          ),
-        );
-      },
+    return BaseScaffold(
+      title: 'Ambrosia Ayurved',
+
+      searchQuery: _searchQuery,
+      onSearchChanged: _onSearchChanged,
+      child:
+          // Consumer<LanguageProvider>(
+          //   builder: (context, languageProvider, child) {
+          //     final currentLanguage = languageProvider.selectedLocale.languageCode;
+          //     return Scaffold(
+          //       backgroundColor: Colors.white,
+          //       appBar: PreferredSize(
+          //         preferredSize: Size.fromHeight(size.height * 0.3),
+          //         child: Container(
+          //           height: size.height * 0.2,
+          //           child: Stack(
+          //             children: <Widget>[
+          //               Container(
+          //                 padding: EdgeInsets.only(
+          //                   top: MediaQuery.of(context).padding.top,
+          //                 ),
+          //                 height: size.height * 0.2 - 22,
+          //                 decoration: BoxDecoration(
+          //                   gradient: LinearGradient(
+          //                     begin: Alignment.topCenter,
+          //                     end: Alignment.bottomCenter,
+          //                     colors: [
+          //                       Color.fromARGB(166, 207, 250, 187),
+          //                       const Color.fromARGB(255, 90, 196, 80),
+          //                     ],
+          //                   ),
+          //                   borderRadius: BorderRadius.only(
+          //                     bottomLeft: Radius.circular(36),
+          //                     bottomRight: Radius.circular(36),
+          //                   ),
+          //                 ),
+          //                 child: Column(
+          //                   children: [
+          //                     SizedBox(height: 10),
+          //                     Padding(
+          //                       padding: const EdgeInsets.symmetric(horizontal: 16),
+          //                       child: Row(
+          //                         children: <Widget>[
+          //                           Container(
+          //                             decoration: BoxDecoration(
+          //                               borderRadius: BorderRadius.circular(12),
+          //                               color: Colors.black.withOpacity(0.2),
+          //                             ),
+          //                             child: Image.asset(
+          //                               "assets/images/abmrosia_log_woutb.png",
+          //                               width: 50,
+          //                               height: 50,
+          //                             ),
+          //                           ),
+          //                           SizedBox(width: 10),
+          //                           Column(
+          //                               mainAxisAlignment: MainAxisAlignment.start,
+          //                               crossAxisAlignment: CrossAxisAlignment.start,
+          //                               children: [
+          //                                 Text(
+          //                                   'Welcome back!',
+          //                                   style: TextStyle(
+          //                                       color: Colors.black, fontSize: 14),
+          //                                 ),
+          //                                 user == null
+          //                                     ? Column(
+          //                                         mainAxisAlignment:
+          //                                             MainAxisAlignment.start,
+          //                                         crossAxisAlignment:
+          //                                             CrossAxisAlignment.start,
+          //                                         children: [
+          //                                           GestureDetector(
+          //                                             onTap: () => RegisterService()
+          //                                                 .showModalBottomSheetregister(
+          //                                                     context),
+          //                                             child: Text(
+          //                                               'Login',
+          //                                               style: TextStyle(
+          //                                                   color: Colors.black,
+          //                                                   fontWeight:
+          //                                                       FontWeight.w600,
+          //                                                   fontSize: 16),
+          //                                             ),
+          //                                           ),
+          //                                         ],
+          //                                       )
+          //                                     : Column(
+          //                                         children: [
+          //                                           // Text(
+          //                                           //   ' Welcome back!',
+          //                                           //   style: TextStyle(
+          //                                           //       color: Colors.black,
+          //                                           //       fontSize: 14),
+          //                                           // ),
+          //                                           Text(
+          //                                             '${user.fname}',
+          //                                             style: TextStyle(
+          //                                                 color: Colors.black,
+          //                                                 fontWeight: FontWeight.w600,
+          //                                                 fontSize: 16),
+          //                                           ),
+          //                                         ],
+          //                                       ),
+          //                               ]),
+          //                           Spacer(),
+          //                           Container(
+          //                             decoration: BoxDecoration(
+          //                               borderRadius: BorderRadius.circular(12),
+          //                               color: Colors.black.withOpacity(0.2),
+          //                             ),
+          //                             child: PopupMenuButton<String>(
+          //                               onSelected: (String value) {
+          //                                 print("🔤 Language selected: $value");
+          //                                 if (value != currentLanguage) {
+          //                                   Provider.of<LanguageProvider>(context,
+          //                                           listen: false)
+          //                                       .changeLanguage(value);
+          //                                 }
+          //                               },
+          //                               offset: const Offset(0, 60),
+          //                               icon: Icon(Icons.language),
+          //                               itemBuilder: (BuildContext context) =>
+          //                                   LanguageProvider.languages
+          //                                       .map((language) =>
+          //                                           PopupMenuItem<String>(
+          //                                             value: language['locale'],
+          //                                             child: Row(
+          //                                               children: [
+          //                                                 if (language['locale'] ==
+          //                                                     currentLanguage)
+          //                                                   Icon(Icons.check,
+          //                                                       size: 16,
+          //                                                       color: Colors.green)
+          //                                                 else
+          //                                                   SizedBox(width: 16),
+          //                                                 SizedBox(width: 8),
+          //                                                 Text(language['name']),
+          //                                               ],
+          //                                             ),
+          //                                           ))
+          //                                       .toList(),
+          //                             ),
+          //                           ),
+          //                           SizedBox(width: 10),
+          //                           Container(
+          //                             decoration: BoxDecoration(
+          //                               borderRadius: BorderRadius.circular(12),
+          //                               color: Colors.black.withOpacity(0.2),
+          //                             ),
+          //                             child: IconButton(
+          //                               onPressed: () {
+          //                                 Navigator.push(
+          //                                     context,
+          //                                     MaterialPageRoute(
+          //                                       builder: (context) =>
+          //                                           const CartPage(),
+          //                                     ));
+          //                               },
+          //                               icon: Stack(
+          //                                   alignment: Alignment.center,
+          //                                   children: [
+          //                                     const Icon(
+          //                                       Icons.shopping_cart_outlined,
+          //                                       size: 30,
+          //                                       color: Colors.black,
+          //                                     ),
+          //                                     Positioned(
+          //                                       right: 0,
+          //                                       top: 0,
+          //                                       child: CircleAvatar(
+          //                                         radius: 7,
+          //                                         backgroundColor:
+          //                                             const Color.fromARGB(
+          //                                                 255, 245, 114, 74),
+          //                                         child: Text(
+          //                                           '${cart.totalUniqueItems}',
+          //                                           style: TextStyle(
+          //                                             fontSize: 10,
+          //                                             color: Colors.black,
+          //                                           ),
+          //                                         ),
+          //                                       ),
+          //                                     ),
+          //                                   ]),
+          //                             ),
+          //                           ),
+          //                         ],
+          //                       ),
+          //                     ),
+          //                   ],
+          //                 ),
+          //               ),
+          //               Positioned(
+          //                 bottom: 0,
+          //                 left: 0,
+          //                 right: 0,
+          //                 child: Container(
+          //                   alignment: Alignment.center,
+          //                   child: HomeTextfield(
+          //                     onSearchChanged: _onSearchChanged,
+          //                     searchQuery: _searchQuery,
+          //                   ),
+          //                 ),
+          //               ),
+          //             ],
+          //           ),
+          //         ),
+          //       ),
+          //  body:
+          SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: 20),
+            if (_searchQuery.isEmpty) ...[
+              Carousel(),
+              SizedBox(height: 10),
+            ],
+            SizedBox(height: 10),
+            ProductList(searchQuery: _searchQuery),
+            if (_searchQuery.isEmpty) ...[
+              SizedBox(height: 10),
+              AnimatedCountersScreen(),
+              SizedBox(height: 35),
+              WhyA5Section(),
+              SizedBox(height: 20),
+              WhyUsScreen(),
+              SizedBox(height: 35),
+              FeaturesSection(),
+              SizedBox(height: 20),
+              FooterHome(),
+            ],
+          ],
+        ),
+      ),
+      // floatingActionButton: FloatingActionButton(
+      //   heroTag: "chat_fab",
+      //   onPressed: () {
+      //     Navigator.push(
+      //       context,
+      //       MaterialPageRoute(builder: (context) => ChatScreen()),
+      //     );
+      //   },
+      //   backgroundColor: Colors.green[50],
+      //   child: Padding(
+      //     padding: const EdgeInsets.all(6.0),
+      //     child: Image.asset('assets/images/chat.png'),
+      //   ),
+      //   // const Icon(Icons.chat, color: Colors.white),
+      // ),
     );
   }
 }

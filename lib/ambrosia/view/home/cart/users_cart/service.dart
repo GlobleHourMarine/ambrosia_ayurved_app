@@ -38,7 +38,6 @@ class CartService {
       throw Exception('Error fetching cart data: $error');
     }
   }
-
   // add to cart
 
   Future<CartItemss?> addToCart(String productId, int quantity, String userId,

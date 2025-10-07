@@ -17,12 +17,20 @@ class Ingredients extends StatelessWidget {
           "Sugar Medicine Powder is used to help regulate blood sugar levels, often for diabetes management. It is usually mixed with water or taken directly as per dosage instructions.",
       "ingredients": [
         {
+          "name": "Giloy",
+          // "Gudmar (Gymnema Sylvestre)",
+          "image": "assets/images/giloy.png",
+          "description": "Supports immunity and detoxifies the body.",
+          // " Reduces sugar cravings and controls blood sugar levels.",
+        },
+        {
           "name": "${AppLocalizations.of(context)!.gudmarName}",
           // "Gudmar (Gymnema Sylvestre)",
-          "image": "assets/images/category_amala.png",
+          "image": "assets/images/gurmar_preview.png",
           "description": "${AppLocalizations.of(context)!.gudmarDesc}",
           // " Reduces sugar cravings and controls blood sugar levels.",
         },
+
         // {
         //   "name": "${AppLocalizations.of(context)!.jamunName}",
         //   // "Jamun (Black Plum) ",
@@ -33,21 +41,36 @@ class Ingredients extends StatelessWidget {
         {
           "name": "${AppLocalizations.of(context)!.methiName}",
           // "Methi (Fenugreek)",
-          "image": "assets/images/category_leaf.png",
+          "image": "assets/images/Fenugreek-preview.png",
           "description": "${AppLocalizations.of(context)!.methiDesc}",
           // "Improves glucose tolerance and supports diabetes control.",
         },
+
+        // {
+        //   "name": "${AppLocalizations.of(context)!.karelaName}",
+        //   // "Karela (Bitter Gourd) ",
+        //   "image": "assets/images/incr_karela.jpg",
+        //   "description": "${AppLocalizations.of(context)!.karelaDesc}",
+        //   //  "Acts as natural insulin and boosts metabolism.",
+        // },
         {
-          "name": "${AppLocalizations.of(context)!.karelaName}",
-          // "Karela (Bitter Gourd) ",
-          "image": "assets/images/incr_karela.jpg",
-          "description": "${AppLocalizations.of(context)!.karelaDesc}",
-          //  "Acts as natural insulin and boosts metabolism.",
+          "name": "Vijaysar",
+          // "Methi (Fenugreek)",
+          "image": "assets/images/images-removebg-preview.png",
+          "description": "Supports overall health and wellness.",
+          // "Improves glucose tolerance and supports diabetes control.",
+        },
+        {
+          "name": "Eucalyptus",
+          // "Methi (Fenugreek)",
+          "image": "assets/images/Eucalyptus_Seeds.png",
+          "description": "Boosts respiratory health.",
+          // "Improves glucose tolerance and supports diabetes control.",
         },
         {
           "name": "${AppLocalizations.of(context)!.neemName}",
           //   "Neem",
-          "image": "assets/images/incr_neem.jpg",
+          "image": "assets/images/neem_preview.png",
           "description": "${AppLocalizations.of(context)!.neemDesc}",
           //    "Purifies the blood and is highly beneficial for diabetics.",
         },

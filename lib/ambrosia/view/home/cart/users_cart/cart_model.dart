@@ -7,6 +7,7 @@ class CartItemss {
   final String productId;
   final String description;
   final String address;
+    final String gstPrice; 
 
   CartItemss({
     required this.cartId,
@@ -17,6 +18,8 @@ class CartItemss {
     required this.productId,
     required this.description,
     required this.address,
+    required this.gstPrice,
+    re
   });
 
   factory CartItemss.fromJson(Map<String, dynamic> json) {
@@ -30,7 +33,8 @@ class CartItemss {
       productId: json['product_id']?.toString() ?? '', // Convert to String
       description:
           json['discription'] ?? 'No description', // Fix spelling & default
-      address: json['address'] ?? 'No address', // Default address
+      address: json['address'] ?? 'No address',
+         gstPrice: json['gst_price']?.toString() ?? '0',  // Default address
     );
   }
 }

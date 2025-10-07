@@ -205,14 +205,14 @@ class _ProductDescriptionScreenState extends State<ProductDescriptionScreen>
         children: <Widget>[
           Text("\Rs ${product.price}",
               style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
-          SizedBox(width: 8.0),
-          Text("11200",
-              style: TextStyle(
-                  fontSize: 14.0,
-                  color: Colors.grey,
-                  decoration: TextDecoration.lineThrough)),
-          SizedBox(width: 8.0),
-          Text("50% off", style: TextStyle(fontSize: 14.0, color: Colors.red)),
+          // SizedBox(width: 8.0),
+          // Text("11200",
+          //     style: TextStyle(
+          //         fontSize: 14.0,
+          //         color: Colors.grey,
+          //         decoration: TextDecoration.lineThrough)),
+          // SizedBox(width: 8.0),
+          // Text("50% off", style: TextStyle(fontSize: 14.0, color: Colors.red)),
         ],
       ),
     );

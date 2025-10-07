@@ -233,7 +233,6 @@ Future<void> createShiprocketOrder({
 
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final String userId = userProvider.id;
-
     await saveTrackingData(
       userId: userId,
       orderId: merchantOrderId.toString(),
@@ -262,7 +261,6 @@ Future<void> createShiprocketOrder({
       title: "Order Placed",
       subtitle: "Your order has been placed successfully ! ",
       //  AWB: $assignedAwbCode",
-
       iconColor: Colors.green,
       icon: Icons.check_circle,
       navigateToScreen: CheckoutMessageView(),

@@ -38,42 +38,24 @@ class ProductNotifier extends ChangeNotifier {
       _isLoading = false;
       notifyListenersSafely();
     }
+    // Get product by ID
+    Product? getProductById(String productId) {
+      try {
+        return _products.firstWhere(
+          (product) => product.id.toString() == productId,
+        );
+      } catch (e) {
+        print('Product not found: $productId');
+        return null;
+      }
+    }
+
+    // Get product GST by ID
+    double getProductGst(String productId) {
+      final product = getProductById(productId);
+      return product?.gstPrice ?? 0.0;
+    }
   }
-  // Future<void> fetchProducts() async {
-  //   if (_disposed) return; // Prevent fetching after disposal
-
-  //   _isLoading = true;
-  //   _errorMessage = null;
-  //   notifyListenersSafely();
-
-  //   try {
-  //     _products = await _productService.fetchProducts();
-  //   } catch (e) {
-  //     _errorMessage = e.toString();
-  //   } finally {
-  //     _isLoading = false;
-  //     notifyListenersSafely();
-  //   }
-  // }
-
-  // Product? getProductById(String productId) {
-  //   try {
-  //     return _products.firstWhere(
-  //       (product) => product.id == productId,
-  //       orElse: () => Product(
-  //         id: 0, // Default value for id
-  //         name: 'Unknown', // Default name
-  //         price: 0.0, // Default price
-  //         description: 'No description available', // Default description
-  //         imageUrl: [], // Default image URL
-  //         quantity: 1, // Default quantity
-  //         //  category: '',
-  //       ),
-  //     );
-  //   } catch (e) {
-  //     return null; // Return null if something goes wrong
-  //   }
-  // }
 
   void notifyListenersSafely() {
     if (!_disposed) notifyListeners();

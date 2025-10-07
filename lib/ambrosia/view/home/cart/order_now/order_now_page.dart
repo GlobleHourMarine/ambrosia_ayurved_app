@@ -505,11 +505,10 @@ class _OrderNowPageState extends State<OrderNowPage> {
                                 double.tryParse(item.price.toString()) ?? 0.0;
                             int quantity =
                                 int.tryParse(item.quantity.toString()) ?? 1;
-                            double basePricePerItem = price / 1.12;
+                            double basePricePerItem = price / 1.05;
 
                             //
                             double gstPerItem = price - basePricePerItem;
-
                             //
                             double baseTotal = basePricePerItem * quantity;
                             double gstTotal = gstPerItem * quantity;
@@ -881,7 +880,7 @@ class _OrderNowPageState extends State<OrderNowPage> {
                                         double grandTotal =
                                             grandTotalProvider.grandTotal;
                                         double basePrice = grandTotal /
-                                            1.12; // Calculate base price (grandTotal / (1 + 0.12))
+                                            1.05; // Calculate base price (grandTotal / (1 + 0.12))
                                         double gstAmount =
                                             grandTotal - basePrice;
                                         double finalTotal =

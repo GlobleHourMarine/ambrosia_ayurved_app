@@ -1,4 +1,5 @@
 /* 
+
 import 'package:flutter/material.dart';
 
 class FoodsToAvoidSection extends StatelessWidget {
@@ -164,11 +165,11 @@ class FoodsToAvoidSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  local.foodsToAvoidIntro,
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 15),
+                // Text(
+                //   local.foodsToAvoidIntro,
+                //   style: const TextStyle(fontSize: 16),
+                // ),
+                // const SizedBox(height: 15),
                 Column(
                   children: [
                     _foodCard(

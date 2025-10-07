@@ -270,7 +270,7 @@ class ProductDetailNewPageState extends State<ProductDetailNewPage>
                         //  if (widget.product.id == 1) FoodsToAvoidSection(),
                         Container(
                           key: _ingredientsKey,
-                          child: widget.product.id == 1
+                          child: widget.product.slug == 'a5-herbal-supplement'
                               ? Ingredients()
                               : SizedBox.shrink(),
                         ),

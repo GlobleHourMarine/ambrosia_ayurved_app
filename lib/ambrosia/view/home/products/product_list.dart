@@ -1,5 +1,6 @@
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/custom_cached_image.dart';
 import 'package:ambrosia_ayurved/ambrosia/common_widgets/highlighted_text.dart';
+import 'package:ambrosia_ayurved/ambrosia/view/home/products/new_product_descrption/product_detail_new_screen.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_briefs/product_description_loader.dart';
 import 'package:ambrosia_ayurved/ambrosia/view/home/products/product_detail_new_page.dart';
 import 'package:flutter/material.dart';
@@ -134,7 +135,8 @@ class _ProductListState extends State<ProductList> {
                             MaterialPageRoute(
                               builder: (context) => ChangeNotifierProvider(
                                 create: (context) => ProductLoadingProvider(),
-                                child: ProductDetailNewPage(product: product),
+                                child: ProductDetailNewPage1(product: product),
+                                //   ProductDetailNewPage(product: product),
                               ),
                             ),
                           );
@@ -228,7 +230,7 @@ class _ProductListState extends State<ProductList> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          '\Rs ${product.price}',
+                                          '\₹ ${product.price}',
                                           style: TextStyle(
                                             fontSize:
                                                 screenWidth > 600 ? 14 : 12,

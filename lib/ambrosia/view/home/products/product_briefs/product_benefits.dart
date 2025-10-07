@@ -99,18 +99,18 @@ class _BenefitsState extends State<Benefits> {
               ),
             ),
             //if (widget.productId == '1')
-            if (widget.productSlug == 'a5-herbal-supplement') ...[
-              _buildBenefit(
-                  t.completelyEliminatesSugar, t.naturallyControlsSugar),
-              _buildBenefit(t.boostsInsulinSensitivity, t.helpsProcessGlucose),
-              _buildBenefit(t.enhancesEnergyLevels, t.reducesFatigue),
-              _buildBenefit(
-                  t.improvesDigestionMetabolism, t.aidsNutrientAbsorption),
-              _buildBenefit(
-                  t.supportsHeartLiverHealth, t.helpsCirculationDetox),
-              _buildBenefit(t.herbalAndNatural, t.safeAndChemicalFree),
-              const SizedBox(height: 5),
-            ],
+            // if (widget.productSlug == 'a5-herbal-supplement') ...[
+            //   _buildBenefit(
+            //       t.completelyEliminatesSugar, t.naturallyControlsSugar),
+            //   _buildBenefit(t.boostsInsulinSensitivity, t.helpsProcessGlucose),
+            //   _buildBenefit(t.enhancesEnergyLevels, t.reducesFatigue),
+            //   _buildBenefit(
+            //       t.improvesDigestionMetabolism, t.aidsNutrientAbsorption),
+            //   _buildBenefit(
+            //       t.supportsHeartLiverHealth, t.helpsCirculationDetox),
+            //   _buildBenefit(t.herbalAndNatural, t.safeAndChemicalFree),
+            //   const SizedBox(height: 5),
+            // ],
             Column(
               children: _fetchedBenefits.map((item) {
                 return _buildBenefitItem(
@@ -177,7 +177,7 @@ Widget _buildBenefitItem({
           ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Image.network(
-              height: 350,
+              height: 250,
               width: double.infinity,
               imagePath,
               fit: BoxFit.contain,
